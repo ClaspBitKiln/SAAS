@@ -1,0 +1,38 @@
+---
+description: Порядок генерации кода контекста в Cursor (ADR-010)
+globs: ["packages/**", "apps/api/**"]
+alwaysApply: false
+---
+
+# Порядок генерации внутри контекста (НЕ генерировать весь модуль сразу)
+
+С проверкой после каждого шага:
+
+1. Entity / Aggregate
+2. Value Objects
+3. Repository Interface (domain)
+4. Prisma Schema (packages/<ctx>/prisma)
+5. Repository Implementation (infrastructure)
+6. Commands
+7. Queries
+8. Handlers
+9. Controllers
+10. DTO (class-validator)
+11. OpenAPI (@nestjs/swagger)
+12. Tests (unit → integration)
+
+# Порядок контекстов (инфраструктура → бизнес, ADR-002/ADR-010)
+```
+shared → database → events → outbox → queues → websocket →
+platform → auth → users → rbac → crm → communication → tasks →
+calendar → telephony → automation → ai → analytics
+```
+
+# Перед генерацией контекстов
+Поднять скелет `apps/api`: bootstrap, config, Prisma-клиент, tenant-guard (RLS GUC),
+Socket.IO gateway, Swagger, exception-filter, logger.
+
+# Жёсткие правила (ADR-009/011/012)
+- Prisma только в infrastructure-репозиториях, не в хендлерах.
+- Никаких cross-module Prisma-запросов; модули общаются интерфейсами и событиями.
+- Каждая сущность: id(UUIDv7), tenant_id, created_at, updated_at, deleted_at, version.

@@ -1,0 +1,61 @@
+name: autofix
+
+# Self-healing CI, ПОЛНОСТЬЮ БЕСПЛАТНО (без внешнего ключа, без карты, работает из РФ).
+# Движок: aider + GitHub Models. Токен раннера GITHUB_TOKEN уже несёт scope models:read,
+# поэтому отдельный секрет не нужен. Лимиты free: ~10 rpm, ~50-150 запросов/день.
+#
+# Когда `api` падает — читаем лог, чиним ПЕРВЫЙ упавший шаг минимальным фиксом
+# (код, не тесты), коммитим. One Failure At A Time (docs/KNOWN_FAILURES.md).
+
+on:
+  workflow_run:
+    workflows: ["api"]
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+  models: read          # бесплатный доступ к GitHub Models через GITHUB_TOKEN
+
+jobs:
+  repair:
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install aider
+        run: pipx install aider-chat
+
+      - name: Download failing logs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh run view ${{ github.event.workflow_run.id }} --log-failed > ci-failure.log || true
+
+      - name: Autonomous repair (aider + GitHub Models — бесплатно)
+        env:
+          # litellm-провайдер GitHub Models. Если на первом прогоне ругнётся на auth —
+          # попробовать GITHUB_API_KEY <-> GITHUB_TOKEN (это и будет первый self-fix).
+          GITHUB_API_KEY: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "autofix-bot"
+          git config user.email "autofix@local"
+          aider --yes --no-auto-lint \
+            --model github/gpt-4o \
+            --message "Прочитай файл ci-failure.log в корне. Определи ПЕРВЫЙ упавший шаг CI (порядок: lint -> prisma -> build -> unit -> integration -> e2e). One Failure At A Time: почини ТОЛЬКО его, минимальным изменением КОДА (не тестов). Соблюдай ADR-009/011/012. Добавь запись в docs/KNOWN_FAILURES.md (Problem/Evidence/Root cause/Fix/Preventive action, Status: CONFIRMED). Коммит в стиле Conventional Commits: 'fix: ...'."
+
+      - name: Push fix
+        run: git push origin HEAD:${{ github.event.workflow_run.head_branch }} || true
+
+# --- Платные альтернативы (если упрёшься в лимиты / нужна надёжность) ---
+# OpenRouter (free-модели): anthropics/claude-code-action@v1,
+#   env ANTHROPIC_BASE_URL=https://openrouter.ai/api, secret OPENROUTER_API_KEY,
+#   claude_args "--model deepseek/deepseek-r1:free".
+# Anthropic (платно): secret ANTHROPIC_API_KEY, claude_args "--model claude-sonnet-4-6".

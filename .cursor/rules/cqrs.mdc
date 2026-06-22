@@ -1,0 +1,14 @@
+---
+description: CQRS + события AI Sales OS
+globs: ["packages/**/application/**", "packages/events/**"]
+alwaysApply: false
+---
+
+# CQRS
+
+- Command = намерение изменить состояние; Query = чтение без побочных эффектов.
+- CommandHandler: загрузить агрегат → вызвать метод домена → сохранить в транзакции → опубликовать доменные события.
+- QueryHandler: читает (можно денормализованные проекции, напр. Timeline/board), ничего не пишет.
+- Доменные события — через NestJS CQRS `EventBus`. Внешняя шина (Kafka/Redpanda) — Stage 2, не сейчас.
+- Каждое событие: `{ tenantId, aggregateId, changes, occurredAt, version }`; описывать Producer/Consumers/Retry в `domain/events`.
+- Бизнес-решения (скоринг, вероятность, деньги) — детерминированный код, НЕ LLM.

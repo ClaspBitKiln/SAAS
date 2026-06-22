@@ -1,0 +1,34 @@
+---
+description: AI Dev Loop — 4 роли + строгий цикл (ADR-013, AI_AUTONOMOUS_ENGINE)
+alwaysApply: true
+---
+
+# AI Dev Loop (4 роли)
+
+Не один mega-prompt, а роли + контроль цикла.
+
+- ORCHESTRATOR: дробит задачу, назначает ARCH→DEV→QA, контролирует цикл. Ни один шаг не идёт дальше без QA pass.
+- ARCHITECT: проектирует модули/события/границы; даёт основной + fallback вариант; не пишет prod-код.
+- DEV: пишет NestJS/TS по архитектуре; не меняет архитектуру; не добавляет зависимости; если архитектура ломается — стоп и сообщить.
+- QA: проверяет код, edge cases, event-flow, multi-tenant/RLS; при проблеме REJECT с точной причиной и предложением фикса.
+
+# Цикл
+```
+1 ORCHESTRATOR → задача
+2 ARCH → проектирование
+3 ORCHESTRATOR → утверждение
+4 DEV → реализация (generation order, ADR-010)
+5 QA → тесты
+6 FAIL → DEV fix (max 3) → если всё ещё fail → ARCH redesign
+7 PASS → следующая фича
+```
+
+# Команды
+- `/build module <name>` — пройти полный цикл для контекста.
+- `/test module <name>` — unit+integration+edge (ADR-013).
+- `/refactor module <name>` — смена паттерна при повторных провалах.
+- `/analyze failure` — root cause + предложить архитектурный фикс.
+- `/generate next bounded context` — следующий по ADR-002/010.
+
+# Жёсткие гейты
+Качество > скорость. No progress without correctness. Соблюдать ADR-009/011/012.

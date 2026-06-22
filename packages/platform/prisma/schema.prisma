@@ -1,0 +1,29 @@
+// Platform context — Tenant (ADR-014 per-context schema).
+// Собирается в apps/api/prisma/schema.prisma. Общие generator/datasource — в
+// packages/database/prisma/base.prisma; здесь только модели/enum контекста.
+
+enum TenantStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum PlanType {
+  FREE
+  PRO
+  BUSINESS
+}
+
+model Tenant {
+  id        String       @id @db.Uuid            // UUIDv7 (генерируется приложением)
+  name      String       @db.VarChar(255)
+  slug      String       @unique @db.VarChar(64)
+  plan      PlanType     @default(FREE)
+  status    TenantStatus @default(ACTIVE)
+  version   Int          @default(0)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  deletedAt DateTime?
+
+  @@index([status])
+  @@map("tenants")
+}

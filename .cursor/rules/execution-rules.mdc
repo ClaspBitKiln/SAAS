@@ -1,0 +1,17 @@
+---
+description: Режим реализации (ADR-015)
+alwaysApply: true
+---
+
+# Execution rules
+
+- Architecture Freeze: до завершения Platform→Auth→Users→RBAC не менять стек/ORM/
+  multi-tenancy, не вводить микросервисы/Kafka/Event Sourcing. Идеи → docs/backlog/architecture-ideas/.
+- Module Completion: агрегат готов только при наличии Entity, VOs, Repo interface,
+  Prisma, Repo impl, Commands, Queries, Handlers, Controllers, DTO, OpenAPI, unit+integration tests, ADR notes. Без «TODO позже».
+- No Big Bang: внутри Platform строго Tenant → Organization → Settings → Subscription → Audit,
+  по одному агрегату, полностью завершая предыдущий.
+- Режим: Design → Code → Test → Fix → Commit → Next.
+- One Failure At A Time: при красном CI чинить только упавший шаг (lint→build→test→e2e
+  по порядку), минимальным фиксом, без рефакторинга. Остальные шаги до этого — `unknown`.
+- Каждый реальный отказ CI заносится в docs/KNOWN_FAILURES.md (evidence + root cause + fix).

@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.env
+*.log
+.turbo/
+coverage/
+# мусор песочницы (удалить вручную)
+blocks/
+**/_gitsnapshot/
+# секреты inn-bot не коммитим
+docs/reference/inn-bot/**/Учётные_данные.md

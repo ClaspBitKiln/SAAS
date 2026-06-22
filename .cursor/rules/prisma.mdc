@@ -1,0 +1,15 @@
+---
+description: Prisma-конвенции AI Sales OS
+globs: ["packages/**/infrastructure/prisma/**", "packages/database/**"]
+alwaysApply: false
+---
+
+# Prisma
+
+- У всех основных моделей есть `tenantId` и составные индексы `(tenantId, ...)`.
+- Репозитории ВСЕГДА фильтруют по `tenantId` — изоляция арендатора обязательна.
+- Денежные суммы — `Decimal(15,2)`, не float. UUID — `@db.Uuid`.
+- Мягкое удаление через `deletedAt`, а не физическое (где применимо).
+- `pg_trgm` GIN-индексы добавляются ручной миграцией (Prisma их не генерирует) — см. конец `schema.prisma`.
+- Изменения схемы — только через миграции (`prisma migrate`), не `db push` в проде.
+- Оптимистическая блокировка по `updatedAt`/version в командных хендлерах.

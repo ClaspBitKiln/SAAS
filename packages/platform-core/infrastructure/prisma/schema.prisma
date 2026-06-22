@@ -1,0 +1,187 @@
+// Foundation schema (AI Sales OS): Platform Core + Identity + RBAC + Audit + Outbox.
+// PostgreSQL, multi-tenant (tenant_id + RLS — см. ADR-003).
+// Реальный проект: один общий Prisma datasource на монолит; модели контекстов
+// (этот файл + crm/schema.prisma и т.д.) объединяются в общую schema при сборке.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TenantStatus { ACTIVE SUSPENDED }
+enum SubscriptionPlan { FREE PRO BUSINESS }
+enum SubscriptionStatus { ACTIVE PAST_DUE CANCELED }
+enum UserStatus { INVITED ACTIVE DISABLED }
+
+model Tenant {
+  id        String       @id @default(uuid()) @db.Uuid
+  name      String       @db.VarChar(255)
+  slug      String       @unique @db.VarChar(64)
+  status    TenantStatus @default(ACTIVE)
+  createdAt DateTime     @default(now())
+
+  organizations Organization[]
+  subscription  Subscription?
+  users         User[]
+  roles         Role[]
+
+  @@map("tenants")
+}
+
+model Organization {
+  id        String   @id @default(uuid()) @db.Uuid
+  tenantId  String   @db.Uuid
+  name      String   @db.VarChar(255)
+  inn       String?  @db.VarChar(12)
+  settings  Json?
+  createdAt DateTime @default(now())
+
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("organizations")
+}
+
+model Subscription {
+  id               String             @id @default(uuid()) @db.Uuid
+  tenantId         String             @unique @db.Uuid
+  plan             SubscriptionPlan   @default(FREE)
+  status           SubscriptionStatus @default(ACTIVE)
+  seats            Int                @default(1)
+  currentPeriodEnd DateTime?
+
+  tenant           Tenant             @relation(fields: [tenantId], references: [id])
+
+  @@map("subscriptions")
+}
+
+model FeatureFlag {
+  id       String  @id @default(uuid()) @db.Uuid
+  tenantId String? @db.Uuid
+  key      String  @db.VarChar(64)
+  enabled  Boolean @default(false)
+
+  @@unique([tenantId, key])
+  @@map("feature_flags")
+}
+
+model Setting {
+  id       String @id @default(uuid()) @db.Uuid
+  tenantId String @db.Uuid
+  key      String @db.VarChar(64)
+  value    Json?
+
+  @@unique([tenantId, key])
+  @@index([tenantId])
+  @@map("settings")
+}
+
+model User {
+  id          String     @id @default(uuid()) @db.Uuid
+  tenantId    String     @db.Uuid
+  email       String     @db.VarChar(255)
+  name        String     @db.VarChar(255)
+  passwordHash String?   @db.VarChar(255) // Argon2id
+  status      UserStatus @default(INVITED)
+  lastLoginAt DateTime?
+  createdAt   DateTime   @default(now())
+
+  tenant      Tenant     @relation(fields: [tenantId], references: [id])
+  roles       UserRole[]
+
+  @@unique([tenantId, email])
+  @@index([tenantId])
+  @@map("users")
+}
+
+model Role {
+  id       String  @id @default(uuid()) @db.Uuid
+  tenantId String? @db.Uuid          // null = системная роль
+  key      String  @db.VarChar(64)   // OWNER|ADMIN|MANAGER|VIEWER|custom
+  name     String  @db.VarChar(255)
+  isSystem Boolean @default(false)
+
+  tenant      Tenant?          @relation(fields: [tenantId], references: [id])
+  permissions RolePermission[]
+  users       UserRole[]
+
+  @@unique([tenantId, key])
+  @@map("roles")
+}
+
+model Permission {
+  id       String @id @default(uuid()) @db.Uuid
+  resource String @db.VarChar(64) // deals, companies, contacts, billing, ...
+  action   String @db.VarChar(32) // read, create, update, delete, assign, ...
+
+  roles    RolePermission[]
+
+  @@unique([resource, action])
+  @@map("permissions")
+}
+
+model RolePermission {
+  roleId       String @db.Uuid
+  permissionId String @db.Uuid
+
+  role         Role       @relation(fields: [roleId], references: [id])
+  permission   Permission @relation(fields: [permissionId], references: [id])
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model UserRole {
+  userId String @db.Uuid
+  roleId String @db.Uuid
+
+  user   User @relation(fields: [userId], references: [id])
+  role   Role @relation(fields: [roleId], references: [id])
+
+  @@id([userId, roleId])
+  @@map("user_roles")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid()) @db.Uuid
+  tenantId   String   @db.Uuid
+  userId     String?  @db.Uuid
+  entityType String   @db.VarChar(64)
+  entityId   String?  @db.Uuid
+  action     String   @db.VarChar(64)
+  oldData    Json?
+  newData    Json?
+  createdAt  DateTime @default(now())
+
+  @@index([tenantId, entityType, entityId])
+  @@index([tenantId, createdAt])
+  @@map("audit_logs")
+}
+
+model EventOutbox {
+  id            String   @id @default(uuid()) @db.Uuid
+  tenantId      String   @db.Uuid
+  eventName     String   @db.VarChar(128) // deal.created, message.received, ...
+  aggregateType String   @db.VarChar(64)
+  aggregateId   String   @db.Uuid
+  payload       Json
+  status        String   @default("PENDING") @db.VarChar(16) // PENDING|PUBLISHED|FAILED
+  createdAt     DateTime @default(now())
+  publishedAt   DateTime?
+
+  @@index([status, createdAt])
+  @@index([tenantId])
+  @@map("event_outbox")
+}
+
+// --- Row Level Security (добавить миграцией; ADR-003 §1) ---
+// ALTER TABLE companies ENABLE ROW LEVEL SECURITY;  -- и т.д. для всех арендных таблиц
+// CREATE POLICY tenant_isolation ON companies
+//   USING (tenant_id = current_setting('app.current_tenant')::uuid);
+// Приложение перед запросом: SET app.current_tenant = '<tenantId>';
+//
+// Sessions/refresh-токены хранятся в Redis, а НЕ в этой схеме (ADR-003 §4).

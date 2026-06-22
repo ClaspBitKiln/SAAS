@@ -1,0 +1,25 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint", "import"],
+  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
+  "rules": {
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "group": ["**/database/prisma/*", "@prisma/client"],
+            "message": "ADR-009: Prisma только в infrastructure-репозиториях, не в хендлерах/контроллерах."
+          }
+        ]
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["**/infrastructure/**", "**/prisma.service.ts", "**/*.module.ts", "**/tests/**"],
+      "rules": { "no-restricted-imports": "off" }
+    }
+  ]
+}

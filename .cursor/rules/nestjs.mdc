@@ -1,0 +1,15 @@
+---
+description: NestJS-конвенции AI Sales OS
+globs: ["apps/api/**", "packages/**"]
+alwaysApply: false
+---
+
+# NestJS
+
+- Каждый bounded context из `packages/*` подключается в `apps/api` как NestModule.
+- Слои не смешивать: controller → command/query (CQRS) → handler → domain → repository.
+- Валидация входа — `class-validator` в DTO; ответы — отдельные response-DTO.
+- OpenAPI — через `@nestjs/swagger` декораторы, генерируется автоматически.
+- Везде прокидывать `tenantId` из контекста запроса (guard/interceptor), не доверять телу.
+- WebSocket-события публиковать через шлюз по каналам `tenant:{id}` / `deal:{id}`.
+- Тяжёлые/фоновые задачи — в `apps/worker` через BullMQ, не в request-цикле.

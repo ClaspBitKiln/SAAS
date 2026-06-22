@@ -1,0 +1,19 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      nest:
+        patterns: ["@nestjs/*"]
+      prisma:
+        patterns: ["prisma", "@prisma/*"]
+      testing:
+        patterns: ["vitest", "@vitest/*", "supertest", "@types/supertest"]
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"

@@ -1,0 +1,11 @@
+# Владельцы кода. Заменить на реальные GitHub-логины.
+# Весь репозиторий
+*                       @owner
+
+# Архитектура и ADR — обязательное ревью
+/docs/038-adr/          @owner
+/.github/               @owner
+
+# Каркас и shared — повышенное внимание
+/apps/api/src/shared/   @owner
+/apps/api/src/database/ @owner

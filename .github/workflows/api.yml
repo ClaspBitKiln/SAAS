@@ -1,0 +1,101 @@
+name: api
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: saas
+          POSTGRES_PASSWORD: saas
+          POSTGRES_DB: saas
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U saas"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+
+    env:
+      DATABASE_URL: "postgresql://saas:saas@localhost:5432/saas?schema=public"
+      REDIS_URL: "redis://localhost:6379"
+      NODE_ENV: test
+
+    defaults:
+      run:
+        working-directory: apps/api
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install (root)
+        working-directory: .
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Prisma generate
+        run: pnpm prisma:generate
+
+      - name: Prisma migrate (deploy schema to test DB)
+        run: pnpm prisma migrate dev --name ci --schema prisma/schema.prisma --skip-seed
+
+      - name: Build (tsc)
+        run: pnpm build
+
+      - name: Unit tests
+        run: pnpm test -- --reporter=default --reporter=junit --outputFile=reports/unit.xml --coverage
+
+      - name: Integration tests
+        run: pnpm test:integration -- --reporter=junit --outputFile=reports/integration.xml
+
+      - name: E2E tests
+        run: pnpm test:e2e -- --reporter=junit --outputFile=reports/e2e.xml
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: apps/api/reports/
+
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: apps/api/coverage/
+
+      # ADR-024: статус вычисляется автоматикой, не пишется руками.
+      - name: Computed status summary
+        if: always()
+        run: |
+          {
+            echo "## Tenant build status (computed)"
+            echo "- result: ${{ job.status }}"
+            echo "- run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            echo "Artifacts: test-reports, coverage (ADR-023)."
+          } >> "$GITHUB_STEP_SUMMARY"
