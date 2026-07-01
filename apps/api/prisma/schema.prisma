@@ -1,6 +1,6 @@
 // СОБРАННАЯ схема (ADR-014). Источник истины — packages/<ctx>/prisma/*.
 // Здесь добавлены generator/datasource + модели контекстов по мере готовности.
-// Сейчас: Platform → Tenant. Не редактировать вручную после внедрения merge-скрипта.
+// Сейчас: Platform → Tenant, Organization.
 
 generator client {
   provider = "prisma-client-js"
@@ -36,4 +36,19 @@ model Tenant {
 
   @@index([status])
   @@map("tenants")
+}
+
+model Organization {
+  id        String    @id @db.Uuid
+  tenantId  String    @db.Uuid
+  name      String    @db.VarChar(255)
+  inn       String?   @db.VarChar(12)
+  settings  Json?
+  version   Int       @default(0)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([tenantId])
+  @@map("organizations")
 }
