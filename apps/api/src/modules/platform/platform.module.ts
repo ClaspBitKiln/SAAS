@@ -34,5 +34,6 @@ const QueryHandlers = [GetTenantHandler, ListTenantsHandler, GetOrganizationHand
     ...CommandHandlers,
     ...QueryHandlers,
   ],
+  exports: [TENANT_REPOSITORY, ORGANIZATION_REPOSITORY],
 })
 export class PlatformModule {}

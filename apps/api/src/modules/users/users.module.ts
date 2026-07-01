@@ -28,5 +28,6 @@ const QueryHandlers = [GetUserHandler, GetUserByEmailHandler, ListUsersHandler];
     ...CommandHandlers,
     ...QueryHandlers,
   ],
+  exports: [USER_REPOSITORY],
 })
 export class UsersModule {}
