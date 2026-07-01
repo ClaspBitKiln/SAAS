@@ -42,3 +42,26 @@ model Organization {
   @@index([tenantId])
   @@map("organizations")
 }
+
+enum UserStatus {
+  INVITED
+  ACTIVE
+  DISABLED
+}
+
+model User {
+  id          String     @id @db.Uuid
+  email       String     @unique @db.VarChar(255)
+  name        String     @db.VarChar(255)
+  avatarUrl   String?    @db.VarChar(2048)
+  locale      String     @default("ru-RU") @db.VarChar(16)
+  timezone    String     @default("Europe/Moscow") @db.VarChar(64)
+  status      UserStatus @default(INVITED)
+  lastLoginAt DateTime?
+  version     Int        @default(0)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  deletedAt   DateTime?
+
+  @@map("users")
+}
