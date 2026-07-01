@@ -21,9 +21,32 @@
 **CI proof:** commit `0e24f73` → workflow `api` → **success**
 https://github.com/ClaspBitKiln/SAAS/actions/runs/28534981949
 
-**DoD (ADR-016):** Tenant = DONE → следующий модуль: **Organization**.
+**DoD (ADR-016):** Tenant = DONE.
+
+## Organization (контекст Platform) — **DONE** (CI_GREEN 2026-07-01)
+
+| Проверка | Команда | Статус | Доказательство |
+|----------|---------|--------|----------------|
+| Lint | `pnpm lint` | CI_GREEN | [run](https://github.com/ClaspBitKiln/SAAS/actions/runs/28537484657) |
+| Prisma generate + migrate | CI steps | CI_GREEN | same run |
+| TypeScript compile | `pnpm build` | CI_GREEN | same run |
+| Unit tests | `pnpm test` | CI_GREEN | same run |
+| Integration tests | `pnpm test:integration` | CI_GREEN | same run |
+| E2E tests | `pnpm test:e2e` | CI_GREEN | same run |
+
+**CI proof:** commit `e68ae91` → workflow `api` → **success**
+https://github.com/ClaspBitKiln/SAAS/actions/runs/28537484657
+
+**DoD (ADR-016):** Organization = DONE → следующий агрегат: **User** (Golden Path).
 
 ## История прогонов
+
+```
+Дата: 2026-07-01
+Commit: e68ae91 feat(platform): add Organization aggregate
+CI run: https://github.com/ClaspBitKiln/SAAS/actions/runs/28537484657
+Статус: CI_GREEN (lint, prisma, build, unit, integration, e2e — all passed)
+```
 
 ```
 Дата: 2026-07-01

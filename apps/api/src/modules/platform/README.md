@@ -1,26 +1,12 @@
-# Module: Platform — Tenant ✅ · Organization (await CI)
+# Module: Platform — Tenant ✅ · Organization ✅
 
 Контекст Platform. Golden Path по ADR-015.
 
 ## Tenant — DONE (CI_GREEN 2026-07-01)
 
-## Organization — Module Completion Checklist
+## Organization — DONE (CI_GREEN 2026-07-01)
 
-- [x] Entity — `domain/entities/organization.entity.ts`
-- [x] Value Objects — `organization-name.vo.ts`, `inn.vo.ts` (правило из inn-bot: 10/12 цифр)
-- [x] Repository Interface — `domain/repositories/organization.repository.ts`
-- [x] Prisma schema — `organizations` table
-- [x] Repository implementation — `infrastructure/prisma-organization.repository.ts`
-- [x] Commands — `application/commands/organization.commands.ts`
-- [x] Queries — `application/queries/organization.queries.ts`
-- [x] Handlers — `application/handlers/organization.*`
-- [x] Controllers — `presentation/controllers/organization.controller.ts`
-- [x] DTO — create/update/response
-- [x] OpenAPI — swagger decorators
-- [x] Unit tests — inn, organization-name, organization.entity
-- [x] Integration tests — prisma-organization.repository.spec.ts
-- [x] E2E tests — organization.e2e-spec.ts
-- [ ] CI_GREEN — await push + GitHub Actions
+- [x] CI_GREEN — run 28537484657, commit `e68ae91`
 
 ## API — Organization
 
@@ -41,6 +27,6 @@ PATCH  /tenants/{id}/activate
 PATCH  /tenants/{id}/suspend
 ```
 
-## Следующий агрегат (после Organization CI_GREEN)
+## Следующий агрегат (Golden Path)
 
-Settings → Subscription → Audit
+User → Role → Permission → Membership → Audit
