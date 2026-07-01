@@ -37,7 +37,10 @@ https://github.com/ClaspBitKiln/SAAS/actions/runs/28534981949
 **CI proof:** commit `e68ae91` → workflow `api` → **success**
 https://github.com/ClaspBitKiln/SAAS/actions/runs/28537484657
 
-**DoD (ADR-016):** Organization = DONE → следующий агрегат: **User** (Golden Path).
+**DoD (ADR-016):** Organization = DONE.
+
+**Следующий шаг:** утвердить `docs/platform/authorization-model.md`, затем Golden Path:
+User → Membership → Role → Permission → Audit (каждый — CI_GREEN).
 
 ## История прогонов
 

@@ -27,6 +27,8 @@ PATCH  /tenants/{id}/activate
 PATCH  /tenants/{id}/suspend
 ```
 
-## Следующий агрегат (Golden Path)
+## Следующий шаг
 
-User → Role → Permission → Membership → Audit
+Утвердить `docs/platform/authorization-model.md` → затем:
+
+User → Membership → Role → Permission → Audit
