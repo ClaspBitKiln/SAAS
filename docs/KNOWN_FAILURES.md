@@ -67,6 +67,15 @@ Root cause: несоответствие module-системы при прого
 Fix:       vitest исполняет TS через esbuild; tsconfig module=commonjs для tsc-сборки. Проверить на первом run.
 Status:    PREDICTED
 
+# F-011
+Problem:           CI `api` падает за ~35с на шаге настройки pnpm (все прогоны, main + dependabot)
+Evidence:          GitHub Actions run 27943801590, annotation: "Multiple versions of pnpm specified:
+                   version 9 in action config + pnpm@9.0.0 in package.json (packageManager)"
+Root cause:        pnpm/action-setup@v4 конфликтует, когда версия задана и в `with: version` и в `packageManager`
+Fix:               убрал `with: version: 9` из .github/workflows/api.yml (источник версии — packageManager)
+Preventive action: задавать версию pnpm только в одном месте (packageManager в package.json)
+Status:            RESOLVED (commit af7ef57, run #12: lint/prisma/build/unit/integration passed)
+
 # F-010
 Problem:           push упал: 'src refspec main does not match any' (нет коммита)
 Evidence:          вывод push.bat 2026-06-22: husky pre-commit -> eslint -> 5 errors -> commit не создан
@@ -99,3 +108,12 @@ Evidence:  —
 Root cause: eslint и плагины не были в devDependencies apps/api.
 Fix:       добавлены eslint + @typescript-eslint/* + eslint-plugin-import в apps/api/package.json.
 Status:    PREDICTED
+
+# F-012
+Problem:           E2E: POST /tenants returns 500 (expected 201/400); integration tests pass
+Evidence:          GitHub Actions run 28282816006, step "E2E tests"
+Root cause:        Vitest default esbuild transform does not emit decoratorMetadata; NestJS DI
+                   (CommandBus/EventBus) and class-validator metadata fail at runtime in e2e only
+Fix:               vitest.config.ts: unplugin-swc with legacyDecorator + decoratorMetadata
+Preventive action: all NestJS/e2e tests must use SWC transform, not plain esbuild
+Status:            CONFIRMED (fix committed; await CI proof)
