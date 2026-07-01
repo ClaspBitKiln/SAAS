@@ -106,3 +106,27 @@ model Membership {
   @@index([organizationId])
   @@map("memberships")
 }
+
+// ===== context: crm (Contact MVP) =====
+enum ContactStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+model Contact {
+  id             String        @id @db.Uuid
+  tenantId       String        @db.Uuid
+  organizationId String        @db.Uuid
+  name           String        @db.VarChar(255)
+  phone          String?       @db.VarChar(50)
+  email          String?       @db.VarChar(255)
+  status         ContactStatus @default(ACTIVE)
+  version        Int           @default(0)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  deletedAt      DateTime?
+
+  @@index([tenantId])
+  @@index([organizationId])
+  @@map("contacts")
+}

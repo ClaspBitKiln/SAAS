@@ -5,19 +5,19 @@ EXECUTION ONLY MODE
 ---
 
 CURRENT
-STOP
+Contact Aggregate
 
 STATUS
-CI_GREEN
+IN PROGRESS
 
 GOAL
-—
+CI_GREEN
 
 NEXT ACTION
-—
+feat(contacts): add Contact aggregate → push
 
 EXIT
-—
+Contact CI_GREEN
 
 NEXT MODULE
 STOP (decided by Founder only)
