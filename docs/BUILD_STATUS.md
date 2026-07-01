@@ -55,9 +55,32 @@ https://github.com/ClaspBitKiln/SAAS/actions/runs/28540666372
 
 **DoD (ADR-016):** User = DONE.
 
-**Следующий шаг:** Membership → Role → Permission → Audit (каждый — CI_GREEN).
+## Membership (контекст Platform) — **DONE** (CI_GREEN 2026-07-01)
+
+| Проверка | Команда | Статус | Доказательство |
+|----------|---------|--------|----------------|
+| Lint | `pnpm lint` | CI_GREEN | [run](https://github.com/ClaspBitKiln/SAAS/actions/runs/28541063138) |
+| Prisma generate + migrate | CI steps | CI_GREEN | same run |
+| TypeScript compile | `pnpm build` | CI_GREEN | same run |
+| Unit tests | `pnpm test` | CI_GREEN | same run |
+| Integration tests | `pnpm test:integration` | CI_GREEN | same run |
+| E2E tests | `pnpm test:e2e` | CI_GREEN | same run |
+
+**CI proof:** commit `6163239` → workflow `api` → **success**
+https://github.com/ClaspBitKiln/SAAS/actions/runs/28541063138
+
+**DoD (ADR-016):** Membership = DONE.
+
+**Следующий шаг:** Role → Permission → Audit (каждый — CI_GREEN).
 
 ## История прогонов
+
+```
+Дата: 2026-07-01
+Commit: 6163239 feat(platform): add Membership aggregate
+CI run: https://github.com/ClaspBitKiln/SAAS/actions/runs/28541063138
+Статус: CI_GREEN (lint, prisma, build, unit, integration, e2e — all passed)
+```
 
 ```
 Дата: 2026-07-01

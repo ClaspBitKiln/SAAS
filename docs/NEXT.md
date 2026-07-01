@@ -5,19 +5,19 @@ EXECUTION ONLY MODE
 ---
 
 CURRENT
-Membership Aggregate
+STOP
 
 STATUS
-NOT STARTED
-
-GOAL
 CI_GREEN
 
+GOAL
+—
+
 NEXT ACTION
-feat(platform): add Membership aggregate → push
+—
 
 EXIT
-Membership CI_GREEN
+—
 
 NEXT MODULE
 STOP (decided by Founder only)
