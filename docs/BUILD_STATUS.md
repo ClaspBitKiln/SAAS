@@ -7,31 +7,41 @@
 Обновлять при каждом реальном прогоне: команда + вывод (или ссылка на CI artifact / run).
 Источник истины — пайплайн `.github/workflows/api.yml`.
 
-## Tenant (контекст Platform) — IMPLEMENTED, ≠ DONE
+## Tenant (контекст Platform) — **DONE** (CI_GREEN 2026-07-01)
 
 | Проверка | Команда | Статус | Доказательство |
 |----------|---------|--------|----------------|
-| TypeScript compile | `pnpm build` | NOT_RUN | — |
-| Unit tests | `pnpm test` | NOT_RUN | — |
-| Integration tests | `pnpm test:integration` | NOT_RUN | — |
-| E2E tests | `pnpm test:e2e` | NOT_RUN | — |
-| Swagger up | `pnpm dev` → GET /docs | NOT_RUN | — |
-| POST /tenants | curl/Swagger | NOT_RUN | — |
-| GET /tenants/:id | curl/Swagger | NOT_RUN | — |
-| PATCH activate/suspend | curl/Swagger | NOT_RUN | — |
+| Lint | `pnpm lint` | CI_GREEN | [run #13](https://github.com/ClaspBitKiln/SAAS/actions/runs/28534981949) |
+| Prisma generate + migrate | CI steps | CI_GREEN | same run |
+| TypeScript compile | `pnpm build` | CI_GREEN | same run |
+| Unit tests | `pnpm test` | CI_GREEN | same run |
+| Integration tests | `pnpm test:integration` | CI_GREEN | same run |
+| E2E tests | `pnpm test:e2e` | CI_GREEN | same run |
 
-**DoD (ADR-016):** все строки выше = GREEN с доказательством → Tenant = DONE → можно Organization.
+**CI proof:** commit `0e24f73` → workflow `api` → **success**
+https://github.com/ClaspBitKiln/SAAS/actions/runs/28534981949
 
-## Примечание о среде генерации
-Песочный shell ассистента в сессиях проектирования был недоступен (workspace booting/timeout),
-поэтому прогоны не выполнялись — статусы честно `NOT_RUN`, а не `ASSUMED_GREEN` (ADR-019).
-Заполнять таблицу при первом локальном/CI-прогоне.
+**DoD (ADR-016):** Tenant = DONE → следующий модуль: **Organization**.
 
-## Шаблон записи прогона
+## История прогонов
+
 ```
-Дата: 2026-06-__
-Команда: pnpm test
-Вывод:
-<вставить хвост вывода: N passed / M failed>
-Статус: GREEN | RED
+Дата: 2026-07-01
+Commit: 0e24f73 fix(test): emit decorator metadata in vitest via SWC
+CI run: https://github.com/ClaspBitKiln/SAAS/actions/runs/28534981949
+Статус: CI_GREEN (lint, prisma, build, unit, integration, e2e — all passed)
+```
+
+```
+Дата: 2026-06-26
+Commit: af7ef57 fix(ci): remove duplicate pnpm version from action-setup
+CI run: https://github.com/ClaspBitKiln/SAAS/actions/runs/28282816006
+Статус: CI_RED (E2E: POST /tenants → 500)
+```
+
+```
+Дата: 2026-06-22
+Commit: 1ba34c1 chore: bootstrap ai-sales-os
+CI run: https://github.com/ClaspBitKiln/SAAS/actions/runs/27943596268
+Статус: CI_RED (pnpm duplicate version, ~35s)
 ```

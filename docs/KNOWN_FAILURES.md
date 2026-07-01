@@ -116,4 +116,4 @@ Root cause:        Vitest default esbuild transform does not emit decoratorMetad
                    (CommandBus/EventBus) and class-validator metadata fail at runtime in e2e only
 Fix:               vitest.config.ts: unplugin-swc with legacyDecorator + decoratorMetadata
 Preventive action: all NestJS/e2e tests must use SWC transform, not plain esbuild
-Status:            CONFIRMED (fix committed; await CI proof)
+Status:            RESOLVED (commit 0e24f73, run 28534981949: e2e passed, CI_GREEN)
