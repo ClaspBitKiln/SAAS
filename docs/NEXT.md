@@ -8,7 +8,7 @@ CURRENT
 STOP
 
 STATUS
-CI_GREEN
+WAITING
 
 GOAL
 —
@@ -17,7 +17,7 @@ NEXT ACTION
 —
 
 EXIT
-Contact = DONE
+—
 
 NEXT MODULE
 STOP (decided by Founder only)

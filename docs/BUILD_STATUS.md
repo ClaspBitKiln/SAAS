@@ -87,7 +87,30 @@ https://github.com/ClaspBitKiln/SAAS/actions/runs/28542030630
 
 **DoD (ADR-016):** Contact = DONE.
 
+## Call (контекст CRM) — **DONE** (CI_GREEN 2026-07-02)
+
+| Проверка | Команда | Статус | Доказательство |
+|----------|---------|--------|----------------|
+| Lint | `pnpm lint` | CI_GREEN | [run](https://github.com/ClaspBitKiln/SAAS/actions/runs/28564317587) |
+| Prisma generate + migrate | CI steps | CI_GREEN | same run |
+| TypeScript compile | `pnpm build` | CI_GREEN | same run |
+| Unit tests | `pnpm test` | CI_GREEN | same run |
+| Integration tests | `pnpm test:integration` | CI_GREEN | same run |
+| E2E tests | `pnpm test:e2e` | CI_GREEN | same run |
+
+**CI proof:** commit `308ce31` → workflow `api` → **success**
+https://github.com/ClaspBitKiln/SAAS/actions/runs/28564317587
+
+**DoD (ADR-016):** Call = DONE.
+
 ## История прогонов
+
+```
+Дата: 2026-07-02
+Commit: 308ce31 feat(calls): add Call aggregate
+CI run: https://github.com/ClaspBitKiln/SAAS/actions/runs/28564317587
+Статус: CI_GREEN (lint, prisma, build, unit, integration, e2e — all passed)
+```
 
 ```
 Дата: 2026-07-01
