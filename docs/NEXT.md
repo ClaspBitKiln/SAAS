@@ -17,10 +17,10 @@ NEXT ACTION
 —
 
 EXIT
-JWT guard CI_GREEN — slice complete
+MVP self-service UI CI_GREEN — usable product shell complete
 
 NEXT MODULE
-STOP (decided by Founder only)
+AI call summary (Founder decision) · Role/RBAC · Telephony
 
 BLOCKERS
 None
