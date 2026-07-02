@@ -135,7 +135,27 @@ https://github.com/ClaspBitKiln/SAAS/actions/runs/28565452927
 
 **DoD (ADR-016):** Session + Refresh = DONE.
 
+## Web Shell (контекст Frontend) — **DONE** (CI_GREEN 2026-07-02)
+
+| Проверка | Команда | Статус | Доказательство |
+|----------|---------|--------|----------------|
+| Lint | `pnpm lint` (apps/web) | CI_GREEN | [run](https://github.com/ClaspBitKiln/SAAS/actions/runs/28566071494) |
+| Next.js build | `pnpm build` (apps/web) | CI_GREEN | same run (job `web-build`) |
+| API regression | `build-test` job | CI_GREEN | same run |
+
+**CI proof:** commits `85bb8db` + `488bb99` → workflow `api` → **success**
+https://github.com/ClaspBitKiln/SAAS/actions/runs/28566071494
+
+**DoD:** Login UI + Dashboard + Contacts/Calls pages = DONE.
+
 ## История прогонов
+
+```
+Дата: 2026-07-02
+Commit: 85bb8db feat(web): bootstrap Next.js app shell with login
+CI run: https://github.com/ClaspBitKiln/SAAS/actions/runs/28566071494
+Статус: CI_GREEN (api build-test + web-build — all passed)
+```
 
 ```
 Дата: 2026-07-02
