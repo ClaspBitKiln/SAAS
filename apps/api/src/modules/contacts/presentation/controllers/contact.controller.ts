@@ -12,6 +12,9 @@ import {
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { CurrentUser } from '../../../auth/infrastructure/current-user.decorator';
+import { AccessTokenPayload } from '../../../auth/infrastructure/access-token.service';
+import { requireOrganizationId } from '../../../auth/infrastructure/require-organization';
 import { CreateContactDto } from '../../application/dto/create-contact.dto';
 import { UpdateContactDto } from '../../application/dto/update-contact.dto';
 import { ContactResponseDto } from '../../application/dto/contact-response.dto';
@@ -30,12 +33,16 @@ export class ContactController {
 
   @Post()
   @ApiOkResponse({ type: ContactResponseDto })
-  async create(@Body() dto: CreateContactDto): Promise<ContactResponseDto> {
+  async create(
+    @CurrentUser() user: AccessTokenPayload,
+    @Body() dto: CreateContactDto,
+  ): Promise<ContactResponseDto> {
+    const organizationId = requireOrganizationId(user);
     try {
       const { id } = await this.commandBus.execute(
-        new CreateContactCommand(dto.organizationId, dto.name, dto.phone, dto.email),
+        new CreateContactCommand(organizationId, dto.name, dto.phone, dto.email),
       );
-      return this.getOrFail(id);
+      return this.getOrFail(id, organizationId);
     } catch (e) {
       if (e instanceof Error && e.message === 'Organization not found') {
         throw new BadRequestException(e.message);
@@ -46,41 +53,54 @@ export class ContactController {
 
   @Get()
   @ApiOkResponse({ type: ContactResponseDto, isArray: true })
-  async list(@Query('organizationId') organizationId: string, @Query('page') page = '1', @Query('size') size = '25') {
-    if (!organizationId) throw new BadRequestException('organizationId required');
-    return this.queryBus.execute(new ListContactsQuery(organizationId, Number(page), Math.min(Number(size), 100)));
+  async list(
+    @CurrentUser() user: AccessTokenPayload,
+    @Query('page') page = '1',
+    @Query('size') size = '25',
+  ) {
+    const organizationId = requireOrganizationId(user);
+    return this.queryBus.execute(
+      new ListContactsQuery(organizationId, Number(page), Math.min(Number(size), 100)),
+    );
   }
 
   @Get(':id')
   @ApiOkResponse({ type: ContactResponseDto })
-  async get(@Param('id') id: string): Promise<ContactResponseDto> {
-    return this.getOrFail(id);
+  async get(@CurrentUser() user: AccessTokenPayload, @Param('id') id: string): Promise<ContactResponseDto> {
+    return this.getOrFail(id, requireOrganizationId(user));
   }
 
   @Patch(':id')
   @ApiOkResponse({ type: ContactResponseDto })
-  async update(@Param('id') id: string, @Body() dto: UpdateContactDto): Promise<ContactResponseDto> {
+  async update(
+    @CurrentUser() user: AccessTokenPayload,
+    @Param('id') id: string,
+    @Body() dto: UpdateContactDto,
+  ): Promise<ContactResponseDto> {
+    const organizationId = requireOrganizationId(user);
     try {
-      await this.commandBus.execute(new UpdateContactCommand(id, dto.name, dto.phone, dto.email));
+      await this.commandBus.execute(
+        new UpdateContactCommand(id, organizationId, dto.name, dto.phone, dto.email),
+      );
     } catch (e) {
       if (e instanceof Error && e.message === 'Contact not found') throw new NotFoundException(e.message);
       throw e;
     }
-    return this.getOrFail(id);
+    return this.getOrFail(id, organizationId);
   }
 
   @Delete(':id')
-  async delete(@Param('id') id: string): Promise<void> {
+  async delete(@CurrentUser() user: AccessTokenPayload, @Param('id') id: string): Promise<void> {
     try {
-      await this.commandBus.execute(new DeleteContactCommand(id));
+      await this.commandBus.execute(new DeleteContactCommand(id, requireOrganizationId(user)));
     } catch (e) {
       if (e instanceof Error && e.message === 'Contact not found') throw new NotFoundException(e.message);
       throw e;
     }
   }
 
-  private async getOrFail(id: string): Promise<ContactResponseDto> {
-    const contact = await this.queryBus.execute(new GetContactQuery(id));
+  private async getOrFail(id: string, organizationId: string): Promise<ContactResponseDto> {
+    const contact = await this.queryBus.execute(new GetContactQuery(id, organizationId));
     if (!contact) throw new NotFoundException('Contact not found');
     return contact;
   }

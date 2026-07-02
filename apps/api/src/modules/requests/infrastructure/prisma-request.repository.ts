@@ -14,9 +14,9 @@ import { RequestStatusEnum } from '../domain/value-objects/request-status.vo';
 export class PrismaRequestRepository implements RequestRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findById(id: string): Promise<Request | null> {
+  async findById(id: string, organizationId: string): Promise<Request | null> {
     const row = await this.prisma.request.findFirst({
-      where: { id, deletedAt: null },
+      where: { id, organizationId, deletedAt: null },
       include: { lines: { orderBy: { sortOrder: 'asc' } } },
     });
     return row ? this.toDomain(row) : null;

@@ -52,15 +52,15 @@ describe('PrismaCallRepository (integration)', () => {
       phone: '+79991234567',
     });
     await callRepo.save(call);
-    const found = await callRepo.findById(call.id);
+    const found = await callRepo.findById(call.id, orgId);
     expect(found?.status).toBe(CallStatusEnum.RINGING);
 
-    const list = await callRepo.listByContact(contactId, { page: 1, size: 10 });
+    const list = await callRepo.listByContact(contactId, orgId, { page: 1, size: 10 });
     expect(list.total).toBeGreaterThanOrEqual(1);
 
     found!.complete();
     await callRepo.save(found!);
-    const completed = await callRepo.findById(call.id);
+    const completed = await callRepo.findById(call.id, orgId);
     expect(completed?.status).toBe(CallStatusEnum.COMPLETED);
     expect(completed?.durationSec).not.toBeNull();
   });

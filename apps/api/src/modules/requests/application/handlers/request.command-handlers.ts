@@ -30,8 +30,8 @@ export class CreateRequestHandler implements ICommandHandler<CreateRequestComman
     const org = await this.orgRepo.findById(cmd.organizationId);
     if (!org) throw new Error('Organization not found');
     if (cmd.contactId) {
-      const contact = await this.contactRepo.findById(cmd.contactId);
-      if (!contact || contact.organizationId !== cmd.organizationId) throw new Error('Contact not found');
+      const contact = await this.contactRepo.findById(cmd.contactId, cmd.organizationId);
+      if (!contact) throw new Error('Contact not found');
     }
     const request = Request.create({
       tenantId: org.tenantId,
@@ -57,11 +57,11 @@ export class UpdateRequestHandler implements ICommandHandler<UpdateRequestComman
   ) {}
 
   async execute(cmd: UpdateRequestCommand): Promise<void> {
-    const request = await this.requestRepo.findById(cmd.id);
+    const request = await this.requestRepo.findById(cmd.id, cmd.organizationId);
     if (!request) throw new Error('Request not found');
     if (cmd.contactId) {
-      const contact = await this.contactRepo.findById(cmd.contactId);
-      if (!contact || contact.organizationId !== request.organizationId) throw new Error('Contact not found');
+      const contact = await this.contactRepo.findById(cmd.contactId, cmd.organizationId);
+      if (!contact) throw new Error('Contact not found');
     }
     request.updateDetails({
       contactId: cmd.contactId,
@@ -83,7 +83,7 @@ export class SearchRequestHandler implements ICommandHandler<SearchRequestComman
   ) {}
 
   async execute(cmd: SearchRequestCommand): Promise<void> {
-    const request = await this.requestRepo.findById(cmd.id);
+    const request = await this.requestRepo.findById(cmd.id, cmd.organizationId);
     if (!request) throw new Error('Request not found');
     const lines = request.lines.map((l) => ({
       gost: l.gost ?? undefined,

@@ -117,3 +117,11 @@ Root cause:        Vitest default esbuild transform does not emit decoratorMetad
 Fix:               vitest.config.ts: unplugin-swc with legacyDecorator + decoratorMetadata
 Preventive action: all NestJS/e2e tests must use SWC transform, not plain esbuild
 Status:            RESOLVED (commit 0e24f73, run 28534981949: e2e passed, CI_GREEN)
+
+# F-013
+Problem:           Broken access control — CRM read/write without tenant scope (IDOR / OWASP A01)
+Evidence:          Code review 2026-07-02: controllers trust client `organizationId`; repositories `findById` without org filter
+Root cause:        JWT payload carries tenant/org but not wired into CQRS queries/commands or Prisma `where`
+Fix:               `@CurrentUser()` + `requireOrganizationId`; scoped `findById(id, organizationId)` on Contact/Call/Request repos; tenant-isolation e2e
+Preventive action: all CRM repository read methods must accept organizationId (or tenantId) scope — no unscoped findById
+Status:            RESOLVED (pending CI_GREEN)

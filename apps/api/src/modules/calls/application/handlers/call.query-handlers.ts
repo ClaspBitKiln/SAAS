@@ -10,7 +10,7 @@ export class GetCallHandler implements IQueryHandler<GetCallQuery> {
   constructor(@Inject(CALL_REPOSITORY) private readonly repo: CallRepository) {}
 
   async execute(q: GetCallQuery): Promise<CallResponseDto | null> {
-    const call = await this.repo.findById(q.id);
+    const call = await this.repo.findById(q.id, q.organizationId);
     return call ? toCallResponse(call) : null;
   }
 }
@@ -20,7 +20,10 @@ export class ListCallsByContactHandler implements IQueryHandler<ListCallsByConta
   constructor(@Inject(CALL_REPOSITORY) private readonly repo: CallRepository) {}
 
   async execute(q: ListCallsByContactQuery): Promise<Page<CallResponseDto>> {
-    const { items, total } = await this.repo.listByContact(q.contactId, { page: q.page, size: q.size });
+    const { items, total } = await this.repo.listByContact(q.contactId, q.organizationId, {
+      page: q.page,
+      size: q.size,
+    });
     return { items: items.map(toCallResponse), page: q.page, size: q.size, total };
   }
 }

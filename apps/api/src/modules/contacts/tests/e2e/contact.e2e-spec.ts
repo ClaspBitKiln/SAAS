@@ -28,17 +28,18 @@ describe('Contact E2E', () => {
   });
 
   it('GET /contacts without token returns 401', async () => {
-    await request(app.getHttpServer()).get('/contacts').query({ organizationId: orgId }).expect(401);
+    await request(app.getHttpServer()).get('/contacts').expect(401);
   });
 
   it('POST /contacts CRUD flow', async () => {
     const res = await request(app.getHttpServer())
       .post('/contacts')
       .set(authHeader(token))
-      .send({ organizationId: orgId, name: 'Jane Doe', email: 'jane@example.com', phone: '+79991234567' })
+      .send({ name: 'Jane Doe', email: 'jane@example.com', phone: '+79991234567' })
       .expect(201);
     expect(res.body.name).toBe('Jane Doe');
     expect(res.body.tenantId).toBe(tenantId);
+    expect(res.body.organizationId).toBe(orgId);
 
     await request(app.getHttpServer())
       .patch(`/contacts/${res.body.id}`)
@@ -46,25 +47,10 @@ describe('Contact E2E', () => {
       .send({ name: 'Jane Updated' })
       .expect(200);
 
-    const list = await request(app.getHttpServer())
-      .get('/contacts')
-      .set(authHeader(token))
-      .query({ organizationId: orgId })
-      .expect(200);
+    const list = await request(app.getHttpServer()).get('/contacts').set(authHeader(token)).expect(200);
     expect(list.body.total).toBeGreaterThanOrEqual(1);
 
     await request(app.getHttpServer()).delete(`/contacts/${res.body.id}`).set(authHeader(token)).expect(200);
     await request(app.getHttpServer()).get(`/contacts/${res.body.id}`).set(authHeader(token)).expect(404);
-  });
-
-  it('POST /contacts rejects unknown organization', async () => {
-    await request(app.getHttpServer())
-      .post('/contacts')
-      .set(authHeader(token))
-      .send({
-        organizationId: '0192a1b2-c3d4-7890-abcd-ef1234567890',
-        name: 'Ghost',
-      })
-      .expect(400);
   });
 });

@@ -14,7 +14,7 @@ export class StartCallHandler implements ICommandHandler<StartCallCommand> {
   ) {}
 
   async execute(cmd: StartCallCommand): Promise<{ id: string }> {
-    const contact = await this.contactRepo.findById(cmd.contactId);
+    const contact = await this.contactRepo.findById(cmd.contactId, cmd.organizationId);
     if (!contact) throw new Error('Contact not found');
     const call = Call.start({
       tenantId: contact.tenantId,
@@ -37,7 +37,7 @@ export class CompleteCallHandler implements ICommandHandler<CompleteCallCommand>
   ) {}
 
   async execute(cmd: CompleteCallCommand): Promise<void> {
-    const call = await this.callRepo.findById(cmd.id);
+    const call = await this.callRepo.findById(cmd.id, cmd.organizationId);
     if (!call) throw new Error('Call not found');
     call.complete();
     await this.callRepo.save(call);
@@ -53,7 +53,7 @@ export class MissCallHandler implements ICommandHandler<MissCallCommand> {
   ) {}
 
   async execute(cmd: MissCallCommand): Promise<void> {
-    const call = await this.callRepo.findById(cmd.id);
+    const call = await this.callRepo.findById(cmd.id, cmd.organizationId);
     if (!call) throw new Error('Call not found');
     call.markMissed();
     await this.callRepo.save(call);

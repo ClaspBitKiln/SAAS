@@ -10,7 +10,7 @@ export class GetContactHandler implements IQueryHandler<GetContactQuery> {
   constructor(@Inject(CONTACT_REPOSITORY) private readonly repo: ContactRepository) {}
 
   async execute(q: GetContactQuery): Promise<ContactResponseDto | null> {
-    const contact = await this.repo.findById(q.id);
+    const contact = await this.repo.findById(q.id, q.organizationId);
     return contact ? toContactResponse(contact) : null;
   }
 }

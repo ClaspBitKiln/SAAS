@@ -1,5 +1,5 @@
 export class GetRequestQuery {
-  constructor(readonly id: string) {}
+  constructor(readonly id: string, readonly organizationId: string) {}
 }
 
 export class ListRequestsQuery {

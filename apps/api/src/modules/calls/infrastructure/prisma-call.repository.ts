@@ -10,16 +10,19 @@ import { CallStatusEnum } from '../domain/value-objects/call-status.vo';
 export class PrismaCallRepository implements CallRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findById(id: string): Promise<Call | null> {
-    const row = await this.prisma.call.findFirst({ where: { id, deletedAt: null } });
+  async findById(id: string, organizationId: string): Promise<Call | null> {
+    const row = await this.prisma.call.findFirst({
+      where: { id, organizationId, deletedAt: null },
+    });
     return row ? this.toDomain(row) : null;
   }
 
   async listByContact(
     contactId: string,
+    organizationId: string,
     params: { page: number; size: number },
   ): Promise<{ items: Call[]; total: number }> {
-    const where = { contactId, deletedAt: null };
+    const where = { contactId, organizationId, deletedAt: null };
     const [rows, total] = await this.prisma.$transaction([
       this.prisma.call.findMany({
         where,

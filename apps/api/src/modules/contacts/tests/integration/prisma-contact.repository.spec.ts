@@ -36,7 +36,7 @@ describe('PrismaContactRepository (integration)', () => {
   it('save + findById + listByOrganization', async () => {
     const contact = Contact.create({ tenantId, organizationId: orgId, name: 'IT Contact' });
     await contactRepo.save(contact);
-    const found = await contactRepo.findById(contact.id);
+    const found = await contactRepo.findById(contact.id, orgId);
     expect(found?.name).toBe('IT Contact');
     const list = await contactRepo.listByOrganization(orgId, { page: 1, size: 10 });
     expect(list.total).toBeGreaterThanOrEqual(1);

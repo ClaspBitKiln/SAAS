@@ -10,7 +10,7 @@ export class GetRequestHandler implements IQueryHandler<GetRequestQuery> {
   constructor(@Inject(REQUEST_REPOSITORY) private readonly requestRepo: RequestRepository) {}
 
   async execute(query: GetRequestQuery): Promise<RequestResponseDto | null> {
-    const request = await this.requestRepo.findById(query.id);
+    const request = await this.requestRepo.findById(query.id, query.organizationId);
     return request ? toRequestResponse(request) : null;
   }
 }

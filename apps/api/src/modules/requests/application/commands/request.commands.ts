@@ -15,6 +15,7 @@ export class CreateRequestCommand {
 export class UpdateRequestCommand {
   constructor(
     readonly id: string,
+    readonly organizationId: string,
     readonly contactId?: string | null,
     readonly title?: string | null,
     readonly notes?: string | null,
@@ -23,5 +24,5 @@ export class UpdateRequestCommand {
 }
 
 export class SearchRequestCommand {
-  constructor(readonly id: string) {}
+  constructor(readonly id: string, readonly organizationId: string) {}
 }

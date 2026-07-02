@@ -10,6 +10,7 @@ export class CreateContactCommand {
 export class UpdateContactCommand {
   constructor(
     readonly id: string,
+    readonly organizationId: string,
     readonly name?: string,
     readonly phone?: string | null,
     readonly email?: string | null,
@@ -17,5 +18,5 @@ export class UpdateContactCommand {
 }
 
 export class DeleteContactCommand {
-  constructor(readonly id: string) {}
+  constructor(readonly id: string, readonly organizationId: string) {}
 }

@@ -26,7 +26,6 @@ export class RequestLineDto {
 }
 
 export class CreateRequestDto {
-  @ApiProperty({ format: 'uuid' }) @IsUUID() organizationId!: string;
   @ApiPropertyOptional({ format: 'uuid' }) @IsOptional() @IsUUID() contactId?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() @Length(0, 255) title?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() @Length(0, 2000) notes?: string;

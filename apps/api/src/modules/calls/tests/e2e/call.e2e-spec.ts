@@ -11,7 +11,6 @@ describe('Call E2E', () => {
   let app: INestApplication;
   let token: string;
   let contactId: string;
-  let orgId: string;
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
@@ -21,12 +20,11 @@ describe('Call E2E', () => {
 
     const auth = await bootstrapE2eAuth(app);
     token = auth.token;
-    orgId = auth.orgId;
 
     const contactRes = await request(app.getHttpServer())
       .post('/contacts')
       .set(authHeader(token))
-      .send({ organizationId: orgId, name: 'Call Contact', phone: '+79991234567' })
+      .send({ name: 'Call Contact', phone: '+79991234567' })
       .expect(201);
     contactId = contactRes.body.id;
   });
@@ -84,11 +82,7 @@ describe('Call E2E', () => {
       .expect(200);
     expect(byContact.body.total).toBeGreaterThanOrEqual(1);
 
-    const byOrg = await request(app.getHttpServer())
-      .get('/calls')
-      .set(authHeader(token))
-      .query({ organizationId: orgId })
-      .expect(200);
+    const byOrg = await request(app.getHttpServer()).get('/calls').set(authHeader(token)).expect(200);
     expect(byOrg.body.total).toBeGreaterThanOrEqual(1);
   });
 

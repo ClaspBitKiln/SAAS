@@ -9,8 +9,10 @@ import { ContactStatusEnum } from '../domain/value-objects/contact-status.vo';
 export class PrismaContactRepository implements ContactRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findById(id: string): Promise<Contact | null> {
-    const row = await this.prisma.contact.findFirst({ where: { id, deletedAt: null } });
+  async findById(id: string, organizationId: string): Promise<Contact | null> {
+    const row = await this.prisma.contact.findFirst({
+      where: { id, organizationId, deletedAt: null },
+    });
     return row ? this.toDomain(row) : null;
   }
 

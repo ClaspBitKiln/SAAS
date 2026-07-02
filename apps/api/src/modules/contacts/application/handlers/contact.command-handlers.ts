@@ -40,7 +40,7 @@ export class UpdateContactHandler implements ICommandHandler<UpdateContactComman
   ) {}
 
   async execute(cmd: UpdateContactCommand): Promise<void> {
-    const contact = await this.contactRepo.findById(cmd.id);
+    const contact = await this.contactRepo.findById(cmd.id, cmd.organizationId);
     if (!contact) throw new Error('Contact not found');
     contact.updateDetails({ name: cmd.name, phone: cmd.phone, email: cmd.email });
     await this.contactRepo.save(contact);
@@ -56,7 +56,7 @@ export class DeleteContactHandler implements ICommandHandler<DeleteContactComman
   ) {}
 
   async execute(cmd: DeleteContactCommand): Promise<void> {
-    const contact = await this.contactRepo.findById(cmd.id);
+    const contact = await this.contactRepo.findById(cmd.id, cmd.organizationId);
     if (!contact) throw new Error('Contact not found');
     contact.archive();
     await this.contactRepo.save(contact);

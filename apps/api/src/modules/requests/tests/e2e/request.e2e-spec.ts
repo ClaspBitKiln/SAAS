@@ -8,7 +8,6 @@ import { authHeader, bootstrapE2eAuth } from '../../../../bootstrap/e2e-auth.hel
 describe('Request E2E', () => {
   let app: INestApplication;
   let token: string;
-  let orgId: string;
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
@@ -18,7 +17,6 @@ describe('Request E2E', () => {
 
     const auth = await bootstrapE2eAuth(app);
     token = auth.token;
-    orgId = auth.orgId;
   });
 
   afterAll(async () => {
@@ -26,7 +24,7 @@ describe('Request E2E', () => {
   });
 
   it('GET /requests without token returns 401', async () => {
-    await request(app.getHttpServer()).get('/requests').query({ organizationId: orgId }).expect(401);
+    await request(app.getHttpServer()).get('/requests').expect(401);
   });
 
   it('POST /requests parse + create + search flow', async () => {
@@ -41,7 +39,6 @@ describe('Request E2E', () => {
       .post('/requests')
       .set(authHeader(token))
       .send({
-        organizationId: orgId,
         title: 'E2E Request',
         source: 'MANUAL',
         lines: parsed.body.lines,
@@ -55,11 +52,7 @@ describe('Request E2E', () => {
       .expect(201);
     expect(searched.body.status).toBe('SEARCHED');
 
-    const list = await request(app.getHttpServer())
-      .get('/requests')
-      .set(authHeader(token))
-      .query({ organizationId: orgId })
-      .expect(200);
+    const list = await request(app.getHttpServer()).get('/requests').set(authHeader(token)).expect(200);
     expect(list.body.total).toBeGreaterThanOrEqual(1);
   });
 });

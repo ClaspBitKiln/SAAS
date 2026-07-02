@@ -3,7 +3,7 @@ import { Contact } from '../entities/contact.entity';
 export const CONTACT_REPOSITORY = Symbol('CONTACT_REPOSITORY');
 
 export interface ContactRepository {
-  findById(id: string): Promise<Contact | null>;
+  findById(id: string, organizationId: string): Promise<Contact | null>;
   listByOrganization(
     organizationId: string,
     params: { page: number; size: number },

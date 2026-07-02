@@ -14,6 +14,9 @@ import {
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { CurrentUser } from '../../../auth/infrastructure/current-user.decorator';
+import { AccessTokenPayload } from '../../../auth/infrastructure/access-token.service';
+import { requireOrganizationId } from '../../../auth/infrastructure/require-organization';
 import {
   CreateRequestDto,
   ParseRequestDto,
@@ -63,11 +66,15 @@ export class RequestController {
 
   @Post()
   @ApiOkResponse({ type: RequestResponseDto })
-  async create(@Body() dto: CreateRequestDto): Promise<RequestResponseDto> {
+  async create(
+    @CurrentUser() user: AccessTokenPayload,
+    @Body() dto: CreateRequestDto,
+  ): Promise<RequestResponseDto> {
+    const organizationId = requireOrganizationId(user);
     try {
       const { id } = await this.commandBus.execute(
         new CreateRequestCommand(
-          dto.organizationId,
+          organizationId,
           dto.contactId,
           dto.title,
           dto.notes,
@@ -75,7 +82,7 @@ export class RequestController {
           dto.lines,
         ),
       );
-      return this.getOrFail(id);
+      return this.getOrFail(id, organizationId);
     } catch (e) {
       if (e instanceof Error && (e.message === 'Organization not found' || e.message === 'Contact not found')) {
         throw new BadRequestException(e.message);
@@ -87,11 +94,11 @@ export class RequestController {
   @Get()
   @ApiOkResponse({ type: RequestListResponseDto })
   async list(
-    @Query('organizationId') organizationId: string,
+    @CurrentUser() user: AccessTokenPayload,
     @Query('page') page = '1',
     @Query('size') size = '25',
   ): Promise<RequestListResponseDto> {
-    if (!organizationId) throw new BadRequestException('organizationId required');
+    const organizationId = requireOrganizationId(user);
     return this.queryBus.execute(
       new ListRequestsQuery(organizationId, Number(page), Math.min(Number(size), 100)),
     );
@@ -99,16 +106,21 @@ export class RequestController {
 
   @Get(':id')
   @ApiOkResponse({ type: RequestResponseDto })
-  async get(@Param('id') id: string): Promise<RequestResponseDto> {
-    return this.getOrFail(id);
+  async get(@CurrentUser() user: AccessTokenPayload, @Param('id') id: string): Promise<RequestResponseDto> {
+    return this.getOrFail(id, requireOrganizationId(user));
   }
 
   @Patch(':id')
   @ApiOkResponse({ type: RequestResponseDto })
-  async update(@Param('id') id: string, @Body() dto: UpdateRequestDto): Promise<RequestResponseDto> {
+  async update(
+    @CurrentUser() user: AccessTokenPayload,
+    @Param('id') id: string,
+    @Body() dto: UpdateRequestDto,
+  ): Promise<RequestResponseDto> {
+    const organizationId = requireOrganizationId(user);
     try {
       await this.commandBus.execute(
-        new UpdateRequestCommand(id, dto.contactId, dto.title, dto.notes, dto.lines),
+        new UpdateRequestCommand(id, organizationId, dto.contactId, dto.title, dto.notes, dto.lines),
       );
     } catch (e) {
       if (e instanceof Error) {
@@ -117,23 +129,24 @@ export class RequestController {
       }
       throw e;
     }
-    return this.getOrFail(id);
+    return this.getOrFail(id, organizationId);
   }
 
   @Post(':id/search')
   @ApiOkResponse({ type: RequestResponseDto })
-  async search(@Param('id') id: string): Promise<RequestResponseDto> {
+  async search(@CurrentUser() user: AccessTokenPayload, @Param('id') id: string): Promise<RequestResponseDto> {
+    const organizationId = requireOrganizationId(user);
     try {
-      await this.commandBus.execute(new SearchRequestCommand(id));
+      await this.commandBus.execute(new SearchRequestCommand(id, organizationId));
     } catch (e) {
       if (e instanceof Error && e.message === 'Request not found') throw new NotFoundException(e.message);
       throw e;
     }
-    return this.getOrFail(id);
+    return this.getOrFail(id, organizationId);
   }
 
-  private async getOrFail(id: string): Promise<RequestResponseDto> {
-    const request = await this.queryBus.execute(new GetRequestQuery(id));
+  private async getOrFail(id: string, organizationId: string): Promise<RequestResponseDto> {
+    const request = await this.queryBus.execute(new GetRequestQuery(id, organizationId));
     if (!request) throw new NotFoundException('Request not found');
     return request;
   }

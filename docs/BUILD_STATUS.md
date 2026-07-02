@@ -190,21 +190,38 @@ https://github.com/ClaspBitKiln/SAAS/actions/runs/28572674729
 
 **DoD:** Register → Invite → Login → Contacts CRUD → Log calls — full UI flow without API bootstrap.
 
-## Request MVP + E-Metall scaffold — **IN PROGRESS** (LOCAL_GREEN 2026-07-02)
+## Request MVP + E-Metall scaffold — **DONE** (CI_GREEN 2026-07-02)
 
 | Проверка | Команда | Статус | Доказательство |
 |----------|---------|--------|----------------|
-| Lint | `pnpm lint` | LOCAL_GREEN | passed locally |
-| TypeScript compile | `pnpm build` | LOCAL_GREEN | passed locally |
-| Unit tests | `pnpm test` | LOCAL_GREEN | 49/49 passed |
-| E2E tests | `pnpm test:e2e` | LOCAL_RED | local DB: no `requests` table + MagicMet slug collision |
-| CI | push pending | NOT_RUN | — |
+| Lint | `pnpm lint` | CI_GREEN | [run](https://github.com/ClaspBitKiln/SAAS/actions/runs/28576198746) |
+| Prisma generate + migrate | CI steps | CI_GREEN | same run |
+| TypeScript compile | `pnpm build` | CI_GREEN | same run |
+| Unit tests | `pnpm test` | CI_GREEN | same run |
+| Integration tests | `pnpm test:integration` | CI_GREEN | same run |
+| E2E tests | `pnpm test:e2e` | CI_GREEN | same run |
+| Web build | `pnpm build` (apps/web) | CI_GREEN | same run (job `web-build`) |
 
-**Scope:** Request aggregate (parse text/file, CRUD, search stub), E-Metall client module, web `/dashboard/requests/*`.
+**CI proof:** commit `5e837a8` (includes `53d6890` feat) → workflow `api` → **success**
+https://github.com/ClaspBitKiln/SAAS/actions/runs/28576198746
 
-**Local note:** Do not commit `apps/api/prisma/migrations/` (incomplete dump). CI `migrate dev` applies schema fresh.
+**DoD:** Request parse/create/search API + E-Metall scaffold + web `/dashboard/requests/*`.
+
+## Tenant isolation (P0 security) — **IN PROGRESS**
+
+| Проверка | Статус |
+|----------|--------|
+| STEP 1 implementation | IN PROGRESS |
+| CI | NOT_RUN |
 
 ## История прогонов
+
+```
+Дата: 2026-07-02
+Commit: 5e837a8 docs: record variant A decision and STEP 0-1 execution order
+CI run: https://github.com/ClaspBitKiln/SAAS/actions/runs/28576198746
+Статус: CI_GREEN (api build-test + web-build — all passed; includes 53d6890 Request MVP)
+```
 
 ```
 Дата: 2026-07-02
