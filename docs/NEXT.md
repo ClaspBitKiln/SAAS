@@ -8,7 +8,7 @@ CURRENT
 STOP
 
 STATUS
-WAITING
+CI_GREEN
 
 GOAL
 —
@@ -17,7 +17,7 @@ NEXT ACTION
 —
 
 EXIT
-—
+JWT guard CI_GREEN — slice complete
 
 NEXT MODULE
 STOP (decided by Founder only)

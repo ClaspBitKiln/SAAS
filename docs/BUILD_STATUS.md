@@ -161,7 +161,30 @@ https://github.com/ClaspBitKiln/SAAS/actions/runs/28567675753
 
 **DoD:** Dashboard shows live contact/call totals from API.
 
+## Auth — JWT Guard (CRM routes) — **DONE** (CI_GREEN 2026-07-02)
+
+| Проверка | Команда | Статус | Доказательство |
+|----------|---------|--------|----------------|
+| Lint | `pnpm lint` | CI_GREEN | [run](https://github.com/ClaspBitKiln/SAAS/actions/runs/28572007693) |
+| Prisma generate + migrate | CI steps | CI_GREEN | same run |
+| TypeScript compile | `pnpm build` | CI_GREEN | same run |
+| Unit tests | `pnpm test` | CI_GREEN | same run |
+| Integration tests | `pnpm test:integration` | CI_GREEN | same run |
+| E2E tests | `pnpm test:e2e` | CI_GREEN | same run |
+
+**CI proof:** commit `9358b36` → workflow `api` → **success**
+https://github.com/ClaspBitKiln/SAAS/actions/runs/28572007693
+
+**DoD:** Global `JwtAuthGuard` protects `/contacts` and `/calls`; platform/auth routes `@Public()`; e2e 401 tests.
+
 ## История прогонов
+
+```
+Дата: 2026-07-02
+Commit: 9358b36 feat(api): protect CRM routes with JWT guard
+CI run: https://github.com/ClaspBitKiln/SAAS/actions/runs/28572007693
+Статус: CI_GREEN (lint, prisma, build, unit, integration, e2e — all passed)
+```
 
 ```
 Дата: 2026-07-02
