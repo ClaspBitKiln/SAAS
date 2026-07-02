@@ -282,6 +282,20 @@ https://github.com/ClaspBitKiln/SAAS/actions/runs/28580480073
 
 **CI proof:** commit `b946126` → [run #73](https://github.com/ClaspBitKiln/SAAS/actions/runs/28592344724)
 
+## Contact Search (CRM Lite slice 2) — **DONE** (CI_GREEN 2026-07-02)
+
+| Проверка | Статус | Доказательство |
+|----------|--------|----------------|
+| `GET /contacts?q=` filter | CI_GREEN | `contact-search.e2e-spec.ts` (3 tests) |
+| Org isolation | CI_GREEN | cross-org never in results; `organizationId` in repo where |
+| Integration search | CI_GREEN | `prisma-contact.repository.spec.ts` |
+| Web UI search field | CI_GREEN | `apps/web/.../contacts/page.tsx` |
+| Railway redeploy | LIVE | auto-deploy after `6edbaeb` push |
+
+**CI proof:** commit `6edbaeb` → [run #74](https://github.com/ClaspBitKiln/SAAS/actions/runs/28593753542)
+
+**CRM Lite slice 1–3:** Contact CRUD + Notes + Search = DONE (awaiting founder isolation check in prod UI)
+
 ## История прогонов
 
 ```
