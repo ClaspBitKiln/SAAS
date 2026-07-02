@@ -1,5 +1,5 @@
-# Railway setup helper (Windows)
-# Generates JWT_SECRET locally; prints deploy checklist. Does NOT print secrets to chat.
+# Railway setup helper (Windows) — quick JWT + checklist
+# Full deploy (inn-bot style): .\scripts\setup_railway_prod.ps1
 # Usage: .\scripts\railway-setup.ps1
 
 $ErrorActionPreference = "Stop"
@@ -32,8 +32,9 @@ if (-not $railway) {
   Write-Host "[2] Railway CLI: $($railway.Source)" -ForegroundColor Green
 }
 
+Write-Host "Full auto-setup (after railway login):"
+Write-Host "  .\scripts\setup_railway_prod.ps1"
 Write-Host ""
-Write-Host "=== Checklist (Railway UI) ===" -ForegroundColor Cyan
 Write-Host "  1. New Project -> Deploy from GitHub -> ClaspBitKiln/SAAS"
 Write-Host "  2. + PostgreSQL database"
 Write-Host "  3. Service API: Dockerfile apps/api/Dockerfile, config apps/api/railway.json"

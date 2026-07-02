@@ -7,7 +7,7 @@ RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
 
 FROM base AS build
 WORKDIR /app
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
 COPY apps/api ./apps/api
 RUN pnpm install --frozen-lockfile
 WORKDIR /app/apps/api
