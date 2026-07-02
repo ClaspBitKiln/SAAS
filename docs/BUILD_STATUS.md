@@ -316,9 +316,9 @@ https://github.com/ClaspBitKiln/SAAS/actions/runs/28580480073
 | Шаг | Статус | Доказательство |
 |-----|--------|----------------|
 | Turnkey kit | READY | `docs/first-user/TURNKEY.md` |
+| **Assigned user** | **Илья Юртаев (MagicMet)** | `docs/EVIDENCE/FEEDBACK_2026-07-02_magicmet-yurtaev.md` |
 | Founder smoke prod | NOT_RUN | — |
-| Manager onboarded | NOT_RUN | — |
-| Feedback captured | NOT_RUN | `docs/EVIDENCE/FEEDBACK_*.md` |
+| Watch session + feedback | NOT_RUN | — |
 
 ## История прогонов
 

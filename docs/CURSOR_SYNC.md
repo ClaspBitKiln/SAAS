@@ -1,55 +1,34 @@
 # CURSOR_SYNC — one-screen snapshot
 
-> Обновлять при смене состояния. Канон задания: `docs/NEXT.md`. Не обрастать перепиской.
+> Обновлять при смене состояния. Полная память: `docs/MEMORY.md`. Канон задания: `docs/NEXT.md`.
 
 ## Project
 
-**AI Sales OS** — call-first B2B CRM (РФ/СНГ). Repo: `ClaspBitKiln/SAAS`. Stack: NestJS + TS + Prisma + PostgreSQL + Next.js.
+**AI Sales OS** · `ClaspBitKiln/SAAS` · NestJS + Prisma + Next.js  
+**Локально (одна папка):** `C:\Users\asus\Claude\Projects\SAAS` (D-002)
 
 ## Roles
 
-| Agent | Job |
-|-------|-----|
-| **Founder** | WHAT — приоритеты, решения |
-| **Claude** | память, стратегия, review, `DECISIONS.md` |
-| **Cursor** | HOW — код, CI, deploy, evidence |
+Founder = WHAT · Claude = память/стратегия · Cursor = HOW/CI  
+**Код:** STOP до фидбека (D-001)
 
-Правила: CI = truth · one failure at a time · Founder не выбирает HOW, Cursor не выбирает WHAT.
+## Prod
 
-## Prod (LIVE)
+Web https://web-production-e22e3.up.railway.app · API /health ok
 
-| | URL |
-|---|-----|
-| Web | https://web-production-e22e3.up.railway.app |
-| API | https://api-production-7f43a.up.railway.app |
-| Health | `GET /health` → `{"status":"ok","database":"up"}` |
+## Done
 
-## Done (CI_GREEN)
-
-Platform (Tenant→Membership) · Contact · Call · Auth+JWT · Web shell · MVP self-service · Request scaffold · Tenant isolation P0 · Railway deploy · Contact Notes · Contact Search · **Company CRUD+search** (`fab5d9f`, [run #78](https://github.com/ClaspBitKiln/SAAS/actions/runs/28600344202))
+MVP core CI_GREEN incl. Company `fab5d9f` run #78 · isolation PASS
 
 ## CURRENT
 
-**First live user + feedback** (D-001). Turnkey: `docs/first-user/TURNKEY.md`.
+**First live user:** Илья Юртаев (MagicMet) · prod register · watch-session pending  
+Feedback: `docs/EVIDENCE/FEEDBACK_2026-07-02_magicmet-yurtaev.md`
 
-## Backlog (until feedback)
+## Backlog until feedback
 
-Deal pipeline · Contact→Company · AI · counterparty-check · RBAC · E-Metall live
+Deal · Contact→Company · AI · inn-bot · RBAC · E-Metall live
 
-## Read order (new session)
+## Read order
 
-1. `docs/CURSOR_SYNC.md` (this file)
-2. `docs/NEXT.md`
-3. `docs/BUILD_STATUS.md` — CI evidence
-4. `docs/DECISIONS.md` — strategy
-
-## Work loop
-
-```
-NEXT.md → implement → lint/build/test → push → CI_GREEN → EVIDENCE → update BUILD_STATUS + NEXT → STOP
-```
-
-## Sync for Edge
-
-- Repo open → read this file + NEXT.md
-- No repo → paste this file into chat as bootstrap context
+`MEMORY.md` → `NEXT.md` → `DECISIONS.md` → `BUILD_STATUS.md`

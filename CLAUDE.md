@@ -21,6 +21,9 @@
 | [TECH_DEBT.md](docs/TECH_DEBT.md) | Debt ledger |
 | [METRICS.md](docs/METRICS.md) | What we measure |
 | [BUILD_STATUS.md](docs/BUILD_STATUS.md) | CI evidence |
+| [MEMORY.md](docs/MEMORY.md) | **Full snapshot for Claude** |
+| [CURSOR_SYNC.md](docs/CURSOR_SYNC.md) | One-screen bootstrap |
+| [DECISIONS.md](docs/DECISIONS.md) | Founder decisions |
 | [directives/FOUNDER_DIRECTIVE.md](docs/directives/FOUNDER_DIRECTIVE.md) | Technical Lead rules |
 
 **Claude must not choose the next module.** Only NEXT.md defines it.
@@ -75,12 +78,14 @@ MVP-1 ядро CRM → MVP-2 коммуникации → MVP-3 телефони
 
 ## Текущий статус (2026-07-02)
 
-- **Platform + CRM core** = DONE (Tenant … Call, Auth, JWT — CI_GREEN)
-- **MVP self-service web** = DONE (`e9cf69c` CI_GREEN)
-- **Request MVP + E-Metall scaffold** = DONE (`5e837a8` CI_GREEN)
-- **Tenant isolation (P0)** = DONE (`a6f1d89` CI_GREEN) — `@CurrentUser`, org-scoped repos, isolation e2e
-- **MagicMet demo tenant** = local only (m1@…m5@magicmet.ru, passwords not in git)
-- **LOOP обязателен:** CI = единственная истина; vitest требует SWC + decoratorMetadata для e2e
+- **MVP CRM core** = DONE (Platform … Company — CI_GREEN `fab5d9f` run #78)
+- **Company isolation** = PASS → `docs/EVIDENCE/STEP_2026-07-02_COMPANY_ISOLATION.md`
+- **CURRENT** = first live user + feedback (D-001): **Илья Юртаев (MagicMet)** — watch-session pending
+- **Код STOP** до фидбека · Deal / Contact→Company в backlog
+- **Локальная папка (единственная):** `C:\Users\asus\Claude\Projects\SAAS` (D-002)
+- **Память:** `docs/MEMORY.md` · `docs/CURSOR_SYNC.md` · `docs/DECISIONS.md`
+- **MagicMet demo** = local only (m1@…m5@magicmet.ru, passwords not in git)
+- **LOOP:** CI = единственная истина; vitest SWC + decoratorMetadata для e2e
 
 ## Reuse между продуктами
 

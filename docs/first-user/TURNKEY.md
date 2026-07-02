@@ -53,6 +53,8 @@ curl -s https://api-production-7f43a.up.railway.app/health
 
 ### 2. Онбординг менеджера
 
+**Текущий пользователь (D-001):** Илья Юртаев · MagicMet · prod register.
+
 **Вариант A — саморегистрация (рекомендуется):**
 1. Отправить ссылку: `https://web-production-e22e3.up.railway.app/register`
 2. Попросить: название компании, имя, рабочий email, пароль (≥8 символов)
