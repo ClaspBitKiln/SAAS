@@ -76,6 +76,18 @@ model User {
   @@map("users")
 }
 
+model Credential {
+  id           String   @id @db.Uuid
+  userId       String   @unique @db.Uuid
+  passwordHash String   @db.VarChar(255)
+  version      Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  deletedAt    DateTime?
+
+  @@map("credentials")
+}
+
 enum MembershipStatus {
   PENDING
   ACTIVE

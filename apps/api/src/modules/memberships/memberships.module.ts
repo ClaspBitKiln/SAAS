@@ -39,5 +39,6 @@ const QueryHandlers = [GetMembershipHandler, ListMembershipsByUserHandler, ListM
     ...CommandHandlers,
     ...QueryHandlers,
   ],
+  exports: [MEMBERSHIP_REPOSITORY],
 })
 export class MembershipsModule {}

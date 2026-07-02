@@ -55,6 +55,14 @@ export class PrismaMembershipRepository implements MembershipRepository {
     return { items: rows.map((r) => this.toDomain(r)), total };
   }
 
+  async findDefaultActiveByUser(userId: string): Promise<Membership | null> {
+    const row = await this.prisma.membership.findFirst({
+      where: { userId, deletedAt: null, status: PrismaMembershipStatus.ACTIVE },
+      orderBy: [{ isDefault: 'desc' }, { createdAt: 'asc' }],
+    });
+    return row ? this.toDomain(row) : null;
+  }
+
   async save(membership: Membership): Promise<void> {
     const data = {
       tenantId: membership.tenantId,

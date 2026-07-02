@@ -10,5 +10,6 @@ export interface MembershipRepository {
     organizationId: string,
     params: { page: number; size: number },
   ): Promise<{ items: Membership[]; total: number }>;
+  findDefaultActiveByUser(userId: string): Promise<Membership | null>;
   save(membership: Membership): Promise<void>;
 }
