@@ -5,10 +5,19 @@ import { PrismaService } from '../../database/prisma/prisma.service';
 import { UsersModule } from '../users/users.module';
 import { MembershipsModule } from '../memberships/memberships.module';
 import { CREDENTIAL_REPOSITORY } from './domain/repositories/credential.repository';
+import { SESSION_REPOSITORY } from './domain/repositories/session.repository';
 import { PrismaCredentialRepository } from './infrastructure/prisma-credential.repository';
+import { PrismaSessionRepository } from './infrastructure/prisma-session.repository';
 import { BcryptPasswordHasher, PASSWORD_HASHER } from './infrastructure/bcrypt-password.hasher';
+import { REFRESH_TOKEN_SERVICE, RefreshTokenService } from './infrastructure/refresh-token.service';
+import { AccessTokenService } from './infrastructure/access-token.service';
 import { AuthController } from './presentation/controllers/auth.controller';
-import { LoginHandler, SetPasswordHandler } from './application/handlers/auth.command-handlers';
+import {
+  LoginHandler,
+  LogoutSessionHandler,
+  RefreshSessionHandler,
+  SetPasswordHandler,
+} from './application/handlers/auth.command-handlers';
 
 @Module({
   imports: [
@@ -25,9 +34,14 @@ import { LoginHandler, SetPasswordHandler } from './application/handlers/auth.co
   providers: [
     PrismaService,
     { provide: CREDENTIAL_REPOSITORY, useClass: PrismaCredentialRepository },
+    { provide: SESSION_REPOSITORY, useClass: PrismaSessionRepository },
     { provide: PASSWORD_HASHER, useClass: BcryptPasswordHasher },
+    { provide: REFRESH_TOKEN_SERVICE, useClass: RefreshTokenService },
+    AccessTokenService,
     SetPasswordHandler,
     LoginHandler,
+    RefreshSessionHandler,
+    LogoutSessionHandler,
   ],
 })
 export class AuthModule {}

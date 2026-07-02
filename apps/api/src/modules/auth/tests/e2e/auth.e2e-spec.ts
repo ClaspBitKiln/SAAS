@@ -56,9 +56,27 @@ describe('Auth E2E', () => {
 
     const login = await request(app.getHttpServer()).post('/auth/login').send({ email, password }).expect(201);
     expect(login.body.accessToken).toBeTruthy();
+    expect(login.body.refreshToken).toBeTruthy();
     expect(login.body.userId).toBe(userId);
     expect(login.body.tenantId).toBe(tenantId);
     expect(login.body.organizationId).toBe(orgId);
+
+    const refreshed = await request(app.getHttpServer())
+      .post('/auth/refresh')
+      .send({ refreshToken: login.body.refreshToken })
+      .expect(201);
+    expect(refreshed.body.accessToken).toBeTruthy();
+    expect(refreshed.body.refreshToken).not.toBe(login.body.refreshToken);
+
+    await request(app.getHttpServer())
+      .post('/auth/logout')
+      .send({ refreshToken: refreshed.body.refreshToken })
+      .expect(204);
+
+    await request(app.getHttpServer())
+      .post('/auth/refresh')
+      .send({ refreshToken: refreshed.body.refreshToken })
+      .expect(401);
   });
 
   it('login rejects invalid password', async () => {

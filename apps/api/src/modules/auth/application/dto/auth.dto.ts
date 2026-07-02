@@ -22,3 +22,10 @@ export class LoginDto {
   @Length(8, 128)
   password!: string;
 }
+
+export class RefreshSessionDto {
+  @ApiProperty()
+  @IsString()
+  @Length(10, 512)
+  refreshToken!: string;
+}

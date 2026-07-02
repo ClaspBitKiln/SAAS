@@ -88,6 +88,21 @@ model Credential {
   @@map("credentials")
 }
 
+model Session {
+  id               String    @id @db.Uuid
+  userId           String    @db.Uuid
+  refreshTokenHash String    @unique @db.VarChar(64)
+  expiresAt        DateTime
+  revokedAt        DateTime?
+  version          Int       @default(0)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  deletedAt        DateTime?
+
+  @@index([userId])
+  @@map("sessions")
+}
+
 enum MembershipStatus {
   PENDING
   ACTIVE

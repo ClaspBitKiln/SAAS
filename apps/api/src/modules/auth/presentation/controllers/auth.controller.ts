@@ -9,9 +9,14 @@ import {
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { LoginDto, SetPasswordDto } from '../../application/dto/auth.dto';
+import { LoginDto, RefreshSessionDto, SetPasswordDto } from '../../application/dto/auth.dto';
 import { LoginResponseDto } from '../../application/dto/login-response.dto';
-import { LoginCommand, SetPasswordCommand } from '../../application/commands/auth.commands';
+import {
+  LoginCommand,
+  LogoutSessionCommand,
+  RefreshSessionCommand,
+  SetPasswordCommand,
+} from '../../application/commands/auth.commands';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -45,5 +50,22 @@ export class AuthController {
       }
       throw e;
     }
+  }
+
+  @Post('refresh')
+  @ApiOkResponse({ type: LoginResponseDto })
+  async refresh(@Body() dto: RefreshSessionDto): Promise<LoginResponseDto> {
+    try {
+      return await this.commandBus.execute(new RefreshSessionCommand(dto.refreshToken));
+    } catch (e) {
+      if (e instanceof UnauthorizedException) throw e;
+      throw e;
+    }
+  }
+
+  @Post('logout')
+  @HttpCode(204)
+  async logout(@Body() dto: RefreshSessionDto): Promise<void> {
+    await this.commandBus.execute(new LogoutSessionCommand(dto.refreshToken));
   }
 }

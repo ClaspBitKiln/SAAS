@@ -11,3 +11,11 @@ export class LoginCommand {
     readonly password: string,
   ) {}
 }
+
+export class RefreshSessionCommand {
+  constructor(readonly refreshToken: string) {}
+}
+
+export class LogoutSessionCommand {
+  constructor(readonly refreshToken: string) {}
+}
