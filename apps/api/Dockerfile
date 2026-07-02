@@ -3,7 +3,10 @@
 FROM node:20-alpine AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
+# Prisma schema engine needs OpenSSL on Alpine (runtime db push + generate).
+RUN apk add --no-cache openssl libc6-compat \
+  && corepack enable \
+  && corepack prepare pnpm@9.0.0 --activate
 
 FROM base AS build
 WORKDIR /app
