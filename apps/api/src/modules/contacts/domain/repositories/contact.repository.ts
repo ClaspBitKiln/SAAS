@@ -6,7 +6,7 @@ export interface ContactRepository {
   findById(id: string, organizationId: string): Promise<Contact | null>;
   listByOrganization(
     organizationId: string,
-    params: { page: number; size: number },
+    params: { page: number; size: number; q?: string },
   ): Promise<{ items: Contact[]; total: number }>;
   save(contact: Contact): Promise<void>;
 }

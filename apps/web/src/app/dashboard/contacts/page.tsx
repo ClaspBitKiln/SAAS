@@ -29,6 +29,7 @@ export default function ContactsPage() {
   const user = getAuthUser();
   const orgId = user?.organizationId;
   const [contacts, setContacts] = useState<Contact[]>([]);
+  const [search, setSearch] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -46,13 +47,16 @@ export default function ContactsPage() {
       return;
     }
     try {
-      const data = await apiAuthGet<ContactList>(`/contacts?organizationId=${orgId}`);
+      const params = new URLSearchParams();
+      if (search.trim()) params.set('q', search.trim());
+      const query = params.toString();
+      const data = await apiAuthGet<ContactList>(`/contacts${query ? `?${query}` : ''}`);
       setContacts(data.items);
       setError(null);
     } catch {
       setError('Could not load contacts');
     }
-  }, [orgId]);
+  }, [orgId, search]);
 
   useEffect(() => {
     void loadContacts();
@@ -163,6 +167,16 @@ export default function ContactsPage() {
         </div>
 
         {error && <p className="mt-4 text-sm text-amber-400">{error}</p>}
+
+        <div className="mt-4 max-w-lg">
+          <input
+            type="search"
+            placeholder="Search by name or email…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-blue-500"
+          />
+        </div>
 
         {showForm && (
           <form onSubmit={onSubmit} className="mt-6 max-w-lg rounded-lg border border-slate-800 bg-slate-900 p-4">

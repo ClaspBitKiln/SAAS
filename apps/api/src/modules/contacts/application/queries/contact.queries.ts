@@ -7,5 +7,6 @@ export class ListContactsQuery {
     readonly organizationId: string,
     readonly page: number,
     readonly size: number,
+    readonly q?: string,
   ) {}
 }

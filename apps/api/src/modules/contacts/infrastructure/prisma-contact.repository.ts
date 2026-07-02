@@ -18,9 +18,21 @@ export class PrismaContactRepository implements ContactRepository {
 
   async listByOrganization(
     organizationId: string,
-    params: { page: number; size: number },
+    params: { page: number; size: number; q?: string },
   ): Promise<{ items: Contact[]; total: number }> {
-    const where = { organizationId, deletedAt: null };
+    const q = params.q?.trim();
+    const where = {
+      organizationId,
+      deletedAt: null,
+      ...(q
+        ? {
+            OR: [
+              { name: { contains: q, mode: 'insensitive' as const } },
+              { email: { contains: q, mode: 'insensitive' as const } },
+            ],
+          }
+        : {}),
+    };
     const [rows, total] = await this.prisma.$transaction([
       this.prisma.contact.findMany({
         where,

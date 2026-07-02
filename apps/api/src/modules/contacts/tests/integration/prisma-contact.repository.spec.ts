@@ -34,11 +34,14 @@ describe('PrismaContactRepository (integration)', () => {
   });
 
   it('save + findById + listByOrganization', async () => {
-    const contact = Contact.create({ tenantId, organizationId: orgId, name: 'IT Contact' });
+    const contact = Contact.create({ tenantId, organizationId: orgId, name: 'IT Contact', email: 'it@example.com' });
     await contactRepo.save(contact);
     const found = await contactRepo.findById(contact.id, orgId);
     expect(found?.name).toBe('IT Contact');
     const list = await contactRepo.listByOrganization(orgId, { page: 1, size: 10 });
     expect(list.total).toBeGreaterThanOrEqual(1);
+    const filtered = await contactRepo.listByOrganization(orgId, { page: 1, size: 10, q: 'it@' });
+    expect(filtered.total).toBeGreaterThanOrEqual(1);
+    expect(filtered.items.every((c) => c.organizationId === orgId)).toBe(true);
   });
 });

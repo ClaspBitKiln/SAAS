@@ -23,6 +23,7 @@ export class ListContactsHandler implements IQueryHandler<ListContactsQuery> {
     const { items, total } = await this.repo.listByOrganization(q.organizationId, {
       page: q.page,
       size: q.size,
+      q: q.q,
     });
     return { items: items.map(toContactResponse), page: q.page, size: q.size, total };
   }

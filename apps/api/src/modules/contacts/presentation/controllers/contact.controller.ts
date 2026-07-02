@@ -57,10 +57,11 @@ export class ContactController {
     @CurrentUser() user: AccessTokenPayload,
     @Query('page') page = '1',
     @Query('size') size = '25',
+    @Query('q') q?: string,
   ) {
     const organizationId = requireOrganizationId(user);
     return this.queryBus.execute(
-      new ListContactsQuery(organizationId, Number(page), Math.min(Number(size), 100)),
+      new ListContactsQuery(organizationId, Number(page), Math.min(Number(size), 100), q),
     );
   }
 
