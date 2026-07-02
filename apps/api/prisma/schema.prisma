@@ -190,3 +190,56 @@ model Call {
   @@index([contactId])
   @@map("calls")
 }
+
+// ===== context: crm (Request / заявка MVP) =====
+enum RequestSource {
+  MANUAL
+  FILE
+}
+
+enum RequestStatus {
+  DRAFT
+  SEARCHED
+}
+
+model Request {
+  id             String        @id @db.Uuid
+  tenantId       String        @db.Uuid
+  organizationId String        @db.Uuid
+  contactId      String?       @db.Uuid
+  title          String?       @db.VarChar(255)
+  notes          String?       @db.VarChar(2000)
+  source         RequestSource @default(MANUAL)
+  status         RequestStatus @default(DRAFT)
+  searchResult   Json?
+  version        Int           @default(0)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  deletedAt      DateTime?
+  lines          RequestLine[]
+
+  @@index([tenantId])
+  @@index([organizationId])
+  @@index([contactId])
+  @@map("requests")
+}
+
+model RequestLine {
+  id          String  @id @db.Uuid
+  requestId   String  @db.Uuid
+  sortOrder   Int     @default(0)
+  gost        String? @db.VarChar(64)
+  steelGrade  String? @db.VarChar(64)
+  productType String? @db.VarChar(128)
+  dimensions  String? @db.VarChar(128)
+  length      String? @db.VarChar(64)
+  thickness   String? @db.VarChar(64)
+  coating     String? @db.VarChar(64)
+  quantity    String? @db.VarChar(32)
+  unit        String? @db.VarChar(16)
+  rawLine     String? @db.VarChar(500)
+  request     Request @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  @@index([requestId])
+  @@map("request_lines")
+}

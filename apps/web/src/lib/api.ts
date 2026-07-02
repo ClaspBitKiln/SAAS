@@ -111,6 +111,24 @@ export async function apiAuthDelete(path: string): Promise<void> {
   await apiFetch<void>(path, { method: 'DELETE', auth: true });
 }
 
+export async function apiAuthUpload<T>(path: string, file: File): Promise<T> {
+  const token = getAccessToken();
+  const form = new FormData();
+  form.append('file', file);
+  const res = await fetch(`${getApiBaseUrl()}${path}`, {
+    method: 'POST',
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    body: form,
+  });
+  if (res.status === 401) {
+    const newToken = await refreshTokens();
+    if (newToken) return apiAuthUpload<T>(path, file);
+    clearAuth();
+    throw new Error('Session expired');
+  }
+  return parseResponse<T>(res);
+}
+
 export async function apiPublicGet<T>(path: string): Promise<T> {
   return apiFetch<T>(path, { method: 'GET' });
 }

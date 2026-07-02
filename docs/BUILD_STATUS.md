@@ -190,6 +190,20 @@ https://github.com/ClaspBitKiln/SAAS/actions/runs/28572674729
 
 **DoD:** Register → Invite → Login → Contacts CRUD → Log calls — full UI flow without API bootstrap.
 
+## Request MVP + E-Metall scaffold — **IN PROGRESS** (LOCAL_GREEN 2026-07-02)
+
+| Проверка | Команда | Статус | Доказательство |
+|----------|---------|--------|----------------|
+| Lint | `pnpm lint` | LOCAL_GREEN | passed locally |
+| TypeScript compile | `pnpm build` | LOCAL_GREEN | passed locally |
+| Unit tests | `pnpm test` | LOCAL_GREEN | 49/49 passed |
+| E2E tests | `pnpm test:e2e` | LOCAL_RED | local DB: no `requests` table + MagicMet slug collision |
+| CI | push pending | NOT_RUN | — |
+
+**Scope:** Request aggregate (parse text/file, CRUD, search stub), E-Metall client module, web `/dashboard/requests/*`.
+
+**Local note:** Do not commit `apps/api/prisma/migrations/` (incomplete dump). CI `migrate dev` applies schema fresh.
+
 ## История прогонов
 
 ```

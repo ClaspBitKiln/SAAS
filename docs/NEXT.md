@@ -5,22 +5,24 @@ EXECUTION ONLY MODE
 ---
 
 CURRENT
-STOP
+CONTINUE
 
 STATUS
-CI_GREEN
+LOCAL_GREEN (Request MVP — push pending)
 
 GOAL
-—
+Request MVP + E-Metall scaffold → CI_GREEN
 
 NEXT ACTION
-—
+1. `git push origin main`
+2. Дождаться CI_GREEN (api + web-build)
+3. `docs:` обновить BUILD_STATUS → STOP
 
 EXIT
-MVP self-service UI CI_GREEN — usable product shell complete
+Request aggregate + parse/upload UI + E-Metall client scaffold committed
 
 NEXT MODULE
-AI call summary (Founder decision) · Role/RBAC · Telephony
+E-Metall live API keys · AI call summary · Role/RBAC
 
 BLOCKERS
-None
+Local e2e: dirty DB (MagicMet) + requests table not migrated — CI fresh DB OK

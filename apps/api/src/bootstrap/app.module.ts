@@ -5,8 +5,10 @@ import { MembershipsModule } from '../modules/memberships/memberships.module';
 import { ContactsModule } from '../modules/contacts/contacts.module';
 import { CallsModule } from '../modules/calls/calls.module';
 import { AuthModule } from '../modules/auth/auth.module';
+import { EMetallModule } from '../modules/e-metall/e-metall.module';
+import { RequestsModule } from '../modules/requests/requests.module';
 
 @Module({
-  imports: [PlatformModule, UsersModule, MembershipsModule, ContactsModule, CallsModule, AuthModule],
+  imports: [PlatformModule, UsersModule, MembershipsModule, ContactsModule, CallsModule, AuthModule, EMetallModule, RequestsModule],
 })
 export class AppModule {}
