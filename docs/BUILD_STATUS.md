@@ -148,7 +148,27 @@ https://github.com/ClaspBitKiln/SAAS/actions/runs/28566071494
 
 **DoD:** Login UI + Dashboard + Contacts/Calls pages = DONE.
 
+## Web — Dashboard live stats — **DONE** (CI_GREEN 2026-07-02)
+
+| Проверка | Команда | Статус | Доказательство |
+|----------|---------|--------|----------------|
+| Lint | `pnpm lint` (apps/web) | CI_GREEN | [run](https://github.com/ClaspBitKiln/SAAS/actions/runs/28567675753) |
+| Next.js build | `pnpm build` (apps/web) | CI_GREEN | same run (job `web-build`) |
+| API regression | `build-test` job | CI_GREEN | same run |
+
+**CI proof:** commit `08e9f59` → workflow `api` → **success**
+https://github.com/ClaspBitKiln/SAAS/actions/runs/28567675753
+
+**DoD:** Dashboard shows live contact/call totals from API.
+
 ## История прогонов
+
+```
+Дата: 2026-07-02
+Commit: 08e9f59 feat(web): show live dashboard stats
+CI run: https://github.com/ClaspBitKiln/SAAS/actions/runs/28567675753
+Статус: CI_GREEN (api build-test + web-build — all passed)
+```
 
 ```
 Дата: 2026-07-02
