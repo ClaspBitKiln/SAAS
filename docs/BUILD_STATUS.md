@@ -224,7 +224,37 @@ https://github.com/ClaspBitKiln/SAAS/actions/runs/28577440195
 
 **DoD:** `@CurrentUser` + org-scoped repos; tenant A cannot read/mutate tenant B data (e2e proof). F-013 RESOLVED.
 
+## Deploy scaffold (Railway) — **DONE** (CI_GREEN 2026-07-02)
+
+| Проверка | Команда | Статус | Доказательство |
+|----------|---------|--------|----------------|
+| Lint | `pnpm lint` | CI_GREEN | [run](https://github.com/ClaspBitKiln/SAAS/actions/runs/28580480073) |
+| Build + tests | CI `build-test` | CI_GREEN | same run |
+| Web build | CI `web-build` | CI_GREEN | same run |
+| Health e2e | `GET /health` | CI_GREEN | same run |
+
+**CI proof:** commit `e2ddee6` → workflow `api` → **success**
+https://github.com/ClaspBitKiln/SAAS/actions/runs/28580480073
+
+**DoD:** Dockerfiles + `railway.json` + `/health` + `docs/deploy/railway.md`. **Prod deploy** = отдельный шаг в Railway UI.
+
+## Railway production — **NOT_RUN**
+
+| Шаг | Статус |
+|-----|--------|
+| Postgres plugin | NOT_RUN |
+| API service ACTIVE | NOT_RUN |
+| Web service ACTIVE | NOT_RUN |
+| Prod smoke | NOT_RUN |
+
 ## История прогонов
+
+```
+Дата: 2026-07-02
+Commit: e2ddee6 feat(deploy): add Railway Docker config and health endpoint
+CI run: https://github.com/ClaspBitKiln/SAAS/actions/runs/28580480073
+Статус: CI_GREEN (lint, prisma, build, unit, integration, e2e, web-build — all passed)
+```
 
 ```
 Дата: 2026-07-02

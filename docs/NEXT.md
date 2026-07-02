@@ -8,21 +8,21 @@ CURRENT
 CONTINUE
 
 STATUS
-CI_GREEN — deploy scaffold ready to commit
+CI_GREEN (deploy scaffold e2ddee6)
 
 GOAL
-STEP 3 — Railway deploy (api + web + postgres)
+Railway production deploy — api + web + postgres LIVE
 
-NEXT ACTION
-1. Commit + push deploy scaffold → CI_GREEN
-2. Railway: postgres + api + web по `docs/deploy/railway.md`
-3. Smoke prod → BUILD_STATUS → STOP
+NEXT ACTION (владелец / UI)
+1. `.\scripts\railway-setup.ps1` — JWT_SECRET в temp
+2. railway.app → проект → Postgres → API → Web (см. `docs/deploy/railway.md`)
+3. После smoke prod → сообщить URL → `docs:` BUILD_STATUS → STOP
 
 EXIT
-MVP на публичном URL
+`https://<web>/register` работает в production
 
 NEXT MODULE
 E-Metall hardening · AI call summary
 
 BLOCKERS
-JWT_SECRET / DATABASE_URL — только Railway Variables
+Railway login + Variables — только владелец (UI или `railway login`)
