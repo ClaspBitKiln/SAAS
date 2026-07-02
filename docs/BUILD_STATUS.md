@@ -259,17 +259,17 @@ https://github.com/ClaspBitKiln/SAAS/actions/runs/28580480073
 
 **Owner DoD (browser):** Register → Login → Dashboard → Contact — **DONE** (claude.smoke1@example.com, Contacts=1, 2026-07-02).
 
-## Production hardening (STEP 1 P0) — **IN PROGRESS**
+## Production hardening (STEP 1 P0) — **DONE** (CI_GREEN 2026-07-02)
 
 | Проверка | Статус | Доказательство |
 |----------|--------|----------------|
-| Rate limit `/auth/login` + `/auth/set-password` | LOCAL_GREEN | `auth-rate-limit.e2e-spec.ts` → 429 |
-| Pino structured logging + request-id | LOCAL_GREEN | JSON logs, redact password/JWT |
-| `/health` skip throttle | LOCAL_GREEN | `@SkipThrottle()` on health |
-| CI_GREEN | PENDING | push → GitHub Actions |
-| Railway redeploy | PENDING | after CI_GREEN |
+| Rate limit `/auth/login` + `/auth/set-password` | CI_GREEN | 5/min/IP · `auth-rate-limit.e2e-spec.ts` |
+| Pino structured logging + request-id | CI_GREEN | prod `x-request-id`; redact secrets |
+| `/health` skip throttle | CI_GREEN | `@SkipThrottle()` |
+| CI_GREEN | **DONE** | commit `4d1083d` → [run #67](https://github.com/ClaspBitKiln/SAAS/actions/runs/28589153902) |
+| Railway redeploy | **DONE** | api SUCCESS; prod `x-ratelimit-limit-auth: 5` |
 
-**Note:** `/auth/register` не существует; регистрация = public onboarding + `POST /auth/set-password` (тоже под rate limit).
+**Note:** `/auth/register` не существует; регистрация = onboarding + `POST /auth/set-password`.
 
 ## История прогонов
 

@@ -5,24 +5,28 @@ EXECUTION ONLY MODE
 ---
 
 CURRENT
-CONTINUE
+STOP
 
 STATUS
-STEP 1 code ready — push + CI_GREEN + redeploy pending
+STEP 1 DONE — CI_GREEN `4d1083d` · prod rate-limit live · handoff в `docs/collab/TO_CLAUDE.md`
 
 GOAL
-STEP 1: Production hardening (rate limit + Pino logging). См. docs/CURSOR_TASK_NEXT.md
+~~STEP 1: Production hardening~~ — **DONE**
+
+NEXT ACTION (Claude)
+1. Прочитать `docs/collab/TO_CLAUDE.md`
+2. Подтвердить STEP 1 · обновить память
+3. Написать `docs/collab/TO_CURSOR.md` + задание Phase 3
+4. Поставить здесь `CURRENT: CONTINUE`
 
 NEXT ACTION (Cursor)
-1. Commit + push STEP 1 slice
-2. CI_GREEN → redeploy Railway api
-3. Smoke `/health` + verify `x-ratelimit-*` headers on `/auth/login`
+Ждать `TO_CURSOR.md` или `CURRENT: CONTINUE`. Цикл: `docs/collab/README.md`
 
 EXIT
-Rate limit на auth активен (e2e 429) + structured logging + prod redeploy green
+~~Rate limit + logging + redeploy~~ — **DONE**
 
-NEXT MODULE (после STEP 1 green)
-Phase 3 дифференциатор: Call → AI Summary → Next Action → follow-up task
+NEXT MODULE
+Phase 3: Call → AI Summary → Next Action → follow-up (после задания Claude)
 
 BLOCKERS
-Нет.
+Ждём Claude (руководство) — автоматический handoff отправлен.
