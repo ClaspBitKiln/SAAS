@@ -119,7 +119,30 @@ https://github.com/ClaspBitKiln/SAAS/actions/runs/28565146632
 
 **DoD (ADR-016):** Auth login (Credential + JWT) = DONE.
 
+## Auth — Session + Refresh (контекст Platform) — **DONE** (CI_GREEN 2026-07-02)
+
+| Проверка | Команда | Статус | Доказательство |
+|----------|---------|--------|----------------|
+| Lint | `pnpm lint` | CI_GREEN | [run](https://github.com/ClaspBitKiln/SAAS/actions/runs/28565452927) |
+| Prisma generate + migrate | CI steps | CI_GREEN | same run |
+| TypeScript compile | `pnpm build` | CI_GREEN | same run |
+| Unit tests | `pnpm test` | CI_GREEN | same run |
+| Integration tests | `pnpm test:integration` | CI_GREEN | same run |
+| E2E tests | `pnpm test:e2e` | CI_GREEN | same run |
+
+**CI proof:** commit `b51faa5` → workflow `api` → **success**
+https://github.com/ClaspBitKiln/SAAS/actions/runs/28565452927
+
+**DoD (ADR-016):** Session + Refresh = DONE.
+
 ## История прогонов
+
+```
+Дата: 2026-07-02
+Commit: b51faa5 feat(auth): add Session aggregate with refresh
+CI run: https://github.com/ClaspBitKiln/SAAS/actions/runs/28565452927
+Статус: CI_GREEN (lint, prisma, build, unit, integration, e2e — all passed)
+```
 
 ```
 Дата: 2026-07-02
