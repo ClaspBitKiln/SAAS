@@ -5,22 +5,24 @@ EXECUTION ONLY MODE
 ---
 
 CURRENT
-STOP
+CONTINUE
 
 STATUS
-CI_GREEN
+CI_GREEN — deploy scaffold ready to commit
 
 GOAL
-—
+STEP 3 — Railway deploy (api + web + postgres)
 
 NEXT ACTION
-—
+1. Commit + push deploy scaffold → CI_GREEN
+2. Railway: postgres + api + web по `docs/deploy/railway.md`
+3. Smoke prod → BUILD_STATUS → STOP
 
 EXIT
-Tenant isolation P0 complete — multi-tenant MVP safe for >1 client
+MVP на публичном URL
 
 NEXT MODULE
-E-Metall platform hardening (live keys) · Deploy · AI call summary
+E-Metall hardening · AI call summary
 
 BLOCKERS
-None
+JWT_SECRET / DATABASE_URL — только Railway Variables
