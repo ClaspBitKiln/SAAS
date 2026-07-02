@@ -15,6 +15,7 @@ async function bootstrap(): Promise<void> {
     .setTitle('AI Sales OS API')
     .setDescription('Modular monolith (ADR-001)')
     .setVersion('0.0.1')
+    .addBearerAuth()
     .build();
   SwaggerModule.setup('docs', app, SwaggerModule.createDocument(app, config));
 

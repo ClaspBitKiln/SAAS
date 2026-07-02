@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { CqrsModule } from '@nestjs/cqrs';
 import { JwtModule } from '@nestjs/jwt';
 import { PrismaService } from '../../database/prisma/prisma.service';
@@ -11,6 +12,7 @@ import { PrismaSessionRepository } from './infrastructure/prisma-session.reposit
 import { BcryptPasswordHasher, PASSWORD_HASHER } from './infrastructure/bcrypt-password.hasher';
 import { REFRESH_TOKEN_SERVICE, RefreshTokenService } from './infrastructure/refresh-token.service';
 import { AccessTokenService } from './infrastructure/access-token.service';
+import { JwtAuthGuard } from './infrastructure/jwt-auth.guard';
 import { AuthController } from './presentation/controllers/auth.controller';
 import {
   LoginHandler,
@@ -42,6 +44,7 @@ import {
     LoginHandler,
     RefreshSessionHandler,
     LogoutSessionHandler,
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
   ],
 })
 export class AuthModule {}

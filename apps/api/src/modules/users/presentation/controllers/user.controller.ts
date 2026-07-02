@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { Public } from '../../../auth/infrastructure/public.decorator';
 import { CreateUserDto } from '../../application/dto/create-user.dto';
 import { UpdateUserDto } from '../../application/dto/update-user.dto';
 import { UserResponseDto } from '../../application/dto/user-response.dto';
@@ -24,6 +25,7 @@ import {
 import { GetUserByEmailQuery, GetUserQuery, ListUsersQuery } from '../../application/queries/user.queries';
 
 @ApiTags('users')
+@Public()
 @Controller('users')
 export class UserController {
   constructor(private readonly commandBus: CommandBus, private readonly queryBus: QueryBus) {}

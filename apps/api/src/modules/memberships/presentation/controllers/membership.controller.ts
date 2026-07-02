@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { Public } from '../../../auth/infrastructure/public.decorator';
 import { InviteMembershipDto } from '../../application/dto/invite-membership.dto';
 import { ChangeMembershipRoleDto } from '../../application/dto/change-membership-role.dto';
 import { MembershipResponseDto } from '../../application/dto/membership-response.dto';
@@ -30,6 +31,7 @@ import {
 } from '../../application/queries/membership.queries';
 
 @ApiTags('memberships')
+@Public()
 @Controller('memberships')
 export class MembershipController {
   constructor(private readonly commandBus: CommandBus, private readonly queryBus: QueryBus) {}

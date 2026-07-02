@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { Public } from '../../infrastructure/public.decorator';
 import { LoginDto, RefreshSessionDto, SetPasswordDto } from '../../application/dto/auth.dto';
 import { LoginResponseDto } from '../../application/dto/login-response.dto';
 import {
@@ -19,6 +20,7 @@ import {
 } from '../../application/commands/auth.commands';
 
 @ApiTags('auth')
+@Public()
 @Controller('auth')
 export class AuthController {
   constructor(private readonly commandBus: CommandBus) {}

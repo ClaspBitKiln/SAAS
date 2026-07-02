@@ -1,12 +1,14 @@
 import { Body, Controller, Get, Param, Patch, Post, NotFoundException, Query } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { Public } from '../../../auth/infrastructure/public.decorator';
 import { CreateTenantDto } from '../../application/dto/create-tenant.dto';
 import { TenantResponseDto } from '../../application/dto/tenant-response.dto';
 import { CreateTenantCommand, ActivateTenantCommand, SuspendTenantCommand } from '../../application/commands/tenant.commands';
 import { GetTenantQuery, ListTenantsQuery } from '../../application/queries/tenant.queries';
 
 @ApiTags('tenants')
+@Public()
 @Controller('tenants')
 export class TenantController {
   constructor(private readonly commandBus: CommandBus, private readonly queryBus: QueryBus) {}

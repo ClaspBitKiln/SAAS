@@ -10,7 +10,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { StartCallDto } from '../../application/dto/start-call.dto';
 import { CallResponseDto } from '../../application/dto/call-response.dto';
 import { CompleteCallCommand, MissCallCommand, StartCallCommand } from '../../application/commands/call.commands';
@@ -21,6 +21,7 @@ import {
 } from '../../application/queries/call.queries';
 
 @ApiTags('calls')
+@ApiBearerAuth()
 @Controller('calls')
 export class CallController {
   constructor(private readonly commandBus: CommandBus, private readonly queryBus: QueryBus) {}

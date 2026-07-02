@@ -11,7 +11,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { CreateContactDto } from '../../application/dto/create-contact.dto';
 import { UpdateContactDto } from '../../application/dto/update-contact.dto';
 import { ContactResponseDto } from '../../application/dto/contact-response.dto';
@@ -23,6 +23,7 @@ import {
 import { GetContactQuery, ListContactsQuery } from '../../application/queries/contact.queries';
 
 @ApiTags('contacts')
+@ApiBearerAuth()
 @Controller('contacts')
 export class ContactController {
   constructor(private readonly commandBus: CommandBus, private readonly queryBus: QueryBus) {}

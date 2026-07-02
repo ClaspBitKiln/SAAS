@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Patch, Post, NotFoundException, Query, BadRequestException } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { Public } from '../../../auth/infrastructure/public.decorator';
 import { CreateOrganizationDto } from '../../application/dto/create-organization.dto';
 import { UpdateOrganizationDto } from '../../application/dto/update-organization.dto';
 import { OrganizationResponseDto } from '../../application/dto/organization-response.dto';
@@ -8,6 +9,7 @@ import { CreateOrganizationCommand, UpdateOrganizationCommand } from '../../appl
 import { GetOrganizationQuery, ListOrganizationsQuery } from '../../application/queries/organization.queries';
 
 @ApiTags('organizations')
+@Public()
 @Controller('organizations')
 export class OrganizationController {
   constructor(private readonly commandBus: CommandBus, private readonly queryBus: QueryBus) {}
