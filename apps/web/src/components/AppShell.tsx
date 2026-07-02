@@ -2,12 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { clearAuth, getAuthUser } from '@/lib/auth';
+import { logoutSession } from '@/lib/api';
+import { getAuthUser } from '@/lib/auth';
 
 const nav = [
   { href: '/dashboard', label: 'Dashboard' },
   { href: '/dashboard/contacts', label: 'Contacts' },
   { href: '/dashboard/calls', label: 'Calls' },
+  { href: '/dashboard/team', label: 'Team' },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -15,8 +17,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const user = getAuthUser();
 
-  function logout() {
-    clearAuth();
+  async function logout() {
+    await logoutSession();
     router.replace('/login');
   }
 
@@ -42,7 +44,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </nav>
         <div className="mt-auto border-t border-slate-800 pt-4 text-xs text-slate-500">
           <div className="mb-2 truncate">{user?.email}</div>
-          <button type="button" onClick={logout} className="text-slate-400 hover:text-white">
+          <button type="button" onClick={() => void logout()} className="text-slate-400 hover:text-white">
             Log out
           </button>
         </div>
