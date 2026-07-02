@@ -8,21 +8,21 @@ CURRENT
 CONTINUE
 
 STATUS
-CI_GREEN (deploy scaffold e2ddee6)
+STEP 1 code ready — push + CI_GREEN + redeploy pending
 
 GOAL
-Railway production deploy — api + web + postgres LIVE
+STEP 1: Production hardening (rate limit + Pino logging). См. docs/CURSOR_TASK_NEXT.md
 
-NEXT ACTION (владелец / UI)
-1. `.\scripts\railway-setup.ps1` — JWT_SECRET в temp
-2. railway.app → проект → Postgres → API → Web (см. `docs/deploy/railway.md`)
-3. После smoke prod → сообщить URL → `docs:` BUILD_STATUS → STOP
+NEXT ACTION (Cursor)
+1. Commit + push STEP 1 slice
+2. CI_GREEN → redeploy Railway api
+3. Smoke `/health` + verify `x-ratelimit-*` headers on `/auth/login`
 
 EXIT
-`https://<web>/register` работает в production
+Rate limit на auth активен (e2e 429) + structured logging + prod redeploy green
 
-NEXT MODULE
-E-Metall hardening · AI call summary
+NEXT MODULE (после STEP 1 green)
+Phase 3 дифференциатор: Call → AI Summary → Next Action → follow-up task
 
 BLOCKERS
-Railway login + Variables — только владелец (UI или `railway login`)
+Нет.

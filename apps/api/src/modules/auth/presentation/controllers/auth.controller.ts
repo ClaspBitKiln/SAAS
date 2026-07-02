@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { AuthThrottle } from '../../../../infrastructure/security/auth-throttle.decorator';
 import { Public } from '../../infrastructure/public.decorator';
 import { LoginDto, RefreshSessionDto, SetPasswordDto } from '../../application/dto/auth.dto';
 import { LoginResponseDto } from '../../application/dto/login-response.dto';
@@ -26,6 +27,7 @@ export class AuthController {
   constructor(private readonly commandBus: CommandBus) {}
 
   @Post('set-password')
+  @AuthThrottle()
   @HttpCode(204)
   async setPassword(@Body() dto: SetPasswordDto): Promise<void> {
     try {
@@ -41,6 +43,7 @@ export class AuthController {
   }
 
   @Post('login')
+  @AuthThrottle()
   @ApiOkResponse({ type: LoginResponseDto })
   async login(@Body() dto: LoginDto): Promise<LoginResponseDto> {
     try {

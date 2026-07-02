@@ -238,16 +238,46 @@ https://github.com/ClaspBitKiln/SAAS/actions/runs/28580480073
 
 **DoD:** Dockerfiles + `railway.json` + `/health` + `docs/deploy/railway.md`. **Prod deploy** = отдельный шаг в Railway UI.
 
-## Railway production — **NOT_RUN**
+## Railway production — **DONE** (LIVE 2026-07-02)
 
-| Шаг | Статус |
-|-----|--------|
-| Postgres plugin | NOT_RUN |
-| API service ACTIVE | NOT_RUN |
-| Web service ACTIVE | NOT_RUN |
-| Prod smoke | NOT_RUN |
+| Шаг | Статус | Доказательство |
+|-----|--------|----------------|
+| Postgres plugin | LIVE | Railway project `ai-sales-os`, ref `${{Postgres.DATABASE_URL}}` |
+| API service ACTIVE | LIVE | `railway service status --service api` → SUCCESS |
+| Web service ACTIVE | LIVE | `railway service status --service web` → SUCCESS |
+| `GET /health` | LIVE | `{"status":"ok","database":"up"}` |
+| Web `/register` | LIVE | HTTP 200 |
+| Prod smoke (API) | LIVE | tenant → org → user → membership → login → contact |
+
+**URLs:**
+- API: https://api-production-7f43a.up.railway.app
+- Web: https://web-production-e22e3.up.railway.app
+
+**Deploy commits:** `c8c4482` (tsconfig in Docker) → `9e27991` (openssl + Prisma binary target for Alpine).
+
+**Prod smoke (CLI, 2026-07-02):** full onboarding chain + `POST /contacts` with JWT → `SMOKE_OK`.
+
+**Owner DoD (browser):** Register → Login → Dashboard → Contact — **DONE** (claude.smoke1@example.com, Contacts=1, 2026-07-02).
+
+## Production hardening (STEP 1 P0) — **IN PROGRESS**
+
+| Проверка | Статус | Доказательство |
+|----------|--------|----------------|
+| Rate limit `/auth/login` + `/auth/set-password` | LOCAL_GREEN | `auth-rate-limit.e2e-spec.ts` → 429 |
+| Pino structured logging + request-id | LOCAL_GREEN | JSON logs, redact password/JWT |
+| `/health` skip throttle | LOCAL_GREEN | `@SkipThrottle()` on health |
+| CI_GREEN | PENDING | push → GitHub Actions |
+| Railway redeploy | PENDING | after CI_GREEN |
+
+**Note:** `/auth/register` не существует; регистрация = public onboarding + `POST /auth/set-password` (тоже под rate limit).
 
 ## История прогонов
+
+```
+Дата: 2026-07-02
+Commit: 9e27991 fix(deploy): openssl and prisma binary target for alpine railway
+Railway: api + web SUCCESS; GET /health → ok; prod smoke SMOKE_OK
+```
 
 ```
 Дата: 2026-07-02

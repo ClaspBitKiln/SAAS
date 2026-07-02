@@ -8,8 +8,22 @@ import { AuthModule } from '../modules/auth/auth.module';
 import { EMetallModule } from '../modules/e-metall/e-metall.module';
 import { RequestsModule } from '../modules/requests/requests.module';
 import { HealthModule } from '../modules/health/health.module';
+import { SecurityModule } from '../infrastructure/security/security.module';
+import { PinoLoggerModule } from '../infrastructure/logging/pino-logger.module';
 
 @Module({
-  imports: [PlatformModule, UsersModule, MembershipsModule, ContactsModule, CallsModule, AuthModule, EMetallModule, RequestsModule, HealthModule],
+  imports: [
+    PinoLoggerModule,
+    SecurityModule,
+    PlatformModule,
+    UsersModule,
+    MembershipsModule,
+    ContactsModule,
+    CallsModule,
+    AuthModule,
+    EMetallModule,
+    RequestsModule,
+    HealthModule,
+  ],
 })
 export class AppModule {}
