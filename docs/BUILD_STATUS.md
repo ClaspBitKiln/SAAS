@@ -292,7 +292,7 @@ https://github.com/ClaspBitKiln/SAAS/actions/runs/28580480073
 | Web UI search field | CI_GREEN | `apps/web/.../contacts/page.tsx` |
 | Railway redeploy | LIVE | auto-deploy after `6edbaeb` push |
 
-**CI proof:** commit `6edbaeb` → [run #74](https://github.com/ClaspBitKiln/SAAS/actions/runs/28593753542)
+**CI proof:** commit `6edbaeb` → [run #75](https://github.com/ClaspBitKiln/SAAS/actions/runs/28593753542)
 
 **CRM Lite slice 1–3:** Contact CRUD + Notes + Search = DONE (awaiting founder isolation check in prod UI)
 
