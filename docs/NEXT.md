@@ -1,45 +1,38 @@
 # NEXT — единственный источник истины
 
-Читают: Cursor (исполнение) + Claude (руководство). Доказательства → `docs/EVIDENCE/`. Стратегия → `docs/DECISIONS.md`. Ленты-переписки (`docs/collab/*`) — упразднены.
+Читают: Cursor (исполнение) + Claude (руководство). Доказательства → `docs/EVIDENCE/`. Стратегия → `docs/DECISIONS.md`.
 
 ---
 
 CURRENT
-MVP CRM — **Company** aggregate (юрлица B2B, ИНН, search)
+Company = DONE. MVP CRM core: Contact + Company + Notes + Search + Call + Request.
 
 STATUS
-CONTINUE — Company slice IN PROGRESS (Cursor)
+STOP по коду. Следующий срез — решение Founder (Deal pipeline / первый пользователь / Contact→Company link).
 
 INPUT
-CRM Lite DONE (Contact + Notes + Search). Founder: «решай сам» → следующий MVP-срез.
+Company CI_GREEN `fab5d9f` + prod redeploy.
 
 OUTPUT
-`GET/POST/PATCH/DELETE /companies` org-scoped + `?q=` (name/inn/email) + UI `/dashboard/companies` · CI_GREEN · redeploy
+Юрлица B2B в CRM: создать компанию с ИНН, найти через search в prod UI.
 
 DONE WHEN
-CI run green + prod redeploy: можно создать/найти юрлицо с ИНН в prod UI. Evidence → `docs/EVIDENCE/`.
+CI_GREEN + evidence записаны. ✓
 
 OUT OF SCOPE
-AI · Deal · Contact→Company link · counterparty-check · RBAC · E-Metall live
+AI · Deal · Activity timeline · Contact.companyId link · counterparty-check · RBAC
 
 ---
 
 ## MVP прогресс
 | Срез | Статус |
 |------|--------|
-| Platform + Auth + Contact + Call + Request | DONE |
-| CRM Lite: Notes + Search | DONE |
-| **Company CRUD + search** | **CONTINUE** |
+| Platform + Auth | DONE |
+| Contact + Notes + Search | DONE |
+| Call + Request scaffold | DONE |
+| **Company CRUD + search** | **DONE** (`fab5d9f`, run #78) |
 | Deal pipeline | backlog |
-| Activity timeline | backlog |
-
-## Company slice — DoD
-- Prisma `Company` (name, inn?, website?, phone?, email?, org-scoped)
-- API: CRUD + `GET /companies?q=` reuse (name/inn/email insensitive)
-- Уникальность ИНН внутри org
-- E2e: CRUD + cross-org isolation на search
-- UI: `/dashboard/companies` (как Contacts)
-- CI_GREEN + EVIDENCE
+| Первый пользователь + фидбек | backlog (DECISIONS) |
 
 BLOCKERS
-Нет.
+Решение Founder: Deal vs первый пользователь vs связка Contact→Company.

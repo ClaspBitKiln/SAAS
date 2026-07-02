@@ -296,6 +296,18 @@ https://github.com/ClaspBitKiln/SAAS/actions/runs/28580480073
 
 **CRM Lite slice 1–3:** Contact CRUD + Notes + Search = DONE (awaiting founder isolation check in prod UI)
 
+## Company (MVP CRM slice) — **DONE** (CI_GREEN 2026-07-02)
+
+| Проверка | Статус | Доказательство |
+|----------|--------|----------------|
+| `GET/POST/PATCH/DELETE /companies` | CI_GREEN | `company.e2e-spec.ts` |
+| `GET /companies?q=` search | CI_GREEN | `company-search.e2e-spec.ts` |
+| Unique INN per org | CI_GREEN | Prisma `@@unique([organizationId, inn])` + handler |
+| Web UI Companies page | CI_GREEN | `apps/web/.../companies/page.tsx` |
+| Railway redeploy | LIVE | auto-deploy after `fab5d9f` |
+
+**CI proof:** commit `fab5d9f` → [run #78](https://github.com/ClaspBitKiln/SAAS/actions/runs/28600344202)
+
 ## История прогонов
 
 ```
