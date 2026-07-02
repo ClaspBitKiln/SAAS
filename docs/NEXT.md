@@ -1,26 +1,26 @@
 # NEXT — единственный источник истины
 
-Читают: Cursor (исполнение) + Claude (руководство). Доказательства → `docs/EVIDENCE/`. Стратегия → `docs/DECISIONS.md`. Ленты-переписки (`docs/collab/*`) — упразднены.
+Читают: Cursor (исполнение) + Claude (руководство). Доказательства → `docs/EVIDENCE/`. Стратегия → `docs/DECISIONS.md`. Снапшот → `docs/CURSOR_SYNC.md`.
 
 ---
 
 CURRENT
-MVP CRM — **Company** aggregate (юрлица B2B, ИНН, search)
+**First live user + feedback** (prod onboarding)
 
 STATUS
-CONTINUE — Company slice IN PROGRESS (Cursor)
+CONTINUE — onboard 1 real manager, capture structured feedback
 
 INPUT
-CRM Lite DONE (Contact + Notes + Search). Founder: «решай сам» → следующий MVP-срез.
+MVP CRM core DONE. Company `fab5d9f` CI_GREEN [run #78](https://github.com/ClaspBitKiln/SAAS/actions/runs/28600344202). Isolation review PASS → `docs/EVIDENCE/STEP_2026-07-02_COMPANY_ISOLATION.md`. Founder decision **D-001**.
 
 OUTPUT
-`GET/POST/PATCH/DELETE /companies` org-scoped + `?q=` (name/inn/email) + UI `/dashboard/companies` · CI_GREEN · redeploy
+Turnkey kit `docs/first-user/TURNKEY.md` · manager completes happy path in prod · feedback → `docs/EVIDENCE/FEEDBACK_*.md`
 
 DONE WHEN
-CI run green + prod redeploy: можно создать/найти юрлицо с ИНН в prod UI. Evidence → `docs/EVIDENCE/`.
+Real user registered in prod, used Contacts / Companies / Calls / Notes / Search, structured feedback recorded. Founder picks next slice from feedback.
 
 OUT OF SCOPE
-AI · Deal · Contact→Company link · counterparty-check · RBAC · E-Metall live
+Deal pipeline · Contact→Company link · AI · counterparty-check · RBAC · E-Metall live
 
 ---
 
@@ -29,17 +29,18 @@ AI · Deal · Contact→Company link · counterparty-check · RBAC · E-Metall l
 |------|--------|
 | Platform + Auth + Contact + Call + Request | DONE |
 | CRM Lite: Notes + Search | DONE |
-| **Company CRUD + search** | **CONTINUE** |
-| Deal pipeline | backlog |
+| Company CRUD + search | DONE (`fab5d9f`, run #78) |
+| **First live user + feedback** | **CONTINUE** |
+| Deal pipeline | backlog (until feedback) |
+| Contact→Company | backlog (until feedback) |
 | Activity timeline | backlog |
 
-## Company slice — DoD
-- Prisma `Company` (name, inn?, website?, phone?, email?, org-scoped)
-- API: CRUD + `GET /companies?q=` reuse (name/inn/email insensitive)
-- Уникальность ИНН внутри org
-- E2e: CRUD + cross-org isolation на search
-- UI: `/dashboard/companies` (как Contacts)
-- CI_GREEN + EVIDENCE
+## First user — DoD
+- Prod smoke OK (`/health`, register → dashboard)
+- Manager onboarded (self-register or invite)
+- Happy path: 3 contacts, 1–2 companies, 2 calls, notes, search
+- Feedback file in `docs/EVIDENCE/`
+- Founder decision on next aggregate
 
 BLOCKERS
 Нет.
