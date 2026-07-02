@@ -8,6 +8,7 @@ import { getAuthUser } from '@/lib/auth';
 const nav = [
   { href: '/dashboard', label: 'Dashboard' },
   { href: '/dashboard/contacts', label: 'Contacts' },
+  { href: '/dashboard/companies', label: 'Companies' },
   { href: '/dashboard/requests', label: 'Requests' },
   { href: '/dashboard/calls', label: 'Calls' },
   { href: '/dashboard/team', label: 'Team' },

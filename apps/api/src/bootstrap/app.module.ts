@@ -3,6 +3,7 @@ import { PlatformModule } from '../modules/platform/platform.module';
 import { UsersModule } from '../modules/users/users.module';
 import { MembershipsModule } from '../modules/memberships/memberships.module';
 import { ContactsModule } from '../modules/contacts/contacts.module';
+import { CompaniesModule } from '../modules/companies/companies.module';
 import { CallsModule } from '../modules/calls/calls.module';
 import { AuthModule } from '../modules/auth/auth.module';
 import { EMetallModule } from '../modules/e-metall/e-metall.module';
@@ -19,6 +20,7 @@ import { PinoLoggerModule } from '../infrastructure/logging/pino-logger.module';
     UsersModule,
     MembershipsModule,
     ContactsModule,
+    CompaniesModule,
     CallsModule,
     AuthModule,
     EMetallModule,

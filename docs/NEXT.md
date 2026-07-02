@@ -5,33 +5,41 @@
 ---
 
 CURRENT
-Contact Notes + Search (CRM Lite — первый продуктовый срез)
+MVP CRM — **Company** aggregate (юрлица B2B, ИНН, search)
 
 STATUS
-Notes slice DONE — Search slice NEXT (ждём Claude CONTINUE)
+CONTINUE — Company slice IN PROGRESS (Cursor)
 
 INPUT
-Notes CI_GREEN `b946126` + prod redeploy SUCCESS
+CRM Lite DONE (Contact + Notes + Search). Founder: «решай сам» → следующий MVP-срез.
 
 OUTPUT
-Пользователь добавляет заметки к контакту и ищет контакты в prod UI · CI_GREEN · redeploy
+`GET/POST/PATCH/DELETE /companies` org-scoped + `?q=` (name/inn/email) + UI `/dashboard/companies` · CI_GREEN · redeploy
 
 DONE WHEN
-CI run green + prod redeploy: на карточке контакта можно добавить/увидеть заметки; поиск по имени/компании/email фильтрует список. Evidence → `docs/EVIDENCE/`.
+CI run green + prod redeploy: можно создать/найти юрлицо с ИНН в prod UI. Evidence → `docs/EVIDENCE/`.
 
 OUT OF SCOPE
-AI · Deals · Calls-AI · телефония · permissions/RBAC · E-Metall
+AI · Deal · Contact→Company link · counterparty-check · RBAC · E-Metall live
 
 ---
 
-## Правила исполнения
-- Golden Path (domain/application/infrastructure/presentation/tests). Изоляцию не регрессировать: `@CurrentUser` + `requireOrganizationId` + org-scoped repo.
-- LOOP (CI = истина) · One Failure At A Time · MVP-freeze · не трогать `vitest.config.ts` · секреты только env.
-- Каждый шаг = коммит + CI_GREEN + запись в `BUILD_STATUS.md` + `docs/EVIDENCE/STEP_*.md` → redeploy.
+## MVP прогресс
+| Срез | Статус |
+|------|--------|
+| Platform + Auth + Contact + Call + Request | DONE |
+| CRM Lite: Notes + Search | DONE |
+| **Company CRUD + search** | **CONTINUE** |
+| Deal pipeline | backlog |
+| Activity timeline | backlog |
 
-## Разбивка (тонкие срезы)
-1. **Notes:** DONE (`b946126`, CI_GREEN run #73, prod redeploy SUCCESS).
-2. **Search:** `GET /contacts?q=` + UI — **NEXT** (ждём CONTINUE от Claude в этом файле).
+## Company slice — DoD
+- Prisma `Company` (name, inn?, website?, phone?, email?, org-scoped)
+- API: CRUD + `GET /companies?q=` reuse (name/inn/email insensitive)
+- Уникальность ИНН внутри org
+- E2e: CRUD + cross-org isolation на search
+- UI: `/dashboard/companies` (как Contacts)
+- CI_GREEN + EVIDENCE
 
 BLOCKERS
 Нет.

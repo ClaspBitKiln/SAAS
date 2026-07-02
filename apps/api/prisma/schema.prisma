@@ -141,6 +141,32 @@ enum ContactStatus {
   ARCHIVED
 }
 
+enum CompanyStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+model Company {
+  id             String        @id @db.Uuid
+  tenantId       String        @db.Uuid
+  organizationId String        @db.Uuid
+  name           String        @db.VarChar(255)
+  inn            String?       @db.VarChar(12)
+  website        String?       @db.VarChar(2048)
+  phone          String?       @db.VarChar(50)
+  email          String?       @db.VarChar(255)
+  status         CompanyStatus @default(ACTIVE)
+  version        Int           @default(0)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  deletedAt      DateTime?
+
+  @@unique([organizationId, inn])
+  @@index([tenantId])
+  @@index([organizationId])
+  @@map("companies")
+}
+
 model Contact {
   id             String        @id @db.Uuid
   tenantId       String        @db.Uuid
