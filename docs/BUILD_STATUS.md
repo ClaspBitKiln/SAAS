@@ -207,12 +207,22 @@ https://github.com/ClaspBitKiln/SAAS/actions/runs/28576198746
 
 **DoD:** Request parse/create/search API + E-Metall scaffold + web `/dashboard/requests/*`.
 
-## Tenant isolation (P0 security) — **IN PROGRESS**
+## Tenant isolation (P0 security) — **DONE** (CI_GREEN 2026-07-02)
 
-| Проверка | Статус |
-|----------|--------|
-| STEP 1 implementation | IN PROGRESS |
-| CI | NOT_RUN |
+| Проверка | Команда | Статус | Доказательство |
+|----------|---------|--------|----------------|
+| Lint | `pnpm lint` | CI_GREEN | [run](https://github.com/ClaspBitKiln/SAAS/actions/runs/28577440195) |
+| Prisma generate + migrate | CI steps | CI_GREEN | same run |
+| TypeScript compile | `pnpm build` | CI_GREEN | same run |
+| Unit tests | `pnpm test` | CI_GREEN | same run |
+| Integration tests | `pnpm test:integration` | CI_GREEN | same run |
+| E2E tests | `pnpm test:e2e` | CI_GREEN | same run (incl. tenant-isolation) |
+| Web build | `pnpm build` (apps/web) | CI_GREEN | same run |
+
+**CI proof:** commit `a6f1d89` → workflow `api` → **success**
+https://github.com/ClaspBitKiln/SAAS/actions/runs/28577440195
+
+**DoD:** `@CurrentUser` + org-scoped repos; tenant A cannot read/mutate tenant B data (e2e proof). F-013 RESOLVED.
 
 ## История прогонов
 
@@ -225,7 +235,12 @@ CI run: https://github.com/ClaspBitKiln/SAAS/actions/runs/28576198746
 
 ```
 Дата: 2026-07-02
-Commit: e9cf69c feat(web): complete MVP self-service flows
+Commit: a6f1d89 fix(security): enforce tenant isolation on CRM routes
+CI run: https://github.com/ClaspBitKiln/SAAS/actions/runs/28577440195
+Статус: CI_GREEN (lint, prisma, build, unit, integration, e2e — all passed)
+```
+
+```
 CI run: https://github.com/ClaspBitKiln/SAAS/actions/runs/28572674729
 Статус: CI_GREEN (api build-test + web-build — all passed)
 ```

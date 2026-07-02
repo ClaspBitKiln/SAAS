@@ -77,7 +77,8 @@ MVP-1 ядро CRM → MVP-2 коммуникации → MVP-3 телефони
 
 - **Platform + CRM core** = DONE (Tenant … Call, Auth, JWT — CI_GREEN)
 - **MVP self-service web** = DONE (`e9cf69c` CI_GREEN)
-- **Request MVP + E-Metall scaffold** = LOCAL_GREEN (committed, CI pending)
+- **Request MVP + E-Metall scaffold** = DONE (`5e837a8` CI_GREEN)
+- **Tenant isolation (P0)** = DONE (`a6f1d89` CI_GREEN) — `@CurrentUser`, org-scoped repos, isolation e2e
 - **MagicMet demo tenant** = local only (m1@…m5@magicmet.ru, passwords not in git)
 - **LOOP обязателен:** CI = единственная истина; vitest требует SWC + decoratorMetadata для e2e
 

@@ -124,4 +124,4 @@ Evidence:          Code review 2026-07-02: controllers trust client `organizatio
 Root cause:        JWT payload carries tenant/org but not wired into CQRS queries/commands or Prisma `where`
 Fix:               `@CurrentUser()` + `requireOrganizationId`; scoped `findById(id, organizationId)` on Contact/Call/Request repos; tenant-isolation e2e
 Preventive action: all CRM repository read methods must accept organizationId (or tenantId) scope — no unscoped findById
-Status:            RESOLVED (pending CI_GREEN)
+Status:            RESOLVED (commit a6f1d89, run 28577440195: CI_GREEN)
