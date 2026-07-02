@@ -36,6 +36,7 @@ Deal pipeline · Contact→Company link · AI · counterparty-check · RBAC · E
 | Activity timeline | backlog |
 
 ## First user — DoD
+- **Assigned:** Илья Юртаев (MagicMet) · evidence `docs/EVIDENCE/FEEDBACK_2026-07-02_magicmet-yurtaev.md`
 - Prod smoke OK (`/health`, register → dashboard)
 - Manager onboarded (self-register or invite)
 - Happy path: 3 contacts, 1–2 companies, 2 calls, notes, search
