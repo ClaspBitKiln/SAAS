@@ -11,8 +11,8 @@ When CI is GREEN for the current task:
 
 - STOP **new scope** — do not start the next module or expand work.
 - Do not propose priorities, write docs, refactor, or redesign architecture.
-- **Auto-handoff:** write `docs/collab/TO_CLAUDE.md` (STATUS / Evidence / DONE / ASK). Set `docs/NEXT.md` → `CURRENT: STOP`.
-- Reply: STATUS / Evidence / DONE / NEXT: STOP / Waiting for Claude (`docs/collab/TO_CURSOR.md`).
+- **Evidence:** add `docs/EVIDENCE/STEP_<date>_<name>.md`; update `docs/BUILD_STATUS.md`. Set `docs/NEXT.md` per Claude (usually next slice or STOP).
+- Reply: STATUS / Evidence / DONE / NEXT: STOP / Waiting.
 
 **STOP is NOT idle.** Until CI_GREEN, keep delivering: push, fix CI, debug, test, repeat.
 
@@ -59,4 +59,4 @@ One aggregate → Lint → Build → Unit → Integration → E2E → CI_GREEN �
 
 One Failure At A Time on CI_RED. Evidence in KNOWN_FAILURES.md.
 
-Read `docs/NEXT.md` first. Do only what CURRENT says.
+Read `docs/NEXT.md` first. Do only what CURRENT says. Evidence → `docs/EVIDENCE/`. Strategy → `docs/DECISIONS.md`.
