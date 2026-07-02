@@ -296,7 +296,38 @@ https://github.com/ClaspBitKiln/SAAS/actions/runs/28580480073
 
 **CRM Lite slice 1–3:** Contact CRUD + Notes + Search = DONE (awaiting founder isolation check in prod UI)
 
+## Company (CRM B2B legal entity) — **DONE** (CI_GREEN 2026-07-02)
+
+| Проверка | Статус | Доказательство |
+|----------|--------|----------------|
+| `GET/POST/PATCH/DELETE /companies` org-scoped | CI_GREEN | `company.e2e-spec.ts` |
+| `GET /companies?q=` name/inn/email | CI_GREEN | `company-search.e2e-spec.ts` |
+| INN unique per org | CI_GREEN | `CreateCompanyHandler` + e2e |
+| Cross-org isolation (search + by id) | CI_GREEN | `company-search.e2e-spec.ts` + `tenant-isolation.e2e-spec.ts` |
+| Web UI `/dashboard/companies` | CI_GREEN | `apps/web/.../companies/page.tsx` |
+| Railway redeploy | LIVE | auto-deploy after `fab5d9f` |
+
+**CI proof:** commit `fab5d9f` → [run #78](https://github.com/ClaspBitKiln/SAAS/actions/runs/28600344202)
+
+**Isolation review:** `docs/EVIDENCE/STEP_2026-07-02_COMPANY_ISOLATION.md` — PASS
+
+## First live user (D-001) — **IN PROGRESS**
+
+| Шаг | Статус | Доказательство |
+|-----|--------|----------------|
+| Turnkey kit | READY | `docs/first-user/TURNKEY.md` |
+| **Assigned user** | **Илья Юртаев (MagicMet)** | `docs/EVIDENCE/FEEDBACK_2026-07-02_magicmet-yurtaev.md` |
+| Founder smoke prod | NOT_RUN | — |
+| Watch session + feedback | NOT_RUN | — |
+
 ## История прогонов
+
+```
+Дата: 2026-07-02
+Commit: fab5d9f feat(companies): add org-scoped company crud with search and ui
+CI run: https://github.com/ClaspBitKiln/SAAS/actions/runs/28600344202
+Статус: CI_GREEN (lint, prisma, build, unit, integration, e2e, web-build — all passed)
+```
 
 ```
 Дата: 2026-07-02

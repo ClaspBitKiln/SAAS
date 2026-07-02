@@ -1,30 +1,37 @@
 # CLAUDE_CODE_BRIEF — Sales OS
 
 > Shared: `founder-platform/CLAUDE.md`  
-> Full: Obsidian `Memory/Founder/03_ПРАВИЛА_CLAUDE` + `Memory/SAAS/03_ПРАВИЛА_…`
+> Full memory: `docs/MEMORY.md` · Obsidian `Memory/SAAS/`  
+> Sync: `docs/CURSOR_SYNC.md` · Task: `docs/NEXT.md`
 
 ## Экосистема
 
-Три слоя: **founder-platform** (shared) · **inn-bot** · **Sales OS** — равноправные продукты.
+**founder-platform** (shared) · **inn-bot** · **Sales OS** — равноправные продукты.
+
+**Локально SAAS:** только `C:\Users\asus\Claude\Projects\SAAS` (D-002).
 
 ## Статус Sales OS (2026-07-02)
 
-**CI_GREEN:** Tenant → Organization → User → Membership → Contact → Call → Auth → JWT → MVP web (`e9cf69c`)
+**MVP CRM core = DONE (CI_GREEN):** Platform → Contact → Call → Auth/JWT → Web → Request scaffold → Tenant isolation → Notes → Search → **Company** (`fab5d9f`, run #78).
 
-**IN PROGRESS:** Request MVP + E-Metall scaffold — LOCAL_GREEN (build + 49 unit tests), push → CI pending
+**Company isolation:** PASS (org-scope, INN per-org). Evidence: `docs/EVIDENCE/STEP_2026-07-02_COMPANY_ISOLATION.md`.
 
-**MagicMet demo:** m1@magicmet.ru (Илья Юртаев, admin), orgId `019f21bd-fa86-79a2-beb6-f2f3c74371d8`, localhost:3001
+**CURRENT (D-001):** First live user + feedback. **Assigned: Илья Юртаев (MagicMet).** Код STOP до фидбека.
 
-**Next:** push, CI_GREEN, then E-Metall live API or AI summary (Founder)
+**Prod:** web-production-e22e3.up.railway.app · api-production-7f43a.up.railway.app
 
-## LOOP (from founder-platform)
+**MagicMet localhost demo:** m1@magicmet.ru — только local, не prod. Илья регистрируется в prod отдельно.
 
-ИЗУЧИ → СДЕЛАЙ → ПРОВЕРЬ → ПОВТОРИ · CI = truth · one failure at a time
+**Backlog until feedback:** Deal · Contact→Company · AI · counterparty-check · E-Metall live
+
+## LOOP
+
+ИЗУЧИ → СДЕЛАЙ → ПРОВЕРЬ → ПОВТОРИ · CI = truth · Founder = WHAT · Cursor = HOW
+
+## Doc↔code flag
+
+`contact-company-link` — нет в `apps/api`, OUT OF SCOPE верно. Не расширять до фидбека.
 
 ## Transfers
 
-`founder-platform/TRANSFER_RULES.md` — never import domain cross-product.
-
-## Product-only
-
-NestJS Golden Path, Platform module order — this repo `.cursor/rules/sales-os-freeze.mdc`
+`founder-platform/TRANSFER_RULES.md` — never cross-product domain import.

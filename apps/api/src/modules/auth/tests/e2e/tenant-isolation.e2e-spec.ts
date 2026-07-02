@@ -15,6 +15,7 @@ describe('Tenant isolation E2E', () => {
   let contactBId: string;
   let callBId: string;
   let requestBId: string;
+  let companyBId: string;
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
@@ -50,6 +51,13 @@ describe('Tenant isolation E2E', () => {
       .send({ title: 'Tenant B Request', source: 'MANUAL', lines: [{ rawLine: 'Лист 10мм' }] })
       .expect(201);
     requestBId = requestB.body.id;
+
+    const companyB = await request(app.getHttpServer())
+      .post('/companies')
+      .set(authHeader(tokenB))
+      .send({ name: 'Tenant B Company', inn: '3664069397' })
+      .expect(201);
+    companyBId = companyB.body.id;
   });
 
   afterAll(async () => {
@@ -66,6 +74,10 @@ describe('Tenant isolation E2E', () => {
 
   it('tenant A cannot GET request from tenant B by id', async () => {
     await request(app.getHttpServer()).get(`/requests/${requestBId}`).set(authHeader(tokenA)).expect(404);
+  });
+
+  it('tenant A cannot GET company from tenant B by id', async () => {
+    await request(app.getHttpServer()).get(`/companies/${companyBId}`).set(authHeader(tokenA)).expect(404);
   });
 
   it('tenant A list ignores foreign organizationId query and returns only own org', async () => {
@@ -93,6 +105,16 @@ describe('Tenant isolation E2E', () => {
       .expect(404);
 
     await request(app.getHttpServer()).delete(`/contacts/${contactBId}`).set(authHeader(tokenA)).expect(404);
+  });
+
+  it('tenant A cannot mutate tenant B company', async () => {
+    await request(app.getHttpServer())
+      .patch(`/companies/${companyBId}`)
+      .set(authHeader(tokenA))
+      .send({ name: 'Hijacked' })
+      .expect(404);
+
+    await request(app.getHttpServer()).delete(`/companies/${companyBId}`).set(authHeader(tokenA)).expect(404);
   });
 
   it('tenant A cannot start call on tenant B contact', async () => {
