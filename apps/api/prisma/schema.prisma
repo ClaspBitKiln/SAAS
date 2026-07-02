@@ -159,6 +159,21 @@ model Contact {
   @@map("contacts")
 }
 
+model ContactNote {
+  id             String   @id @db.Uuid
+  tenantId       String   @db.Uuid
+  organizationId String   @db.Uuid
+  contactId      String   @db.Uuid
+  body           String   @db.Text
+  createdById    String?  @db.Uuid
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([contactId])
+  @@index([organizationId])
+  @@map("contact_notes")
+}
+
 enum CallDirection {
   INBOUND
   OUTBOUND

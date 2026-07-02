@@ -20,9 +20,10 @@ describe('Tenant E2E', () => {
   });
 
   it('POST /tenants создаёт арендатора', async () => {
+    const slug = `e2e-co-${Date.now()}`;
     const res = await request(app.getHttpServer())
       .post('/tenants')
-      .send({ name: 'E2E Co', slug: 'e2e-co' })
+      .send({ name: 'E2E Co', slug })
       .expect(201);
     expect(res.body.id).toBeDefined();
     expect(res.body.status).toBe('ACTIVE');

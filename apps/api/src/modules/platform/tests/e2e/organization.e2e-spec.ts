@@ -16,7 +16,7 @@ describe('Organization E2E', () => {
 
     const tenantRes = await request(app.getHttpServer())
       .post('/tenants')
-      .send({ name: 'E2E Tenant Org', slug: 'e2e-tenant-org' })
+      .send({ name: 'E2E Tenant Org', slug: `e2e-tenant-org-${Date.now()}` })
       .expect(201);
     tenantId = tenantRes.body.id;
   });

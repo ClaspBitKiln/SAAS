@@ -1,32 +1,37 @@
-# NEXT
+# NEXT — единственный источник истины
 
-EXECUTION ONLY MODE
+Читают: Cursor (исполнение) + Claude (руководство). Доказательства → `docs/EVIDENCE/`. Стратегия → `docs/DECISIONS.md`. Ленты-переписки (`docs/collab/*`) — упразднены.
 
 ---
 
 CURRENT
-STOP
+Contact Notes + Search (CRM Lite — первый продуктовый срез)
 
 STATUS
-STEP 1 DONE — CI_GREEN `4d1083d` · prod rate-limit live · handoff в `docs/collab/TO_CLAUDE.md`
+READY
 
-GOAL
-~~STEP 1: Production hardening~~ — **DONE**
+INPUT
+Contact CI_GREEN + prod LIVE (Register→Login→Dashboard→Contact работают)
 
-NEXT ACTION (Claude)
-1. Прочитать `docs/collab/TO_CLAUDE.md`
-2. Подтвердить STEP 1 · обновить память
-3. Написать `docs/collab/TO_CURSOR.md` + задание Phase 3
-4. Поставить здесь `CURRENT: CONTINUE`
+OUTPUT
+Пользователь добавляет заметки к контакту и ищет контакты в prod UI · CI_GREEN · redeploy
 
-NEXT ACTION (Cursor)
-Ждать `TO_CURSOR.md` или `CURRENT: CONTINUE`. Цикл: `docs/collab/README.md`
+DONE WHEN
+CI run green + prod redeploy: на карточке контакта можно добавить/увидеть заметки; поиск по имени/компании/email фильтрует список. Evidence → `docs/EVIDENCE/`.
 
-EXIT
-~~Rate limit + logging + redeploy~~ — **DONE**
+OUT OF SCOPE
+AI · Deals · Calls-AI · телефония · permissions/RBAC · E-Metall
 
-NEXT MODULE
-Phase 3: Call → AI Summary → Next Action → follow-up (после задания Claude)
+---
+
+## Правила исполнения
+- Golden Path (domain/application/infrastructure/presentation/tests). Изоляцию не регрессировать: `@CurrentUser` + `requireOrganizationId` + org-scoped repo.
+- LOOP (CI = истина) · One Failure At A Time · MVP-freeze · не трогать `vitest.config.ts` · секреты только env.
+- Каждый шаг = коммит + CI_GREEN + запись в `BUILD_STATUS.md` + `docs/EVIDENCE/STEP_*.md` → redeploy.
+
+## Разбивка (тонкие срезы)
+1. **Notes:** добавить `Note` к Contact — **IN PROGRESS (Cursor)**.
+2. **Search:** `GET /contacts?q=` + UI — после Notes CI_GREEN.
 
 BLOCKERS
-Ждём Claude (руководство) — автоматический handoff отправлен.
+Нет.

@@ -17,6 +17,12 @@ interface ContactList {
   total: number;
 }
 
+interface ContactNote {
+  id: string;
+  body: string;
+  createdAt: string;
+}
+
 const emptyForm = { name: '', email: '', phone: '' };
 
 export default function ContactsPage() {
@@ -28,6 +34,11 @@ export default function ContactsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [notesContactId, setNotesContactId] = useState<string | null>(null);
+  const [notes, setNotes] = useState<ContactNote[]>([]);
+  const [noteBody, setNoteBody] = useState('');
+  const [notesLoading, setNotesLoading] = useState(false);
+  const [noteSaving, setNoteSaving] = useState(false);
 
   const loadContacts = useCallback(async () => {
     if (!orgId) {
@@ -93,9 +104,43 @@ export default function ContactsPage() {
     if (!confirm('Delete this contact?')) return;
     try {
       await apiAuthDelete(`/contacts/${id}`);
+      if (notesContactId === id) setNotesContactId(null);
       await loadContacts();
     } catch {
       setError('Delete failed');
+    }
+  }
+
+  async function openNotes(contactId: string) {
+    setNotesContactId(contactId);
+    setNoteBody('');
+    setNotesLoading(true);
+    try {
+      const data = await apiAuthGet<ContactNote[]>(`/contacts/${contactId}/notes`);
+      setNotes(data);
+    } catch {
+      setError('Could not load notes');
+      setNotes([]);
+    } finally {
+      setNotesLoading(false);
+    }
+  }
+
+  async function onAddNote(e: FormEvent) {
+    e.preventDefault();
+    if (!notesContactId || !noteBody.trim()) return;
+    setNoteSaving(true);
+    try {
+      const created = await apiAuthPost<ContactNote>(`/contacts/${notesContactId}/notes`, {
+        body: noteBody.trim(),
+      });
+      setNotes((prev) => [created, ...prev]);
+      setNoteBody('');
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not save note');
+    } finally {
+      setNoteSaving(false);
     }
   }
 
@@ -168,6 +213,9 @@ export default function ContactsPage() {
                 <div className="text-sm text-slate-500">{c.email ?? c.phone ?? '—'}</div>
               </div>
               <div className="flex gap-2 text-sm">
+                <button type="button" onClick={() => openNotes(c.id)} className="text-slate-300 hover:underline">
+                  Notes
+                </button>
                 <button type="button" onClick={() => openEdit(c)} className="text-blue-400 hover:underline">
                   Edit
                 </button>
@@ -178,6 +226,52 @@ export default function ContactsPage() {
             </li>
           ))}
         </ul>
+
+        {notesContactId && (
+          <div className="mt-6 max-w-lg rounded-lg border border-slate-800 bg-slate-900 p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-sm font-medium">Notes</h2>
+              <button
+                type="button"
+                onClick={() => setNotesContactId(null)}
+                className="text-xs text-slate-400 hover:text-white"
+              >
+                Close
+              </button>
+            </div>
+            <form onSubmit={onAddNote} className="mb-4 grid gap-2">
+              <textarea
+                required
+                rows={3}
+                placeholder="Add a note…"
+                value={noteBody}
+                onChange={(e) => setNoteBody(e.target.value)}
+                className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-blue-500"
+              />
+              <button
+                type="submit"
+                disabled={noteSaving}
+                className="w-fit rounded-md bg-blue-600 px-3 py-1.5 text-sm hover:bg-blue-500 disabled:opacity-50"
+              >
+                {noteSaving ? 'Saving…' : 'Add note'}
+              </button>
+            </form>
+            {notesLoading ? (
+              <p className="text-sm text-slate-500">Loading notes…</p>
+            ) : notes.length === 0 ? (
+              <p className="text-sm text-slate-500">No notes yet.</p>
+            ) : (
+              <ul className="space-y-3">
+                {notes.map((n) => (
+                  <li key={n.id} className="rounded-md border border-slate-800 bg-slate-950 px-3 py-2 text-sm">
+                    <p className="whitespace-pre-wrap">{n.body}</p>
+                    <p className="mt-1 text-xs text-slate-500">{new Date(n.createdAt).toLocaleString()}</p>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
       </div>
     </RequireAuth>
   );
