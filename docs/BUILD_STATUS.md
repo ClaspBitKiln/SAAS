@@ -271,6 +271,17 @@ https://github.com/ClaspBitKiln/SAAS/actions/runs/28580480073
 
 **Note:** `/auth/register` не существует; регистрация = onboarding + `POST /auth/set-password`.
 
+## Contact Notes (CRM Lite slice 1) — **DONE** (CI_GREEN 2026-07-02)
+
+| Проверка | Статус | Доказательство |
+|----------|--------|----------------|
+| `POST/GET /contacts/:id/notes` | CI_GREEN | `contact-note.e2e-spec.ts` |
+| Org isolation | CI_GREEN | 404 cross-org; Claude review PASS |
+| Web UI Notes panel | CI_GREEN | `apps/web/.../contacts/page.tsx` |
+| Railway redeploy | LIVE | api + web SUCCESS |
+
+**CI proof:** commit `b946126` → [run #73](https://github.com/ClaspBitKiln/SAAS/actions/runs/28592344724)
+
 ## История прогонов
 
 ```

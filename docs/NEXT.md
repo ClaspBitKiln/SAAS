@@ -8,10 +8,10 @@ CURRENT
 Contact Notes + Search (CRM Lite — первый продуктовый срез)
 
 STATUS
-READY
+Notes slice DONE — Search slice NEXT (ждём Claude CONTINUE)
 
 INPUT
-Contact CI_GREEN + prod LIVE (Register→Login→Dashboard→Contact работают)
+Notes CI_GREEN `b946126` + prod redeploy SUCCESS
 
 OUTPUT
 Пользователь добавляет заметки к контакту и ищет контакты в prod UI · CI_GREEN · redeploy
@@ -30,8 +30,8 @@ AI · Deals · Calls-AI · телефония · permissions/RBAC · E-Metall
 - Каждый шаг = коммит + CI_GREEN + запись в `BUILD_STATUS.md` + `docs/EVIDENCE/STEP_*.md` → redeploy.
 
 ## Разбивка (тонкие срезы)
-1. **Notes:** добавить `Note` к Contact — **IN PROGRESS (Cursor)**.
-2. **Search:** `GET /contacts?q=` + UI — после Notes CI_GREEN.
+1. **Notes:** DONE (`b946126`, CI_GREEN run #73, prod redeploy SUCCESS).
+2. **Search:** `GET /contacts?q=` + UI — **NEXT** (ждём CONTINUE от Claude в этом файле).
 
 BLOCKERS
 Нет.
