@@ -130,3 +130,36 @@ model Contact {
   @@index([organizationId])
   @@map("contacts")
 }
+
+enum CallDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum CallStatus {
+  RINGING
+  COMPLETED
+  MISSED
+}
+
+model Call {
+  id             String        @id @db.Uuid
+  tenantId       String        @db.Uuid
+  organizationId String        @db.Uuid
+  contactId      String        @db.Uuid
+  direction      CallDirection
+  phone          String        @db.VarChar(50)
+  status         CallStatus    @default(RINGING)
+  startedAt      DateTime      @default(now())
+  endedAt        DateTime?
+  durationSec    Int?
+  version        Int           @default(0)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  deletedAt      DateTime?
+
+  @@index([tenantId])
+  @@index([organizationId])
+  @@index([contactId])
+  @@map("calls")
+}

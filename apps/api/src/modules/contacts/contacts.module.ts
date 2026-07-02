@@ -24,5 +24,6 @@ import { GetContactHandler, ListContactsHandler } from './application/handlers/c
     GetContactHandler,
     ListContactsHandler,
   ],
+  exports: [CONTACT_REPOSITORY],
 })
 export class ContactsModule {}
