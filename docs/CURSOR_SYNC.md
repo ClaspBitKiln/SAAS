@@ -16,7 +16,7 @@ Health: OK
 ✅ Contact  ✅ Notes  ✅ Search  ✅ Company
 
 ## Current
-Contact→Company merged (`e135e41`), prod smoke PASS. RU UI coded — awaiting commit push + CI_GREEN.
+RU UI DONE (CI_GREEN run #89). STOP — Founder: скриншот RU UI в prod → приглашение менеджера.
 
 ## Rules
 - NEXT.md = единственный источник «что делать»

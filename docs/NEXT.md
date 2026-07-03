@@ -44,7 +44,7 @@ Deal pipeline · AI · Activity timeline · counterparty-check · RBAC · Commun
 
 ✅ **Prod smoke (2026-07-03):** Railway redeploy OK — `/health`, OpenAPI `companyId`, contacts JS bundle. Evidence `STEP_2026-07-03_CONTACT_COMPANY_PROD.md`.
 
-### 3. RU UI (явное задание Founder 2026-07-03: «по-русски всё меню должно быть») — **CODE DONE**, CI pending push
+### 3. RU UI — **DONE** (CI_GREEN 2026-07-03, `ddda7b8` + `9037517`, run #89)
 Локализовать web UI на русский: меню (Dashboard→Панель, Contacts→Контакты, Companies→Компании, Calls→Звонки, Requests→Заявки, Team→Команда), формы register/login/set-password, страницы контактов/компаний/заявок, кнопки/плейсхолдеры/ошибки валидации.
 Просто и без боли: без i18n-фреймворка — статичные русские строки (или один `ru.ts` словарь). EN не сохранять. Код/API/БД остаются английскими.
 DoD: в UI нет видимых английских строк на happy path · web-build CI_GREEN · redeploy · скриншот-проверка Founder.
