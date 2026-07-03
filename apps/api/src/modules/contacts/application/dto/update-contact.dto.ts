@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsOptional, IsString, Length } from 'class-validator';
+import { IsEmail, IsOptional, IsString, IsUUID, Length } from 'class-validator';
 
 export class UpdateContactDto {
   @ApiPropertyOptional({ minLength: 2, maxLength: 255 })
@@ -18,4 +18,9 @@ export class UpdateContactDto {
   @IsOptional()
   @IsEmail()
   email?: string | null;
+
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  companyId?: string | null;
 }

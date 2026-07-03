@@ -20,4 +20,12 @@ describe('Contact entity', () => {
     expect(c.name).toBe('Bob');
     expect(c.phone).toBe('+79990001122');
   });
+
+  it('create and update companyId', () => {
+    const companyId = '0192a1b2-c3d4-7890-abcd-ef1234567892';
+    const c = Contact.create({ tenantId, organizationId: orgId, name: 'Linked', companyId });
+    expect(c.companyId).toBe(companyId);
+    c.updateDetails({ companyId: null });
+    expect(c.companyId).toBeNull();
+  });
 });

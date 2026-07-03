@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { PrismaService } from '../../database/prisma/prisma.service';
 import { PlatformModule } from '../platform/platform.module';
+import { CompaniesModule } from '../companies/companies.module';
 import { CONTACT_REPOSITORY } from './domain/repositories/contact.repository';
 import { CONTACT_NOTE_REPOSITORY } from './domain/repositories/contact-note.repository';
 import { PrismaContactRepository } from './infrastructure/prisma-contact.repository';
@@ -18,7 +19,7 @@ import { GetContactHandler, ListContactsHandler } from './application/handlers/c
 import { ListContactNotesHandler } from './application/handlers/contact-note.query-handlers';
 
 @Module({
-  imports: [CqrsModule, PlatformModule],
+  imports: [CqrsModule, PlatformModule, CompaniesModule],
   controllers: [ContactController, ContactNoteController],
   providers: [
     PrismaService,

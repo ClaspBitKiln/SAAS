@@ -4,6 +4,7 @@ export class CreateContactCommand {
     readonly name: string,
     readonly phone?: string | null,
     readonly email?: string | null,
+    readonly companyId?: string | null,
   ) {}
 }
 
@@ -14,6 +15,7 @@ export class UpdateContactCommand {
     readonly name?: string,
     readonly phone?: string | null,
     readonly email?: string | null,
+    readonly companyId?: string | null,
   ) {}
 }
 

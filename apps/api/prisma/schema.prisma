@@ -171,6 +171,7 @@ model Contact {
   id             String        @id @db.Uuid
   tenantId       String        @db.Uuid
   organizationId String        @db.Uuid
+  companyId      String?       @db.Uuid
   name           String        @db.VarChar(255)
   phone          String?       @db.VarChar(50)
   email          String?       @db.VarChar(255)
@@ -182,6 +183,7 @@ model Contact {
 
   @@index([tenantId])
   @@index([organizationId])
+  @@index([companyId])
   @@map("contacts")
 }
 
