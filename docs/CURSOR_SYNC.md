@@ -16,7 +16,7 @@ Health: OK
 ✅ Contact  ✅ Notes  ✅ Search  ✅ Company
 
 ## Current
-См. docs/NEXT.md → первый живой пользователь + фидбек. STOP по коду. Git hygiene DONE 2026-07-03.
+П.1 PROD CLEANUP DONE. Активно: п.2 Contact→Company PR (STOP до Claude review) → п.3 RU UI → первый менеджер.
 
 ## Rules
 - NEXT.md = единственный источник «что делать»

@@ -20,7 +20,27 @@ DONE WHEN
 Activation достигнута (signup→login→≥1 contact) + 3 ответа фидбека записаны в Obsidian `Memory/SAAS/`.
 
 OUT OF SCOPE (до фидбека)
-Deal pipeline · Contact→Company link · AI · Activity timeline · counterparty-check · RBAC · UX-полировка (debounce/phone/company-search/FTS)
+Deal pipeline · AI · Activity timeline · counterparty-check · RBAC · Communications/мессенджеры · UX-полировка (debounce/phone/company-search/FTS)
+
+## Задания Cursor (по порядку, DECISIONS 2026-07-03)
+
+### 1. PROD CLEANUP — **DONE** (2026-07-03, evidence `STEP_2026-07-03_PROD_CLEANUP.md`)
+
+### 2. UNFREEZE: Contact→Company link (разморожен решением Founder 2026-07-03)
+Боль подтверждена реальным использованием (3 контакта, нет поля компании). Код уже в ветке.
+1. `feat/contact-company-link` → rebase на актуальный main.
+2. Полный локальный прогон (lint/build/unit/integration/e2e) → push → PR → CI_GREEN.
+3. **STOP: Claude review PR до merge** (обязательно — org-scope на companyId, nullable back-compat, e2e cross-org).
+4. После approve: merge → Railway redeploy → prod smoke: создать контакт с компанией.
+5. Миграцию коммитить по образцу `20260702140000_company` (prod остаётся на `db push`, TD-006 не трогаем).
+DoD: CI_GREEN на main · prod: контакт связывается с компанией · BUILD_STATUS/EVIDENCE/CURSOR_SYNC · отчёт CURSOR → CLAUDE.
+
+### 3. RU UI (явное задание Founder 2026-07-03: «по-русски всё меню должно быть»)
+Локализовать web UI на русский: меню (Dashboard→Панель, Contacts→Контакты, Companies→Компании, Calls→Звонки, Requests→Заявки, Team→Команда), формы register/login/set-password, страницы контактов/компаний/заявок, кнопки/плейсхолдеры/ошибки валидации.
+Просто и без боли: без i18n-фреймворка — статичные русские строки (или один `ru.ts` словарь). EN не сохранять. Код/API/БД остаются английскими.
+DoD: в UI нет видимых английских строк на happy path · web-build CI_GREEN · redeploy · скриншот-проверка Founder.
+
+Порядок: 1 → 2 → 3, One Failure At A Time. После п.3 — приглашение первого менеджера (русский UI до его прихода).
 
 ---
 
@@ -39,7 +59,7 @@ Platform+Auth · Contact+Notes+Search · Company CRUD+search (`fab5d9f`, run #78
 web https://web-production-e22e3.up.railway.app · api https://api-production-7f43a.up.railway.app · `/health` ok
 
 BLOCKERS
-Founder: имя первого пользователя + запуск watch-session. Кода не трогаем до фидбека.
+Founder: имя первого пользователя + watch-session — **после** п.2 merge и п.3 RU UI.
 
 ## Примечание (док↔код) — RESOLVED 2026-07-03
 Claude подтвердил: связка Contact→Company частично внедрена (schema+migration+e2e+UI), но не закоммичена и не проверена CI → статус UNPROVEN. Решение: изолировать в ветку (см. chore выше), не расширять до фидбека.

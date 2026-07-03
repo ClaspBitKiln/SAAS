@@ -318,10 +318,19 @@ https://github.com/ClaspBitKiln/SAAS/actions/runs/28580480073
 | `.env.local` gitignored | DONE | commit `a7375be` |
 | CI on main (docs-only) | CI_GREEN | [run #82](https://github.com/ClaspBitKiln/SAAS/actions/runs/28662890270) |
 
-**CI proof:** commits `77bfeb7` + `a7375be` → workflow `api` → **success**
-https://github.com/ClaspBitKiln/SAAS/actions/runs/28662890270
-
 **Evidence:** `docs/EVIDENCE/STEP_2026-07-03_GIT_HYGIENE.md`
+
+## Prod cleanup (chore) — **DONE** (2026-07-03)
+
+| Проверка | Статус | Доказательство |
+|----------|--------|----------------|
+| Smoke account removed | DONE | `claude.smoke1@example.com` tenant deleted |
+| MagicMet prod data | UNTOUCHED | 1 user `%magicmet.ru%` remains |
+| `/health` | OK | `database: up` |
+| Smoke login | 401 | post-delete |
+| Code/deploy | NONE | data-only |
+
+**Evidence:** `docs/EVIDENCE/STEP_2026-07-03_PROD_CLEANUP.md`
 
 ## История прогонов
 
