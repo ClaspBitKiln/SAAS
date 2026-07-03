@@ -40,12 +40,15 @@ export class ContactController {
     const organizationId = requireOrganizationId(user);
     try {
       const { id } = await this.commandBus.execute(
-        new CreateContactCommand(organizationId, dto.name, dto.phone, dto.email),
+        new CreateContactCommand(organizationId, dto.name, dto.phone, dto.email, dto.companyId),
       );
       return this.getOrFail(id, organizationId);
     } catch (e) {
       if (e instanceof Error && e.message === 'Organization not found') {
         throw new BadRequestException(e.message);
+      }
+      if (e instanceof Error && e.message === 'Company not found') {
+        throw new NotFoundException(e.message);
       }
       throw e;
     }
@@ -81,10 +84,11 @@ export class ContactController {
     const organizationId = requireOrganizationId(user);
     try {
       await this.commandBus.execute(
-        new UpdateContactCommand(id, organizationId, dto.name, dto.phone, dto.email),
+        new UpdateContactCommand(id, organizationId, dto.name, dto.phone, dto.email, dto.companyId),
       );
     } catch (e) {
       if (e instanceof Error && e.message === 'Contact not found') throw new NotFoundException(e.message);
+      if (e instanceof Error && e.message === 'Company not found') throw new NotFoundException(e.message);
       throw e;
     }
     return this.getOrFail(id, organizationId);

@@ -6,6 +6,7 @@ import { makeContactEvent } from '../events/contact.events';
 
 export class Contact extends AggregateRoot {
   private _organizationId: string;
+  private _companyId: string | null;
   private _name: ContactName;
   private _phone: string | null;
   private _email: string | null;
@@ -15,6 +16,7 @@ export class Contact extends AggregateRoot {
     id: string;
     tenantId: string;
     organizationId: string;
+    companyId?: string | null;
     name: ContactName;
     phone: string | null;
     email: string | null;
@@ -31,6 +33,7 @@ export class Contact extends AggregateRoot {
       updatedAt: props.updatedAt,
     });
     this._organizationId = props.organizationId;
+    this._companyId = props.companyId ?? null;
     this._name = props.name;
     this._phone = props.phone;
     this._email = props.email;
@@ -43,12 +46,14 @@ export class Contact extends AggregateRoot {
     name: string;
     phone?: string | null;
     email?: string | null;
+    companyId?: string | null;
   }): Contact {
     const id = newId();
     const contact = new Contact({
       id,
       tenantId: input.tenantId,
       organizationId: input.organizationId,
+      companyId: input.companyId ?? null,
       name: new ContactName(input.name),
       phone: input.phone?.trim() || null,
       email: input.email?.trim().toLowerCase() || null,
@@ -62,6 +67,7 @@ export class Contact extends AggregateRoot {
     id: string;
     tenantId: string;
     organizationId: string;
+    companyId: string | null;
     name: string;
     phone: string | null;
     email: string | null;
@@ -74,6 +80,7 @@ export class Contact extends AggregateRoot {
       id: props.id,
       tenantId: props.tenantId,
       organizationId: props.organizationId,
+      companyId: props.companyId,
       name: new ContactName(props.name),
       phone: props.phone,
       email: props.email,
@@ -84,10 +91,16 @@ export class Contact extends AggregateRoot {
     });
   }
 
-  updateDetails(input: { name?: string; phone?: string | null; email?: string | null }): void {
+  updateDetails(input: {
+    name?: string;
+    phone?: string | null;
+    email?: string | null;
+    companyId?: string | null;
+  }): void {
     if (input.name !== undefined) this._name = new ContactName(input.name);
     if (input.phone !== undefined) this._phone = input.phone?.trim() || null;
     if (input.email !== undefined) this._email = input.email?.trim().toLowerCase() || null;
+    if (input.companyId !== undefined) this._companyId = input.companyId;
     this.touch();
     this.addEvent(makeContactEvent('contact.updated', this, { ...input }));
   }
@@ -100,6 +113,10 @@ export class Contact extends AggregateRoot {
 
   get organizationId(): string {
     return this._organizationId;
+  }
+
+  get companyId(): string | null {
+    return this._companyId;
   }
 
   get name(): string {

@@ -49,6 +49,7 @@ export class PrismaContactRepository implements ContactRepository {
     const data = {
       tenantId: contact.tenantId,
       organizationId: contact.organizationId,
+      companyId: contact.companyId,
       name: contact.name,
       phone: contact.phone,
       email: contact.email,
@@ -75,6 +76,7 @@ export class PrismaContactRepository implements ContactRepository {
     id: string;
     tenantId: string;
     organizationId: string;
+    companyId: string | null;
     name: string;
     phone: string | null;
     email: string | null;
@@ -87,6 +89,7 @@ export class PrismaContactRepository implements ContactRepository {
       id: row.id,
       tenantId: row.tenantId,
       organizationId: row.organizationId,
+      companyId: row.companyId,
       name: row.name,
       phone: row.phone,
       email: row.email,

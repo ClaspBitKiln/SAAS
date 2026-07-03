@@ -5,11 +5,17 @@ import { RequireAuth } from '@/components/RequireAuth';
 import { apiAuthDelete, apiAuthGet, apiAuthPatch, apiAuthPost } from '@/lib/api';
 import { getAuthUser } from '@/lib/auth';
 
+interface Company {
+  id: string;
+  name: string;
+}
+
 interface Contact {
   id: string;
   name: string;
   email: string | null;
   phone: string | null;
+  companyId: string | null;
 }
 
 interface ContactList {
@@ -23,12 +29,13 @@ interface ContactNote {
   createdAt: string;
 }
 
-const emptyForm = { name: '', email: '', phone: '' };
+const emptyForm = { name: '', email: '', phone: '', companyId: '' };
 
 export default function ContactsPage() {
   const user = getAuthUser();
   const orgId = user?.organizationId;
   const [contacts, setContacts] = useState<Contact[]>([]);
+  const [companies, setCompanies] = useState<Company[]>([]);
   const [search, setSearch] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -40,6 +47,24 @@ export default function ContactsPage() {
   const [noteBody, setNoteBody] = useState('');
   const [notesLoading, setNotesLoading] = useState(false);
   const [noteSaving, setNoteSaving] = useState(false);
+
+  const companyNameById = useCallback(
+    (id: string | null) => {
+      if (!id) return null;
+      return companies.find((c) => c.id === id)?.name ?? null;
+    },
+    [companies],
+  );
+
+  const loadCompanies = useCallback(async () => {
+    if (!orgId) return;
+    try {
+      const data = await apiAuthGet<{ items: Company[] }>('/companies?size=100');
+      setCompanies(data.items);
+    } catch {
+      /* optional — form works without companies */
+    }
+  }, [orgId]);
 
   const loadContacts = useCallback(async () => {
     if (!orgId) {
@@ -59,6 +84,10 @@ export default function ContactsPage() {
   }, [orgId, search]);
 
   useEffect(() => {
+    void loadCompanies();
+  }, [loadCompanies]);
+
+  useEffect(() => {
     void loadContacts();
   }, [loadContacts]);
 
@@ -70,7 +99,12 @@ export default function ContactsPage() {
 
   function openEdit(c: Contact) {
     setEditingId(c.id);
-    setForm({ name: c.name, email: c.email ?? '', phone: c.phone ?? '' });
+    setForm({
+      name: c.name,
+      email: c.email ?? '',
+      phone: c.phone ?? '',
+      companyId: c.companyId ?? '',
+    });
     setShowForm(true);
   }
 
@@ -89,11 +123,15 @@ export default function ContactsPage() {
         name: form.name,
         email: form.email || undefined,
         phone: form.phone || undefined,
+        companyId: form.companyId || undefined,
       };
       if (editingId) {
-        await apiAuthPatch(`/contacts/${editingId}`, body);
+        await apiAuthPatch(`/contacts/${editingId}`, {
+          ...body,
+          companyId: form.companyId ? form.companyId : null,
+        });
       } else {
-        await apiAuthPost('/contacts', { organizationId: orgId, ...body });
+        await apiAuthPost('/contacts', body);
       }
       closeForm();
       await loadContacts();
@@ -202,6 +240,18 @@ export default function ContactsPage() {
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
                 className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-blue-500"
               />
+              <select
+                value={form.companyId}
+                onChange={(e) => setForm({ ...form, companyId: e.target.value })}
+                className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-blue-500"
+              >
+                <option value="">No company</option>
+                {companies.map((co) => (
+                  <option key={co.id} value={co.id}>
+                    {co.name}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="mt-3 flex gap-2">
               <button
@@ -224,7 +274,12 @@ export default function ContactsPage() {
             <li key={c.id} className="flex items-center justify-between px-4 py-3">
               <div>
                 <div className="font-medium">{c.name}</div>
-                <div className="text-sm text-slate-500">{c.email ?? c.phone ?? '—'}</div>
+                <div className="text-sm text-slate-500">
+                  {c.email ?? c.phone ?? '—'}
+                  {c.companyId && (
+                    <span className="ml-2 text-slate-400">· {companyNameById(c.companyId) ?? 'Company'}</span>
+                  )}
+                </div>
               </div>
               <div className="flex gap-2 text-sm">
                 <button type="button" onClick={() => openNotes(c.id)} className="text-slate-300 hover:underline">

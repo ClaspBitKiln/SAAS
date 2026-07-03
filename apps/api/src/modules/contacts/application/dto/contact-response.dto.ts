@@ -9,6 +9,7 @@ export class ContactResponseDto {
   @ApiProperty() name!: string;
   @ApiPropertyOptional() phone!: string | null;
   @ApiPropertyOptional() email!: string | null;
+  @ApiPropertyOptional() companyId!: string | null;
   @ApiProperty({ enum: ContactStatusEnum }) status!: ContactStatusEnum;
   @ApiProperty() version!: number;
 }
@@ -21,6 +22,7 @@ export function toContactResponse(c: Contact): ContactResponseDto {
     name: c.name,
     phone: c.phone,
     email: c.email,
+    companyId: c.companyId,
     status: c.status,
     version: c.version,
   };
