@@ -16,7 +16,7 @@ Health: OK
 ✅ Contact  ✅ Notes  ✅ Search  ✅ Company
 
 ## Current
-См. docs/NEXT.md → первый живой пользователь + фидбек. STOP по коду.
+См. docs/NEXT.md → первый живой пользователь + фидбек. STOP по коду. Git hygiene DONE 2026-07-03.
 
 ## Rules
 - NEXT.md = единственный источник «что делать»

@@ -308,15 +308,18 @@ https://github.com/ClaspBitKiln/SAAS/actions/runs/28580480073
 
 **CI proof:** commit `fab5d9f` → [run #78](https://github.com/ClaspBitKiln/SAAS/actions/runs/28600344202)
 
-## Git hygiene (chore) — **PENDING** (2026-07-03)
+## Git hygiene (chore) — **DONE** (CI_GREEN 2026-07-03)
 
 | Проверка | Статус | Доказательство |
 |----------|--------|----------------|
-| WIP Contact→Company isolated | LOCAL | branch `feat/contact-company-link` (`fb596ca`) |
-| `main` product code clean | LOCAL | no companyId on main |
-| `docs/**` tracked | LOCAL | docs commit pending push |
-| `.env.local` gitignored | LOCAL | `.gitignore` chore commit |
-| CI on main (docs-only) | PENDING | push → workflow `api` |
+| WIP Contact→Company isolated | DONE | branch `feat/contact-company-link` (`fb596ca`), pushed |
+| `main` product code clean | DONE | no companyId / migrations on main |
+| `docs/**` tracked | DONE | commit `77bfeb7` |
+| `.env.local` gitignored | DONE | commit `a7375be` |
+| CI on main (docs-only) | CI_GREEN | [run #82](https://github.com/ClaspBitKiln/SAAS/actions/runs/28662890270) |
+
+**CI proof:** commits `77bfeb7` + `a7375be` → workflow `api` → **success**
+https://github.com/ClaspBitKiln/SAAS/actions/runs/28662890270
 
 **Evidence:** `docs/EVIDENCE/STEP_2026-07-03_GIT_HYGIENE.md`
 
