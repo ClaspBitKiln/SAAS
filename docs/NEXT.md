@@ -40,14 +40,16 @@ Deal pipeline · AI · Activity timeline · counterparty-check · RBAC · Commun
 1. ✅ **F-014 fix (DONE 2026-07-03):** `apps/api/.env` → localhost; prod scan+cleanup — evidence `STEP_2026-07-03_F014.md`. e2e-auth tenants: 0; smoke-1782992706 removed; MagicMet untouched.
 2. ✅ **CI_GREEN на PR #12** (2026-07-03: `api` on pull_request — build-test ✓, web-build ✓; подтверждено Claude по скрину Checks).
 
-**Ожидает Founder:** merge PR #12 → redeploy → prod smoke «контакт + компания» → Cursor task 3 RU UI.
+✅ **MERGED 2026-07-03 (Founder, добро Claude):** PR #12 → main `e135e41`, 2 checks passed, ветка удалена.
 
-### 3. RU UI (явное задание Founder 2026-07-03: «по-русски всё меню должно быть»)
+✅ **Prod smoke (2026-07-03):** Railway redeploy OK — `/health`, OpenAPI `companyId`, contacts JS bundle. Evidence `STEP_2026-07-03_CONTACT_COMPANY_PROD.md`.
+
+### 3. RU UI (явное задание Founder 2026-07-03: «по-русски всё меню должно быть») — **CODE DONE**, CI pending push
 Локализовать web UI на русский: меню (Dashboard→Панель, Contacts→Контакты, Companies→Компании, Calls→Звонки, Requests→Заявки, Team→Команда), формы register/login/set-password, страницы контактов/компаний/заявок, кнопки/плейсхолдеры/ошибки валидации.
 Просто и без боли: без i18n-фреймворка — статичные русские строки (или один `ru.ts` словарь). EN не сохранять. Код/API/БД остаются английскими.
 DoD: в UI нет видимых английских строк на happy path · web-build CI_GREEN · redeploy · скриншот-проверка Founder.
 
-Порядок: 1 → 2 → 3, One Failure At A Time. После п.3 — приглашение первого менеджера (русский UI до его прихода).
+Порядок: 1 → 2 → 3, One Failure At A Time. **После CI_GREEN п.3** — Founder: скриншот RU UI → приглашение первого менеджера.
 
 ---
 
@@ -66,7 +68,7 @@ Platform+Auth · Contact+Notes+Search · Company CRUD+search (`fab5d9f`, run #78
 web https://web-production-e22e3.up.railway.app · api https://api-production-7f43a.up.railway.app · `/health` ok
 
 BLOCKERS
-Founder: имя первого пользователя + watch-session — **после** п.2 merge и п.3 RU UI.
+Founder: скриншот-проверка RU UI + приглашение менеджера — **после** CI_GREEN RU UI push.
 
 ## Примечание (док↔код) — RESOLVED 2026-07-03
 Claude подтвердил: связка Contact→Company частично внедрена (schema+migration+e2e+UI), но не закоммичена и не проверена CI → статус UNPROVEN. Решение: изолировать в ветку (см. chore выше), не расширять до фидбека.

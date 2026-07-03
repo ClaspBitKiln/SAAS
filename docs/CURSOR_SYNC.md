@@ -16,7 +16,7 @@ Health: OK
 ✅ Contact  ✅ Notes  ✅ Search  ✅ Company
 
 ## Current
-F-014 DONE. PR #12 ready for merge (awaiting Founder). Next: merge → redeploy → RU UI (task 3).
+Contact→Company merged (`e135e41`), prod smoke PASS. RU UI coded — awaiting commit push + CI_GREEN.
 
 ## Rules
 - NEXT.md = единственный источник «что делать»

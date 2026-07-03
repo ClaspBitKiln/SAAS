@@ -343,6 +343,29 @@ https://github.com/ClaspBitKiln/SAAS/actions/runs/28580480073
 
 **Evidence:** `docs/EVIDENCE/STEP_2026-07-03_F014.md`
 
+## Contact→Company prod smoke — **DONE** (2026-07-03)
+
+| Проверка | Статус | Доказательство |
+|----------|--------|----------------|
+| Merge PR #12 | DONE | main `e135e41` |
+| `/health` prod | OK | database up |
+| OpenAPI `companyId` | PASS | `/docs-json` |
+| Contacts UI bundle | PASS | `companyId` + select in prod JS chunk |
+| MagicMet | UNTOUCHED | no writes |
+
+**Evidence:** `docs/EVIDENCE/STEP_2026-07-03_CONTACT_COMPANY_PROD.md`
+
+## RU UI — **LOCAL BUILD PASS**, CI pending
+
+| Проверка | Статус | Доказательство |
+|----------|--------|----------------|
+| `ru.ts` dictionary | DONE | `apps/web/src/lib/ru.ts` |
+| All web pages localized | DONE | login/register/dashboard/* |
+| `pnpm --filter web build` | PASS | local 2026-07-03 |
+| CI web-build | pending | after push |
+
+**Evidence:** `docs/EVIDENCE/STEP_2026-07-03_RU_UI.md`
+
 ## История прогонов
 
 ```
