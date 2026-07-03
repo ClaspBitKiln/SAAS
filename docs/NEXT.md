@@ -26,14 +26,21 @@ Deal pipeline · AI · Activity timeline · counterparty-check · RBAC · Commun
 
 ### 1. PROD CLEANUP — **DONE** (2026-07-03, evidence `STEP_2026-07-03_PROD_CLEANUP.md`)
 
-### 2. UNFREEZE: Contact→Company link (разморожен решением Founder 2026-07-03)
-Боль подтверждена реальным использованием (3 контакта, нет поля компании). Код уже в ветке.
-1. `feat/contact-company-link` → rebase на актуальный main.
-2. Полный локальный прогон (lint/build/unit/integration/e2e) → push → PR → CI_GREEN.
-3. **STOP: Claude review PR до merge** (обязательно — org-scope на companyId, nullable back-compat, e2e cross-org).
-4. После approve: merge → Railway redeploy → prod smoke: создать контакт с компанией.
-5. Миграцию коммитить по образцу `20260702140000_company` (prod остаётся на `db push`, TD-006 не трогаем).
-DoD: CI_GREEN на main · prod: контакт связывается с компанией · BUILD_STATUS/EVIDENCE/CURSOR_SYNC · отчёт CURSOR → CLAUDE.
+### 2. UNFREEZE: Contact→Company link — **CLAUDE REVIEW: PASS** (2026-07-03, afbea50)
+
+Проверено Claude по диффу `main...feat/contact-company-link`:
+- ✅ org-scope: `resolveCompanyId` → `companyRepo.findById(companyId, organizationId)`, cross-org → 404 (не раскрывает существование)
+- ✅ back-compat: `companyId` nullable/optional; `null` снимает связь, `undefined` не трогает
+- ✅ DTO: `@IsUUID @IsOptional`; response включает companyId
+- ✅ e2e: same-org link + unlink + cross-org create/update → 404
+- ✅ миграции: baseline `051451_local` НЕ содержит companies → конфликта с `140000_company` нет; порядок 051451→140000→150000 валиден для CI `migrate dev`
+- ℹ️ non-blocking: baseline не содержит requests/contact_notes (CI доберёт auto-diff) — консолидировать при TD-006
+
+**Условия merge:**
+1. ✅ **F-014 fix (DONE 2026-07-03):** `apps/api/.env` → localhost; prod scan+cleanup — evidence `STEP_2026-07-03_F014.md`. e2e-auth tenants: 0; smoke-1782992706 removed; MagicMet untouched.
+2. ✅ **CI_GREEN на PR #12** (2026-07-03: `api` on pull_request — build-test ✓, web-build ✓; подтверждено Claude по скрину Checks).
+
+**Ожидает Founder:** merge PR #12 → redeploy → prod smoke «контакт + компания» → Cursor task 3 RU UI.
 
 ### 3. RU UI (явное задание Founder 2026-07-03: «по-русски всё меню должно быть»)
 Локализовать web UI на русский: меню (Dashboard→Панель, Contacts→Контакты, Companies→Компании, Calls→Звонки, Requests→Заявки, Team→Команда), формы register/login/set-password, страницы контактов/компаний/заявок, кнопки/плейсхолдеры/ошибки валидации.

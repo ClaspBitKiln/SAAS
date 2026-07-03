@@ -16,7 +16,7 @@ Health: OK
 ✅ Contact  ✅ Notes  ✅ Search  ✅ Company
 
 ## Current
-П.1 PROD CLEANUP DONE. Активно: п.2 Contact→Company PR (STOP до Claude review) → п.3 RU UI → первый менеджер.
+F-014 DONE. PR #12 ready for merge (awaiting Founder). Next: merge → redeploy → RU UI (task 3).
 
 ## Rules
 - NEXT.md = единственный источник «что делать»

@@ -332,6 +332,17 @@ https://github.com/ClaspBitKiln/SAAS/actions/runs/28580480073
 
 **Evidence:** `docs/EVIDENCE/STEP_2026-07-03_PROD_CLEANUP.md`
 
+## F-014 local .env + prod e2e junk — **DONE** (2026-07-03)
+
+| Проверка | Статус | Доказательство |
+|----------|--------|----------------|
+| apps/api/.env localhost | DONE | no prod URL in repo |
+| e2e-auth tenants in prod | 0 | scan 2026-07-03 |
+| Smoke tenant removed | DONE | smoke-1782992706 deleted |
+| MagicMet prod data | UNTOUCHED | m1@magicmet.ru + 3 contacts |
+
+**Evidence:** `docs/EVIDENCE/STEP_2026-07-03_F014.md`
+
 ## История прогонов
 
 ```

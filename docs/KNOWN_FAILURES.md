@@ -118,6 +118,14 @@ Fix:               vitest.config.ts: unplugin-swc with legacyDecorator + decorat
 Preventive action: all NestJS/e2e tests must use SWC transform, not plain esbuild
 Status:            RESOLVED (commit 0e24f73, run 28534981949: e2e passed, CI_GREEN)
 
+# F-014
+Problem:           Локальные e2e-тесты выполнялись против PRODUCTION БД (3×500 на contact tests)
+Evidence:          Отчёт Cursor 2026-07-03, task 2: apps/api/.env DATABASE_URL = Railway prod proxy (hayabusa…); prod-схема без companyId
+Root cause:        В apps/api/.env прописан прод-URL вместо локальной БД; локальный прогон = запись тестовых данных в прод
+Fix:               apps/api/.env → локальный Postgres (docker-compose); прод-URL хранить только в Railway variables
+Preventive action: прод-DATABASE_URL никогда не хранится в файлах репо/локальных .env; перед локальным прогоном проверять, что URL = localhost. Проверить и удалить мусор e2e (bootstrapE2eAuth-tenants), попавший в прод при RED-прогоне
+Status:            RESOLVED (2026-07-03, evidence `STEP_2026-07-03_F014.md`; .env local; prod e2e-auth=0; smoke-1782992706 removed; MagicMet untouched)
+
 # F-013
 Problem:           Broken access control — CRM read/write without tenant scope (IDOR / OWASP A01)
 Evidence:          Code review 2026-07-02: controllers trust client `organizationId`; repositories `findById` without org filter
