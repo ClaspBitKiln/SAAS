@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { loginRequest } from '@/lib/api';
 import { saveAuth } from '@/lib/auth';
+import { ru } from '@/lib/ru';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -31,7 +32,7 @@ export default function LoginPage() {
       );
       router.push('/dashboard');
     } catch {
-      setError('Invalid email or password');
+      setError(ru.login.error);
     } finally {
       setLoading(false);
     }
@@ -40,11 +41,11 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
       <form onSubmit={onSubmit} className="w-full max-w-sm rounded-xl border border-slate-800 bg-slate-900 p-6 shadow-xl">
-        <h1 className="mb-1 text-2xl font-semibold">Sales OS</h1>
-        <p className="mb-6 text-sm text-slate-400">Sign in to your workspace</p>
+        <h1 className="mb-1 text-2xl font-semibold">{ru.appName}</h1>
+        <p className="mb-6 text-sm text-slate-400">{ru.login.subtitle}</p>
         {error && <p className="mb-4 rounded-md bg-red-950/50 px-3 py-2 text-sm text-red-300">{error}</p>}
         <label className="mb-4 block text-sm">
-          <span className="mb-1 block text-slate-400">Email</span>
+          <span className="mb-1 block text-slate-400">{ru.common.email}</span>
           <input
             type="email"
             required
@@ -54,7 +55,7 @@ export default function LoginPage() {
           />
         </label>
         <label className="mb-6 block text-sm">
-          <span className="mb-1 block text-slate-400">Password</span>
+          <span className="mb-1 block text-slate-400">{ru.login.password}</span>
           <input
             type="password"
             required
@@ -69,12 +70,12 @@ export default function LoginPage() {
           disabled={loading}
           className="w-full rounded-md bg-blue-600 py-2 text-sm font-medium hover:bg-blue-500 disabled:opacity-50"
         >
-          {loading ? 'Signing in…' : 'Sign in'}
+          {loading ? ru.login.submitting : ru.login.submit}
         </button>
         <p className="mt-4 text-center text-sm text-slate-500">
-          New here?{' '}
+          {ru.login.newHere}{' '}
           <Link href="/register" className="text-blue-400 hover:underline">
-            Create workspace
+            {ru.login.createWorkspace}
           </Link>
         </p>
       </form>

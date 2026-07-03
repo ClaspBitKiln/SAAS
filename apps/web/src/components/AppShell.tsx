@@ -4,14 +4,15 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { logoutSession } from '@/lib/api';
 import { getAuthUser } from '@/lib/auth';
+import { ru } from '@/lib/ru';
 
 const nav = [
-  { href: '/dashboard', label: 'Dashboard' },
-  { href: '/dashboard/contacts', label: 'Contacts' },
-  { href: '/dashboard/companies', label: 'Companies' },
-  { href: '/dashboard/requests', label: 'Requests' },
-  { href: '/dashboard/calls', label: 'Calls' },
-  { href: '/dashboard/team', label: 'Team' },
+  { href: '/dashboard', label: ru.nav.dashboard },
+  { href: '/dashboard/contacts', label: ru.nav.contacts },
+  { href: '/dashboard/companies', label: ru.nav.companies },
+  { href: '/dashboard/requests', label: ru.nav.requests },
+  { href: '/dashboard/calls', label: ru.nav.calls },
+  { href: '/dashboard/team', label: ru.nav.team },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -27,7 +28,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen">
       <aside className="flex w-56 flex-col border-r border-slate-800 bg-slate-900 p-4">
-        <div className="mb-8 text-lg font-semibold tracking-tight">Sales OS</div>
+        <div className="mb-8 text-lg font-semibold tracking-tight">{ru.appName}</div>
         <nav className="flex flex-1 flex-col gap-1">
           {nav.map((item) => {
             const active = pathname === item.href;
@@ -47,7 +48,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className="mt-auto border-t border-slate-800 pt-4 text-xs text-slate-500">
           <div className="mb-2 truncate">{user?.email}</div>
           <button type="button" onClick={() => void logout()} className="text-slate-400 hover:text-white">
-            Log out
+            {ru.nav.logout}
           </button>
         </div>
       </aside>

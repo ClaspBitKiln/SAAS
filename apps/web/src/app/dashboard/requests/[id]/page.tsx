@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { RequireAuth } from '@/components/RequireAuth';
 import { apiAuthGet, apiAuthPost } from '@/lib/api';
+import { ru } from '@/lib/ru';
 
 interface Offer {
   supplierName: string;
@@ -36,7 +37,7 @@ export default function RequestDetailPage() {
       const data = await apiAuthGet<RequestDetail>(`/requests/${id}`);
       setRequest(data);
     } catch {
-      setError('Request not found');
+      setError(ru.requests.notFound);
     }
   }, [id]);
 
@@ -51,7 +52,7 @@ export default function RequestDetailPage() {
       const data = await apiAuthPost<RequestDetail>(`/requests/${id}/search`, {});
       setRequest(data);
     } catch {
-      setError('Search failed');
+      setError(ru.requests.searchFailed);
     } finally {
       setSearching(false);
     }
@@ -60,7 +61,7 @@ export default function RequestDetailPage() {
   if (!request && !error) {
     return (
       <RequireAuth>
-        <div className="text-slate-400">Loading…</div>
+        <div className="text-slate-400">{ru.common.loading}</div>
       </RequireAuth>
     );
   }
@@ -71,13 +72,15 @@ export default function RequestDetailPage() {
     <RequireAuth>
       <div className="max-w-3xl">
         <Link href="/dashboard/requests" className="text-sm text-slate-400 hover:text-white">
-          ← Back
+          {ru.requests.back}
         </Link>
-        <h1 className="mt-4 text-2xl font-semibold">{request?.title ?? 'Request'}</h1>
-        <p className="mt-1 text-sm text-slate-500">Status: {request?.status}</p>
+        <h1 className="mt-4 text-2xl font-semibold">{request?.title ?? ru.requests.detailTitle}</h1>
+        <p className="mt-1 text-sm text-slate-500">
+          {ru.requests.status}: {request?.status}
+        </p>
         {request?.notes && <p className="mt-4 text-sm text-slate-400">{request.notes}</p>}
 
-        <h2 className="mt-8 text-sm font-medium text-slate-300">Positions</h2>
+        <h2 className="mt-8 text-sm font-medium text-slate-300">{ru.requests.positions}</h2>
         <ul className="mt-2 divide-y divide-slate-800 rounded-lg border border-slate-800">
           {request?.lines.map((l, i) => (
             <li key={i} className="px-4 py-3 text-sm">
@@ -95,12 +98,12 @@ export default function RequestDetailPage() {
           disabled={searching}
           className="mt-6 rounded-md bg-blue-600 px-4 py-2 text-sm disabled:opacity-50"
         >
-          {searching ? 'Searching…' : 'Search E-Metall'}
+          {searching ? ru.requests.searching : ru.requests.searchEmetall}
         </button>
 
         {offers.length > 0 && (
           <>
-            <h2 className="mt-8 text-sm font-medium text-slate-300">Offers</h2>
+            <h2 className="mt-8 text-sm font-medium text-slate-300">{ru.requests.offers}</h2>
             <ul className="mt-2 divide-y divide-slate-800 rounded-lg border border-slate-800">
               {offers.map((o, i) => (
                 <li key={i} className="px-4 py-3 text-sm">
@@ -108,7 +111,7 @@ export default function RequestDetailPage() {
                   <div className="text-slate-500">
                     {o.price != null ? `${o.price} ${o.currency ?? 'RUB'}` : '—'}
                     {o.region ? ` · ${o.region}` : ''}
-                    {o.inStock ? ' · in stock' : ''}
+                    {o.inStock ? ` · ${ru.requests.inStock}` : ''}
                   </div>
                 </li>
               ))}
@@ -117,9 +120,7 @@ export default function RequestDetailPage() {
         )}
 
         {request?.status === 'SEARCHED' && offers.length === 0 && (
-          <p className="mt-4 text-sm text-slate-500">
-            Search completed (E-Metall not configured or no offers). Connect API keys to get live results.
-          </p>
+          <p className="mt-4 text-sm text-slate-500">{ru.requests.searchDoneEmpty}</p>
         )}
 
         {error && <p className="mt-4 text-sm text-amber-400">{error}</p>}

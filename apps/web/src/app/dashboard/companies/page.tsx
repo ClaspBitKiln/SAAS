@@ -4,6 +4,7 @@ import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { RequireAuth } from '@/components/RequireAuth';
 import { apiAuthDelete, apiAuthGet, apiAuthPatch, apiAuthPost } from '@/lib/api';
 import { getAuthUser } from '@/lib/auth';
+import { ru } from '@/lib/ru';
 
 interface Company {
   id: string;
@@ -34,7 +35,7 @@ export default function CompaniesPage() {
 
   const loadCompanies = useCallback(async () => {
     if (!orgId) {
-      setError('No organization context. Complete onboarding first.');
+      setError(ru.common.noOrg);
       return;
     }
     try {
@@ -45,7 +46,7 @@ export default function CompaniesPage() {
       setCompanies(data.items);
       setError(null);
     } catch {
-      setError('Could not load companies');
+      setError(ru.companies.loadError);
     }
   }, [orgId, search]);
 
@@ -97,19 +98,19 @@ export default function CompaniesPage() {
       closeForm();
       await loadCompanies();
     } catch {
-      setError('Save failed');
+      setError(ru.common.saveFailed);
     } finally {
       setSaving(false);
     }
   }
 
   async function onDelete(id: string) {
-    if (!confirm('Delete this company?')) return;
+    if (!confirm(ru.companies.deleteConfirm)) return;
     try {
       await apiAuthDelete(`/companies/${id}`);
       await loadCompanies();
     } catch {
-      setError('Delete failed');
+      setError(ru.common.deleteFailed);
     }
   }
 
@@ -117,14 +118,14 @@ export default function CompaniesPage() {
     <RequireAuth>
       <div className="p-6 text-slate-100">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-semibold">Companies</h1>
+          <h1 className="text-xl font-semibold">{ru.companies.title}</h1>
           <button
             type="button"
             onClick={openCreate}
             disabled={!orgId}
             className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium hover:bg-blue-500 disabled:opacity-50"
           >
-            New company
+            {ru.companies.new}
           </button>
         </div>
 
@@ -133,7 +134,7 @@ export default function CompaniesPage() {
         <div className="mt-4 max-w-lg">
           <input
             type="search"
-            placeholder="Search by name, INN or email…"
+            placeholder={ru.companies.search}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-blue-500"
@@ -142,36 +143,36 @@ export default function CompaniesPage() {
 
         {showForm && (
           <form onSubmit={onSubmit} className="mt-6 max-w-lg rounded-lg border border-slate-800 bg-slate-900 p-4">
-            <h2 className="mb-4 text-sm font-medium">{editingId ? 'Edit company' : 'New company'}</h2>
+            <h2 className="mb-4 text-sm font-medium">{editingId ? ru.companies.edit : ru.companies.new}</h2>
             <div className="grid gap-3">
               <input
                 required
-                placeholder="Company name"
+                placeholder={ru.companies.companyName}
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-blue-500"
               />
               <input
-                placeholder="INN (10 or 12 digits)"
+                placeholder={ru.companies.inn}
                 value={form.inn}
                 onChange={(e) => setForm({ ...form, inn: e.target.value })}
                 className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-blue-500"
               />
               <input
                 type="email"
-                placeholder="Email"
+                placeholder={ru.common.email}
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-blue-500"
               />
               <input
-                placeholder="Phone"
+                placeholder={ru.common.phone}
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
                 className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-blue-500"
               />
               <input
-                placeholder="Website"
+                placeholder={ru.companies.website}
                 value={form.website}
                 onChange={(e) => setForm({ ...form, website: e.target.value })}
                 className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-blue-500"
@@ -183,10 +184,10 @@ export default function CompaniesPage() {
                 disabled={saving}
                 className="rounded-md bg-blue-600 px-4 py-2 text-sm hover:bg-blue-500 disabled:opacity-50"
               >
-                {saving ? 'Saving…' : 'Save'}
+                {saving ? ru.common.saving : ru.common.save}
               </button>
               <button type="button" onClick={closeForm} className="rounded-md border border-slate-700 px-4 py-2 text-sm">
-                Cancel
+                {ru.common.cancel}
               </button>
             </div>
           </form>
@@ -198,20 +199,20 @@ export default function CompaniesPage() {
               <div>
                 <p className="font-medium">{c.name}</p>
                 <p className="text-xs text-slate-400">
-                  {[c.inn && `INN ${c.inn}`, c.email, c.phone].filter(Boolean).join(' · ') || 'No details'}
+                  {[c.inn && `ИНН ${c.inn}`, c.email, c.phone].filter(Boolean).join(' · ') || ru.companies.noDetails}
                 </p>
               </div>
               <div className="flex gap-2">
                 <button type="button" onClick={() => openEdit(c)} className="text-sm text-blue-400 hover:underline">
-                  Edit
+                  {ru.common.edit}
                 </button>
                 <button type="button" onClick={() => void onDelete(c.id)} className="text-sm text-red-400 hover:underline">
-                  Delete
+                  {ru.common.delete}
                 </button>
               </div>
             </li>
           ))}
-          {companies.length === 0 && <li className="px-4 py-8 text-center text-sm text-slate-500">No companies yet</li>}
+          {companies.length === 0 && <li className="px-4 py-8 text-center text-sm text-slate-500">{ru.companies.empty}</li>}
         </ul>
       </div>
     </RequireAuth>

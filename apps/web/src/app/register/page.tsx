@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { loginRequest } from '@/lib/api';
 import { saveAuth } from '@/lib/auth';
 import { registerCompany } from '@/lib/onboarding';
+import { ru } from '@/lib/ru';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -35,7 +36,7 @@ export default function RegisterPage() {
       );
       router.push('/dashboard');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Registration failed');
+      setError(err instanceof Error ? err.message : ru.register.error);
     } finally {
       setLoading(false);
     }
@@ -44,11 +45,11 @@ export default function RegisterPage() {
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
       <form onSubmit={onSubmit} className="w-full max-w-md rounded-xl border border-slate-800 bg-slate-900 p-6 shadow-xl">
-        <h1 className="mb-1 text-2xl font-semibold">Create workspace</h1>
-        <p className="mb-6 text-sm text-slate-400">Register your company and admin account</p>
+        <h1 className="mb-1 text-2xl font-semibold">{ru.register.title}</h1>
+        <p className="mb-6 text-sm text-slate-400">{ru.register.subtitle}</p>
         {error && <p className="mb-4 rounded-md bg-red-950/50 px-3 py-2 text-sm text-red-300">{error}</p>}
         <label className="mb-4 block text-sm">
-          <span className="mb-1 block text-slate-400">Company name</span>
+          <span className="mb-1 block text-slate-400">{ru.register.companyName}</span>
           <input
             required
             minLength={2}
@@ -58,7 +59,7 @@ export default function RegisterPage() {
           />
         </label>
         <label className="mb-4 block text-sm">
-          <span className="mb-1 block text-slate-400">Your name</span>
+          <span className="mb-1 block text-slate-400">{ru.register.yourName}</span>
           <input
             required
             minLength={2}
@@ -68,7 +69,7 @@ export default function RegisterPage() {
           />
         </label>
         <label className="mb-4 block text-sm">
-          <span className="mb-1 block text-slate-400">Work email</span>
+          <span className="mb-1 block text-slate-400">{ru.register.workEmail}</span>
           <input
             type="email"
             required
@@ -78,7 +79,7 @@ export default function RegisterPage() {
           />
         </label>
         <label className="mb-6 block text-sm">
-          <span className="mb-1 block text-slate-400">Password (min 8 chars)</span>
+          <span className="mb-1 block text-slate-400">{ru.register.passwordHint}</span>
           <input
             type="password"
             required
@@ -93,12 +94,12 @@ export default function RegisterPage() {
           disabled={loading}
           className="w-full rounded-md bg-blue-600 py-2 text-sm font-medium hover:bg-blue-500 disabled:opacity-50"
         >
-          {loading ? 'Creating…' : 'Create workspace'}
+          {loading ? ru.register.submitting : ru.register.submit}
         </button>
         <p className="mt-4 text-center text-sm text-slate-500">
-          Already have an account?{' '}
+          {ru.register.hasAccount}{' '}
           <Link href="/login" className="text-blue-400 hover:underline">
-            Sign in
+            {ru.register.signIn}
           </Link>
         </p>
       </form>

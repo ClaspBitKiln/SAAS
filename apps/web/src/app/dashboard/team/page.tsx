@@ -5,6 +5,7 @@ import { RequireAuth } from '@/components/RequireAuth';
 import { apiAuthGet, apiPublicGet } from '@/lib/api';
 import { getAuthUser } from '@/lib/auth';
 import { inviteTeamMember } from '@/lib/onboarding';
+import { ru } from '@/lib/ru';
 
 interface Membership {
   id: string;
@@ -52,7 +53,7 @@ export default function TeamPage() {
       );
       setMembers(resolved);
     } catch {
-      setError('Could not load team');
+      setError(ru.team.loadError);
     }
   }, [user?.organizationId]);
 
@@ -63,7 +64,7 @@ export default function TeamPage() {
   async function onInvite(e: FormEvent) {
     e.preventDefault();
     if (!user?.tenantId || !user.organizationId) {
-      setError('No organization context');
+      setError(ru.team.noOrg);
       return;
     }
     setError(null);
@@ -83,7 +84,7 @@ export default function TeamPage() {
       setEmail('');
       await loadTeam();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Invite failed');
+      setError(err instanceof Error ? err.message : ru.team.inviteError);
     } finally {
       setLoading(false);
     }
@@ -92,15 +93,15 @@ export default function TeamPage() {
   return (
     <RequireAuth>
       <div>
-        <h1 className="text-2xl font-semibold">Team</h1>
-        <p className="mt-2 text-slate-400">Invite colleagues to your workspace.</p>
+        <h1 className="text-2xl font-semibold">{ru.team.title}</h1>
+        <p className="mt-2 text-slate-400">{ru.team.subtitle}</p>
 
         <form onSubmit={onInvite} className="mt-6 max-w-lg rounded-lg border border-slate-800 bg-slate-900 p-4">
-          <h2 className="mb-4 text-sm font-medium text-slate-300">Invite member</h2>
+          <h2 className="mb-4 text-sm font-medium text-slate-300">{ru.team.inviteTitle}</h2>
           <div className="grid gap-3 sm:grid-cols-2">
             <input
               required
-              placeholder="Name"
+              placeholder={ru.common.name}
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-blue-500"
@@ -108,7 +109,7 @@ export default function TeamPage() {
             <input
               type="email"
               required
-              placeholder="Email"
+              placeholder={ru.common.email}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-blue-500"
@@ -119,11 +120,11 @@ export default function TeamPage() {
             disabled={loading}
             className="mt-3 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium hover:bg-blue-500 disabled:opacity-50"
           >
-            {loading ? 'Inviting…' : 'Send invite'}
+            {loading ? ru.team.inviting : ru.team.sendInvite}
           </button>
           {inviteLink && (
             <div className="mt-3 rounded-md bg-slate-950 p-3 text-xs">
-              <p className="mb-1 text-slate-400">Share this activation link:</p>
+              <p className="mb-1 text-slate-400">{ru.team.shareLink}</p>
               <code className="break-all text-blue-300">{inviteLink}</code>
             </div>
           )}
@@ -132,7 +133,7 @@ export default function TeamPage() {
         {error && <p className="mt-4 text-sm text-amber-400">{error}</p>}
 
         <ul className="mt-8 divide-y divide-slate-800 rounded-lg border border-slate-800">
-          {members.length === 0 && <li className="px-4 py-6 text-sm text-slate-500">No team members yet.</li>}
+          {members.length === 0 && <li className="px-4 py-6 text-sm text-slate-500">{ru.team.empty}</li>}
           {members.map((m) => (
             <li key={m.membershipId} className="flex items-center justify-between px-4 py-3 text-sm">
               <div>

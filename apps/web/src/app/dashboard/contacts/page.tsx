@@ -4,6 +4,7 @@ import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { RequireAuth } from '@/components/RequireAuth';
 import { apiAuthDelete, apiAuthGet, apiAuthPatch, apiAuthPost } from '@/lib/api';
 import { getAuthUser } from '@/lib/auth';
+import { ru } from '@/lib/ru';
 
 interface Company {
   id: string;
@@ -62,13 +63,13 @@ export default function ContactsPage() {
       const data = await apiAuthGet<{ items: Company[] }>('/companies?size=100');
       setCompanies(data.items);
     } catch {
-      /* optional — form works without companies */
+      /* optional */
     }
   }, [orgId]);
 
   const loadContacts = useCallback(async () => {
     if (!orgId) {
-      setError('No organization context. Complete onboarding first.');
+      setError(ru.common.noOrg);
       return;
     }
     try {
@@ -79,7 +80,7 @@ export default function ContactsPage() {
       setContacts(data.items);
       setError(null);
     } catch {
-      setError('Could not load contacts');
+      setError(ru.contacts.loadError);
     }
   }, [orgId, search]);
 
@@ -136,20 +137,20 @@ export default function ContactsPage() {
       closeForm();
       await loadContacts();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Save failed');
+      setError(err instanceof Error ? err.message : ru.common.saveFailed);
     } finally {
       setSaving(false);
     }
   }
 
   async function onDelete(id: string) {
-    if (!confirm('Delete this contact?')) return;
+    if (!confirm(ru.contacts.deleteConfirm)) return;
     try {
       await apiAuthDelete(`/contacts/${id}`);
       if (notesContactId === id) setNotesContactId(null);
       await loadContacts();
     } catch {
-      setError('Delete failed');
+      setError(ru.common.deleteFailed);
     }
   }
 
@@ -161,7 +162,7 @@ export default function ContactsPage() {
       const data = await apiAuthGet<ContactNote[]>(`/contacts/${contactId}/notes`);
       setNotes(data);
     } catch {
-      setError('Could not load notes');
+      setError(ru.contacts.notesLoadError);
       setNotes([]);
     } finally {
       setNotesLoading(false);
@@ -180,7 +181,7 @@ export default function ContactsPage() {
       setNoteBody('');
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not save note');
+      setError(err instanceof Error ? err.message : ru.contacts.noteSaveError);
     } finally {
       setNoteSaving(false);
     }
@@ -191,8 +192,8 @@ export default function ContactsPage() {
       <div>
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-semibold">Contacts</h1>
-            <p className="mt-2 text-slate-400">CRM contacts for your organization.</p>
+            <h1 className="text-2xl font-semibold">{ru.contacts.title}</h1>
+            <p className="mt-2 text-slate-400">{ru.contacts.subtitle}</p>
           </div>
           <button
             type="button"
@@ -200,7 +201,7 @@ export default function ContactsPage() {
             disabled={!orgId}
             className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium hover:bg-blue-500 disabled:opacity-50"
           >
-            New contact
+            {ru.contacts.new}
           </button>
         </div>
 
@@ -209,7 +210,7 @@ export default function ContactsPage() {
         <div className="mt-4 max-w-lg">
           <input
             type="search"
-            placeholder="Search by name or email…"
+            placeholder={ru.contacts.search}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-blue-500"
@@ -218,24 +219,24 @@ export default function ContactsPage() {
 
         {showForm && (
           <form onSubmit={onSubmit} className="mt-6 max-w-lg rounded-lg border border-slate-800 bg-slate-900 p-4">
-            <h2 className="mb-4 text-sm font-medium">{editingId ? 'Edit contact' : 'New contact'}</h2>
+            <h2 className="mb-4 text-sm font-medium">{editingId ? ru.contacts.edit : ru.contacts.new}</h2>
             <div className="grid gap-3">
               <input
                 required
-                placeholder="Name"
+                placeholder={ru.common.name}
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-blue-500"
               />
               <input
                 type="email"
-                placeholder="Email"
+                placeholder={ru.common.email}
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-blue-500"
               />
               <input
-                placeholder="Phone"
+                placeholder={ru.common.phone}
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
                 className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-blue-500"
@@ -245,7 +246,7 @@ export default function ContactsPage() {
                 onChange={(e) => setForm({ ...form, companyId: e.target.value })}
                 className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-blue-500"
               >
-                <option value="">No company</option>
+                <option value="">{ru.contacts.noCompany}</option>
                 {companies.map((co) => (
                   <option key={co.id} value={co.id}>
                     {co.name}
@@ -259,17 +260,17 @@ export default function ContactsPage() {
                 disabled={saving}
                 className="rounded-md bg-blue-600 px-4 py-2 text-sm hover:bg-blue-500 disabled:opacity-50"
               >
-                {saving ? 'Saving…' : 'Save'}
+                {saving ? ru.common.saving : ru.common.save}
               </button>
               <button type="button" onClick={closeForm} className="rounded-md px-4 py-2 text-sm text-slate-400 hover:text-white">
-                Cancel
+                {ru.common.cancel}
               </button>
             </div>
           </form>
         )}
 
         <ul className="mt-6 divide-y divide-slate-800 rounded-lg border border-slate-800">
-          {contacts.length === 0 && !error && <li className="px-4 py-6 text-sm text-slate-500">No contacts yet.</li>}
+          {contacts.length === 0 && !error && <li className="px-4 py-6 text-sm text-slate-500">{ru.contacts.empty}</li>}
           {contacts.map((c) => (
             <li key={c.id} className="flex items-center justify-between px-4 py-3">
               <div>
@@ -277,19 +278,21 @@ export default function ContactsPage() {
                 <div className="text-sm text-slate-500">
                   {c.email ?? c.phone ?? '—'}
                   {c.companyId && (
-                    <span className="ml-2 text-slate-400">· {companyNameById(c.companyId) ?? 'Company'}</span>
+                    <span className="ml-2 text-slate-400">
+                      · {companyNameById(c.companyId) ?? ru.contacts.companyFallback}
+                    </span>
                   )}
                 </div>
               </div>
               <div className="flex gap-2 text-sm">
                 <button type="button" onClick={() => openNotes(c.id)} className="text-slate-300 hover:underline">
-                  Notes
+                  {ru.contacts.notes}
                 </button>
                 <button type="button" onClick={() => openEdit(c)} className="text-blue-400 hover:underline">
-                  Edit
+                  {ru.common.edit}
                 </button>
                 <button type="button" onClick={() => onDelete(c.id)} className="text-red-400 hover:underline">
-                  Delete
+                  {ru.common.delete}
                 </button>
               </div>
             </li>
@@ -299,20 +302,20 @@ export default function ContactsPage() {
         {notesContactId && (
           <div className="mt-6 max-w-lg rounded-lg border border-slate-800 bg-slate-900 p-4">
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-sm font-medium">Notes</h2>
+              <h2 className="text-sm font-medium">{ru.contacts.notes}</h2>
               <button
                 type="button"
                 onClick={() => setNotesContactId(null)}
                 className="text-xs text-slate-400 hover:text-white"
               >
-                Close
+                {ru.common.close}
               </button>
             </div>
             <form onSubmit={onAddNote} className="mb-4 grid gap-2">
               <textarea
                 required
                 rows={3}
-                placeholder="Add a note…"
+                placeholder={ru.contacts.addNote}
                 value={noteBody}
                 onChange={(e) => setNoteBody(e.target.value)}
                 className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-blue-500"
@@ -322,19 +325,19 @@ export default function ContactsPage() {
                 disabled={noteSaving}
                 className="w-fit rounded-md bg-blue-600 px-3 py-1.5 text-sm hover:bg-blue-500 disabled:opacity-50"
               >
-                {noteSaving ? 'Saving…' : 'Add note'}
+                {noteSaving ? ru.common.saving : ru.contacts.addNoteBtn}
               </button>
             </form>
             {notesLoading ? (
-              <p className="text-sm text-slate-500">Loading notes…</p>
+              <p className="text-sm text-slate-500">{ru.contacts.loadingNotes}</p>
             ) : notes.length === 0 ? (
-              <p className="text-sm text-slate-500">No notes yet.</p>
+              <p className="text-sm text-slate-500">{ru.contacts.noNotes}</p>
             ) : (
               <ul className="space-y-3">
                 {notes.map((n) => (
                   <li key={n.id} className="rounded-md border border-slate-800 bg-slate-950 px-3 py-2 text-sm">
                     <p className="whitespace-pre-wrap">{n.body}</p>
-                    <p className="mt-1 text-xs text-slate-500">{new Date(n.createdAt).toLocaleString()}</p>
+                    <p className="mt-1 text-xs text-slate-500">{new Date(n.createdAt).toLocaleString('ru-RU')}</p>
                   </li>
                 ))}
               </ul>
