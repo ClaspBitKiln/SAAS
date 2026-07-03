@@ -1,6 +1,6 @@
-# Authorization Model — User, Membership, Role, Permission
+# Authorization Model — Identity, User, Membership, Role, Permission
 
-**Статус:** Draft (2026-06-16) — **утвердить до написания кода User**  
+**Статус:** Draft v2 (2026-06-16) — **утвердить до написания кода**  
 **Контекст:** Platform + Users + RBAC · дополняет `012-foundation-domains.md`, ADR-003  
 **Уже реализовано (CI_GREEN):** Tenant, Organization
 
@@ -8,359 +8,330 @@
 
 ## 1. Зачем этот документ
 
-User — начало системы безопасности. Ошибка здесь (например `User.roleId`) через полгода
-потребует миграции всей RBAC.
+User/Identity — начало системы безопасности. Ошибка здесь (например `User.roleId`)
+через полгода потребует миграции всей RBAC.
 
-**Правило:** сначала зафиксировать модель доступа целиком, затем кодировать агрегаты
-по одному с CI_GREEN на каждый.
-
-**Цель MVP:** менеджер по продажам не теряет клиента после звонка — доступ должен
-поддерживать «один человек — несколько организаций — разные роли», без переделок.
+**Правило:** зафиксировать модель целиком → кодировать агрегаты по одному с CI_GREEN.
 
 ---
 
-## 2. Иерархия и границы
+## 2. ASCII-диаграмма связей
 
 ```
-Tenant (арендатор SaaS)
-  └── Organization (компания клиента внутри tenant)
-        └── Membership (участие User в Organization + Role)
-              ├── User (личность, без roleId)
-              └── Role (набор Permission в scope tenant/organization)
-                    └── Permission (resource × action)
+Tenant
+   │
+   ├──────────────┐
+   │              │
+Organization      Role
+   │              │
+   └──────┐       │
+          │       │
+      Membership──┘
+          │
+          │
+         User
+          │
+    (будущий split)
+          │
+       Identity   ← email, password, OAuth, MFA
 ```
 
-### Что НЕ делаем
-
-| Анти-паттерн | Почему плохо |
-|--------------|--------------|
-| `User.roleId` | один user не может быть Manager в Org A и Admin в Org B |
-| `User.tenantId` как единственная привязка | смешивает identity и membership |
-| Role без scope | непонятно, где роль действует |
-| Permission на User напрямую | обход Role, неконтролируемый рост прав |
-
-### Правильная цепочка проверки прав
+**Цепочка доступа:**
 
 ```
-Request → JWT (userId) → Membership (org context) → Role → Permissions → Guard / Repository filter
+Request → JWT (userId) → Membership → Role → RolePermission → Permission
 ```
 
----
-
-## 3. Сущности — что хранит каждая
-
-### Tenant *(реализован ✅)*
-
-| Поле | Тип | Назначение |
-|------|-----|------------|
-| id | UUID | PK |
-| name, slug | string | идентификация арендатора |
-| plan, status | enum | тариф, ACTIVE/SUSPENDED |
-| version, timestamps, deletedAt | ADR-012 | optimistic lock, soft delete |
-
-**Ответственность:** граница данных SaaS (RLS `tenant_id`). Не знает User/Role.
+**Membership — сердце модели.** User не знает Role. Organization не знает User.
 
 ---
 
-### Organization *(реализован ✅)*
+## 3. Identity vs User
 
-| Поле | Тип | Назначение |
-|------|-----|------------|
-| id | UUID | PK |
-| tenantId | UUID | FK логический → Tenant |
-| name | string | название компании |
-| inn | string? | реквизиты (10/12 цифр) |
-| settings | json | org-level настройки |
-| version, timestamps, deletedAt | ADR-012 | |
+| Сущность | Ответственность |
+|----------|-----------------|
+| **Identity** | email, passwordHash, OAuth, MFA, refresh tokens |
+| **User** | name, avatarUrl, locale, timezone, status |
 
-**Ответственность:** бизнес-единица внутри tenant (карточка «компания клиента»).
-Не знает User напрямую — только через Membership.
+```
+Identity (1) ──→ (1) User ──→ (N) Membership
+```
 
----
+**MVP:** один агрегат User в **`UsersModule`**; Credential в `packages/auth`.
+Split Identity/User — позже, через ADR, без смены Membership.
 
-### User *(следующий агрегат — после утверждения)*
-
-| Поле | Тип | Назначение |
-|------|-----|------------|
-| id | UUID | PK, глобальная личность |
-| email | string | **уникален глобально** (один аккаунт — один email) |
-| name | string | отображаемое имя |
-| status | enum | INVITED \| ACTIVE \| DISABLED (глобальный статус аккаунта) |
-| lastLoginAt | datetime? | обновляется Auth |
-| version, timestamps, deletedAt | ADR-012 | |
-
-**Не хранит:** `tenantId`, `roleId`, `organizationId`, `passwordHash` (→ Auth/Credential).
-
-**Методы домена:** `invite()`, `activate()`, `disable()`, `rename()`, `changeEmail()`.
-
-**События:** `UserInvited`, `UserActivated`, `UserDisabled`, `UserRenamed`, `UserEmailChanged`.
-
-> **Решение:** email уникален **глобально**, не per-tenant. Один User входит в несколько
-> Organization через Membership. Это упрощает login и соответствует сценарию
-> «консультант работает с двумя компаниями».
-
-*Альтернатива (отклонена для MVP):* email unique per tenant — усложняет Auth и дублирует
-identity. Вернуться можно через отдельный ADR.
+**На User запрещено:** `roleId`, `tenantId`, `organizationId`, массив permissions.
 
 ---
 
-### Membership *(контекст доступа — до Role в коде)*
+## 4. Сущности
 
-| Поле | Тип | Назначение |
-|------|-----|------------|
-| id | UUID | PK |
-| tenantId | UUID | RLS + denormalize для запросов |
-| userId | UUID | → User |
-| organizationId | UUID | → Organization |
-| roleId | UUID | → Role (роль **в этой** organization) |
-| status | enum | PENDING \| ACTIVE \| SUSPENDED \| REVOKED |
-| invitedAt, joinedAt | datetime? | онбординг |
-| version, timestamps, deletedAt | ADR-012 | |
+### Tenant *(✅ CI_GREEN)*
 
-**Уникальность:** `@@unique([userId, organizationId])` — один user, одна membership на org.
-
-**Ответственность:** единственное место, где User связан с Role и Organization.
-Именно Membership попадает в JWT/session context при работе «от имени организации».
-
-**Методы:** `invite()`, `accept()`, `suspend()`, `revoke()`, `changeRole(roleId)`.
-
-**События:** `MembershipInvited`, `MembershipActivated`, `MembershipRevoked`, `MembershipRoleChanged`.
-
-**Инварианты:**
-- Organization.tenantId == Membership.tenantId
-- Role.tenantId == Membership.tenantId (или role scoped to same tenant)
-- нельзя revoke последнюю ACTIVE Membership с Role=Owner в Organization *(когда Role будет)*
+id, name, slug, plan, status, version, timestamps, deletedAt.
 
 ---
 
-### Role
+### Organization *(✅ CI_GREEN, migration: slug)*
 
-| Поле | Тип | Назначение |
-|------|-----|------------|
-| id | UUID | PK |
-| tenantId | UUID | scope tenant (системные роли per-tenant) |
-| key | string | OWNER \| ADMIN \| MANAGER \| VIEWER \| custom slug |
-| name | string | «Менеджер» |
-| isSystem | boolean | нельзя удалить системные |
-| version, timestamps, deletedAt | ADR-012 | |
+| Поле | Назначение |
+|------|------------|
+| id, tenantId | PK, scope |
+| name | название |
+| **slug** | unique per tenant (`alfa-corp`) — для URL и invite |
+| inn, settings | реквизиты, настройки |
+| version, timestamps, deletedAt | ADR-012 |
 
-**Не хранит:** userId. Связь User↔Role **только** через Membership.
+Organization **не знает** User.
 
-**Системные роли (seed per tenant):** Owner, Admin, Manager, Viewer — см. ADR-003 §5.
+---
+
+### User *(UsersModule — первый агрегат после утверждения)*
+
+| Поле | Назначение |
+|------|------------|
+| id | UUID |
+| email | unique **global** |
+| name | имя |
+| avatarUrl | nullable |
+| locale | default `ru-RU` |
+| timezone | default `Europe/Moscow` |
+| status | INVITED \| ACTIVE \| DISABLED |
+| lastLoginAt | Auth |
+| version, timestamps, deletedAt | ADR-012 |
+
+---
+
+### Membership *(сердце RBAC — второй агрегат)*
+
+| Поле | Назначение |
+|------|------------|
+| id | PK |
+| tenantId | RLS |
+| userId | → User |
+| organizationId | → Organization |
+| roleId | → Role **в этой org** |
+| status | PENDING \| ACTIVE \| SUSPENDED \| REVOKED |
+| **invitedBy** | userId пригласившего |
+| invitedAt | когда отправлено |
+| **joinedAt** | принял приглашение |
+| **leftAt** | уволен / вышел |
+| **isDefault** | org по умолчанию после login |
+| version, timestamps, deletedAt | ADR-012 |
+
+**Unique:** `@@unique([userId, organizationId])`
+
+**Методы:** `invite()`, `accept()`, `suspend()`, `revoke()`, `changeRole()`, `setDefault()`.
+
+---
+
+### Role *(tenant scope)*
+
+| Поле | Назначение |
+|------|------------|
+| id, tenantId | PK, scope |
+| key | OWNER \| ADMIN \| MANAGER \| VIEWER \| custom |
+| name | отображаемое имя |
+| isSystem | системные не удалять |
+| version, timestamps, deletedAt | ADR-012 |
+
+**Не хранит:** userId, массив Permission.
 
 ---
 
 ### Permission
 
-| Поле | Тип | Назначение |
-|------|-----|------------|
-| id | UUID | PK |
-| resource | string | `deals`, `contacts`, `organizations`, … |
-| action | string | `read`, `create`, `update`, `delete`, `assign` |
+| Поле | Назначение |
+|------|------------|
+| id | PK |
+| **code** | стабильный ключ для UI и guards |
+| resource | `crm.contact`, `crm.call`, … |
+| action | `read`, `write`, `delete`, … |
+| description | человекочитаемо |
 
-**Связь M:N:** `RolePermission(roleId, permissionId)` — права назначаются Role, не User.
+**Примеры code:**
 
-**Примеры:** `deals:read`, `deals:update`, `contacts:create`, `calls:record`.
-
-**Проверка:** `@RequirePermission('deals','update')` → JWT userId → active Membership → Role → permissions[].
-
-**«Только свои» для Manager:** не Permission, а фильтр репозитория CRM по `ownerUserId` (ADR-003).
-
----
-
-## 4. Диаграмма связей
-
-```mermaid
-erDiagram
-  Tenant ||--o{ Organization : has
-  Tenant ||--o{ Role : scopes
-  Organization ||--o{ Membership : has
-  User ||--o{ Membership : has
-  Role ||--o{ Membership : assigned_in
-  Role ||--o{ RolePermission : grants
-  Permission ||--o{ RolePermission : included_in
-
-  Tenant {
-    uuid id PK
-    string slug
-  }
-  Organization {
-    uuid id PK
-    uuid tenantId
-    string name
-  }
-  User {
-    uuid id PK
-    string email UK
-    string status
-  }
-  Membership {
-    uuid id PK
-    uuid tenantId
-    uuid userId
-    uuid organizationId
-    uuid roleId
-    string status
-  }
-  Role {
-    uuid id PK
-    uuid tenantId
-    string key
-  }
-  Permission {
-    uuid id PK
-    string resource
-    string action
-  }
+```
+crm.contact.read
+crm.contact.write
+crm.contact.delete
+crm.call.listen
+crm.task.close
+billing.manage
 ```
 
-| Связь | Кардинальность | Комментарий |
-|-------|----------------|-------------|
-| Tenant → Organization | 1:N | org всегда в одном tenant |
-| User → Membership | 1:N | один user, много org |
-| Organization → Membership | 1:N | много users в org |
-| Membership → User | N:1 | |
-| Membership → Role | N:1 | роль **в контексте** org |
-| Role → Permission | N:M | через RolePermission |
+**Unique:** `@@unique([code])` или `@@unique([resource, action])`
 
 ---
 
-## 5. Сценарий: один User — две Organization — разные Role
+### RolePermission *(отдельная таблица, не массив в Role)*
 
-**Алексей** (`user@corp.ru`, User.id = U1)
+```
+Role (1) ──→ (N) RolePermission (N) ──→ (1) Permission
+```
 
-| Organization | Membership | Role |
-|--------------|------------|------|
-| ООО «Альфа» (Org A) | M1 | MANAGER |
-| ООО «Бета» (Org B) | M2 | ADMIN |
+| Поле | Назначение |
+|------|------------|
+| id | PK |
+| roleId | → Role |
+| permissionId | → Permission |
+| grantedAt | когда назначено |
 
-**Login:** Auth выдаёт JWT с `sub=U1`, без role (role не на User).
-
-**Выбор контекста:** клиент передаёт `X-Organization-Id: Org A` (или UI switcher).
-
-**API request:** Guard загружает Membership(U1, Org A) → Role MANAGER → permissions.
-
-**Переключение на Org B:** тот же JWT, другой `organizationId` → ADMIN → другие permissions.
-
-✅ Модель поддерживает сценарий без `User.roleId`.
+**Unique:** `@@unique([roleId, permissionId])`
 
 ---
 
-## 6. Auth (отдельный контекст — не смешивать с User)
+### AuditEvent *(интерфейс с первого дня — реализация после Permission)*
 
-| Сущность | Где | Назначение |
-|----------|-----|------------|
-| Credential | `packages/auth` | userId + passwordHash (Argon2id) |
-| Session | Redis | sessionId, userId, optional activeOrganizationId, refresh |
+| Поле | Назначение |
+|------|------------|
+| id | PK |
+| tenantId | RLS |
+| **actorId** | userId |
+| **organizationId** | контекст org |
+| **entity** | `Contact`, `Deal`, `Membership`, … |
+| **entityId** | UUID сущности |
+| **action** | `created`, `updated`, `deleted`, `invited`, … |
+| **payload** | jsonb (old/new snapshot) |
+| createdAt | |
 
-**JWT claims (access):** `sub` (userId), `tenantId` (active tenant), `orgId` (active org, optional), `membershipId` (optional).
+**Интерфейс в коде:** `AuditLogger.log(event)` — stub до полной реализации.
 
-Refresh/session — ADR-003 §4. Роли в JWT — **кэш** permissions snapshot, источник истины — Membership+Role в БД.
+---
+
+## 5. Platform Super Admin *(вне Membership)*
+
+| Сущность | Назначение |
+|----------|------------|
+| **PlatformAdmin** | userId + scope PLATFORM, не привязан к Organization |
+
+Доступ ко всем Tenant для support/onboarding. **Не** через Membership Owner.
+
+---
+
+## 6. Пять сценариев (проверка модели)
+
+### Сценарий 1 — один user, одна org, одна role
+
+```
+User U1 → Membership M1 (Org A, MANAGER, ACTIVE)
+```
+
+JWT + `X-Organization-Id: A` → MANAGER permissions. ✅
+
+### Сценарий 2 — один user, две org, две role
+
+```
+U1 → M1 (Org A, MANAGER)
+U1 → M2 (Org B, ADMIN)
+```
+
+Переключение org в UI → другой Membership → другие permissions. ✅ Без `User.roleId`.
+
+### Сценарий 3 — увольнение
+
+```
+Membership M1: ACTIVE → REVOKED, leftAt = now
+User U1: остаётся ACTIVE (может быть в других org)
+```
+
+Login работает; доступ к Org A закрыт. ✅
+
+### Сценарий 4 — удаление Organization
+
+```
+Organization A: soft delete (deletedAt)
+→ все Membership где organizationId=A: REVOKED или cascade soft delete
+User U1: остаётся
+```
+
+✅ User не удаляется.
+
+### Сценарий 5 — суперадминистратор платформы
+
+```
+PlatformAdmin(U1) — не Membership
+→ доступ к Tenant management API
+→ не Owner в клиентской org
+```
+
+✅ Отдельная сущность, не ломает RBAC клиентов.
 
 ---
 
 ## 7. Порядок реализации (Golden Path)
 
-После **утверждения** этого документа:
+После **утверждения** документа:
 
 ```
-1. User           — identity only, no roleId
-2. Membership     — user ↔ organization ↔ role
-3. Role           — system roles seed per tenant
-4. Permission     — RolePermission matrix
-5. Audit          — audit_logs (ADR-003 §6)
+1. User              (UsersModule)
+2. Membership
+3. Role              (+ seed OWNER/ADMIN/MANAGER/VIEWER per tenant)
+4. Permission        (+ seed codes)
+5. RolePermission
+6. AuditEvent        (полная реализация)
 ```
 
-Каждый шаг: Entity → Prisma → CQRS → tests → **CI_GREEN** → DONE.
+Organization.slug — migration **до** Membership (invite-ссылки).
 
-**Auth** (login/session) — параллельно или сразу после User+Membership, до CRM.
+Каждый шаг: Entity → Prisma → CQRS → tests → **CI_GREEN**.
+
+**Auth** (login/session) — после User + Membership, до CRM.
 
 ---
 
-## 8. Первый end-to-end бизнес-сценарий (North Star)
-
-Не только Platform — первый **вертикальный** сценарий продукта:
+## 8. North Star (первый E2E продукт)
 
 ```
-1. Create Tenant
-2. Create Organization
-3. Invite User          → User + Membership (PENDING)
-4. User accepts / Login → Auth + Membership ACTIVE
-5. Create Contact       → CRM (Manager permission)
-6. Make Call            → Telephony
-7. AI Summary           → AI service (текст, не решения)
-8. Task auto-created    → Tasks (из summary)
+Tenant → Organization → Invite User → Login → Contact → Call → AI summary → Task
 ```
-
-Platform (Tenant, Org, User, Membership, Role) — **фундамент** для шагов 1–4.  
-CRM + Telephony + AI — следующие vertical slices **после** RBAC MVP.
 
 ---
 
-## 9. API (черновик)
+## 9. Модули NestJS
 
-### User
+| Модуль | Агрегаты |
+|--------|----------|
+| `PlatformModule` | Tenant, Organization |
+| **`UsersModule`** | User *(не «UserModule» — весь контекст users)* |
+| `RbacModule` | Membership, Role, Permission, RolePermission |
+| `AuthModule` | Credential, Session |
+| `AuditModule` | AuditEvent |
+
+---
+
+## 10. API (черновик)
+
 ```
-POST /users/invite          { email, name, organizationId, roleId }  → User + Membership
+POST /users/invite     { email, name, organizationId, roleId }
 GET  /users/{id}
-PATCH /users/{id}
-POST /users/{id}/disable
-```
+PATCH /users/{id}      { name, locale, timezone, avatarUrl }
 
-### Membership
-```
 GET  /memberships?organizationId=
-GET  /memberships?userId=
-PATCH /memberships/{id}     { roleId }
-POST /memberships/{id}/revoke
+PATCH /memberships/{id}   { roleId, isDefault }
 POST /memberships/{id}/accept
-```
+POST /memberships/{id}/revoke
 
-### Role / Permission
-```
 GET  /roles
-POST /roles/{id}/permissions
-GET  /users/me/permissions    (effective, via active Membership)
+POST /roles/{id}/permissions   { permissionId }
+
+GET  /users/me/permissions     effective via active Membership
 ```
 
-Invite создаёт **оба** агрегата: User (если email новый) + Membership — оркестрация в application layer, домены не сливаются.
-
 ---
 
-## 10. Контексты (packages)
+## 11. Чеклист утверждения
 
-| Контекст | Агрегаты |
-|----------|----------|
-| `packages/platform` | Tenant, Organization *(done)* |
-| `packages/users` | User |
-| `packages/rbac` | Membership, Role, Permission, RolePermission |
-| `packages/auth` | Credential, Session (Redis) |
+- [ ] User без roleId / tenantId / organizationId
+- [ ] Membership — единственная связь User ↔ Org ↔ Role
+- [ ] Permission: code + resource + action + description
+- [ ] RolePermission — отдельная таблица
+- [ ] Membership: invitedBy, joinedAt, leftAt, isDefault
+- [ ] Organization.slug
+- [ ] User: locale, timezone, avatarUrl
+- [ ] AuditEvent interface зафиксирован
+- [ ] 5 сценариев пройдены
+- [ ] UsersModule (не UserModule)
 
-Membership логически в RBAC (связывает User и Role), но invite-flow координирует Users module.
-
----
-
-## 11. Отличия от `012-foundation-domains.md`
-
-| Было в 012 | Стало |
-|------------|-------|
-| User.tenantId | **Убрано** — tenant через Membership |
-| UserRole M:N | **Заменено** на Membership.roleId |
-| AssignRole на User | **AssignRole** = `Membership.changeRole()` |
-| email unique per tenant | **email unique global** (MVP) |
-
-После утверждения — обновить `012-foundation-domains.md` одним `docs:` commit.
-
----
-
-## 12. Чеклист утверждения
-
-- [ ] User не содержит roleId / organizationId / tenantId
-- [ ] Membership — единственная связь User ↔ Organization ↔ Role
-- [ ] Сценарий «Manager в A, Admin в B» описан и выполним
-- [ ] Permission только через Role
-- [ ] Порядок кодирования: User → Membership → Role → Permission → Audit
-- [ ] Auth/Credential отделены от User aggregate
-
-**Утверждает:** владелец продукта  
-**После утверждения:** начать `feat(users): add User aggregate` (только User, без Membership)
+**Утверждает:** владелец  
+**После утверждения:** `feat(users): add User aggregate` — только User, без Membership
