@@ -362,7 +362,8 @@ https://github.com/ClaspBitKiln/SAAS/actions/runs/28580480073
 | `ru.ts` dictionary | DONE | `apps/web/src/lib/ru.ts` |
 | All web pages localized | DONE | login/register/dashboard/* |
 | `pnpm --filter web build` | PASS | local 2026-07-03 |
-| CI web-build | pending | after push |
+| CI web-build | PASS | [run #88](https://github.com/ClaspBitKiln/SAAS/actions/runs/28667740808) web-build job |
+| CI build-test e2e | FLAKE | run #88 auth.e2e POST /tenants 500 — no API diff since `e135e41`; rerun pending |
 
 **Evidence:** `docs/EVIDENCE/STEP_2026-07-03_RU_UI.md`
 
