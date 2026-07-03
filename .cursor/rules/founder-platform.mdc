@@ -1,0 +1,19 @@
+---
+description: Ссылка на Founder Platform — shared engineering layer
+alwaysApply: true
+---
+
+# Founder Platform (shared)
+
+Canonical rules и ADR живут **вне** этого продукта:
+
+```
+C:\Users\asus\Claude\Projects\founder-platform
+```
+
+Читать: `founder-platform/CLAUDE.md`, `TRANSFER_RULES.md`, `adr/`.
+
+inn-bot и Sales OS — **независимые продукты**. No parent-child.
+Never import domain между продуктами.
+
+Product-specific rules — остальные файлы в `.cursor/rules/` этого репо.

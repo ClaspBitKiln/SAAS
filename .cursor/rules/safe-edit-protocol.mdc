@@ -1,0 +1,14 @@
+---
+description: Safe Edit Protocol (canonical copy — sync from founder-platform)
+alwaysApply: true
+---
+
+# Safe Edit Protocol
+
+Перед каждым edit: правильный **repo**, **файл**, **расширение**, **git status**, прочитать файл.
+
+**Never:** docs → .tsx или .tsx → docs.
+
+Несовпадение типа содержимого и расширения → **STOP**, Git restore или спросить владельца.
+
+Canonical: `C:\Users\asus\Claude\Projects\founder-platform\rules\claude\SAFE_EDIT_PROTOCOL.md`

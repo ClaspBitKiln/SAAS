@@ -1,0 +1,14 @@
+---
+description: Language Policy (canonical copy — sync from founder-platform)
+alwaysApply: true
+---
+
+# Language Policy
+
+Общение с пользователем — **русский** (если не попросил иное).
+
+Код, API, БД, commits, ADR, README, имена файлов/классов — **английский**.
+
+**UI не менять** без явного задания. Русский в чате ≠ русский в интерфейсе.
+
+Canonical: `C:\Users\asus\Claude\Projects\founder-platform\rules\claude\LANGUAGE_POLICY.md`

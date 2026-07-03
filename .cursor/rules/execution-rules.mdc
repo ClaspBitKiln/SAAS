@@ -60,3 +60,14 @@ One aggregate → Lint → Build → Unit → Integration → E2E → CI_GREEN �
 One Failure At A Time on CI_RED. Evidence in KNOWN_FAILURES.md.
 
 Read `docs/NEXT.md` first. Do only what CURRENT says. Evidence → `docs/EVIDENCE/`. Strategy → `docs/DECISIONS.md`.
+
+## Post-CI snapshot (self-maintenance)
+
+After each CI_GREEN, update **only** these 4 files — nothing else:
+
+- `docs/BUILD_STATUS.md`
+- `docs/NEXT.md`
+- `docs/CURSOR_SYNC.md`
+- `docs/EVIDENCE/STEP_xxx.md`
+
+Then STOP.

@@ -1,0 +1,15 @@
+---
+description: Sales OS — architecture freeze (product-specific)
+alwaysApply: true
+---
+
+# Sales OS architecture freeze
+
+Дополняет `founder-platform/rules/cursor/execution-rules.mdc`.
+
+- Stack freeze: NestJS + TS + Prisma + PostgreSQL (ADR-001 in this repo).
+- Platform Golden Path: Tenant → Organization → Settings → Subscription → Audit.
+- No Kafka/microservices until real pain (ADR-001 phasing).
+- Multitenancy: tenant_id on all main tables.
+
+Shared process rules: `founder-platform/adr/ADR-015-execution-rules.md`
