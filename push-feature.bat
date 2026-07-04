@@ -13,7 +13,7 @@ echo [1/3] git add -A ...
 git add -A
 
 echo [2/3] commit ...
-git commit -m "test(companies): align inn spec with country-aware validation"
+git commit -m "fix(security): scope 5rpm auth throttle to auth routes only"
 if errorlevel 1 (
   echo [!] Commit failed or nothing to commit. See message above.
   pause

@@ -54,10 +54,11 @@ describe('Company country (CIS tax ids) E2E', () => {
   });
 
   it('rejects 9-digit tax id for RU with 400', async () => {
+    // unique digits — a duplicate INN in the same org returns 409 before format check
     await request(app.getHttpServer())
       .post('/companies')
       .set(authHeader(auth.token))
-      .send({ name: 'RU Wrong Inn Co', country: 'RU', inn: '123456789' })
+      .send({ name: 'RU Wrong Inn Co', country: 'RU', inn: '987654321' })
       .expect(400);
   });
 

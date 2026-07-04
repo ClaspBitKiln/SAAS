@@ -118,6 +118,15 @@ Fix:               vitest.config.ts: unplugin-swc with legacyDecorator + decorat
 Preventive action: all NestJS/e2e tests must use SWC transform, not plain esbuild
 Status:            RESOLVED (commit 0e24f73, run 28534981949: e2e passed, CI_GREEN)
 
+# F-017
+Problem:           PROD BUG: глобальный rate-limit 5 req/min на ЛЮБОЙ маршрут (429 на 6-м POST /companies за минуту)
+Evidence:          CI run (task+country fix): company-country.e2e 6-й POST → 429; headers x-ratelimit-limit-auth:5 на всех ответах
+Root cause:        именованный throttler 'auth' (limit 5) зарегистрирован в ThrottlerModule.forRoot → глобальный ThrottlerGuard применяет его ко всем маршрутам, а не только к auth (AuthThrottle лишь переопределяет лимиты на /auth/*)
+Fix:               forRoot 'auth' limit 5 → 600 (permissive default); строгие 5/min остаются на auth-роутах через @Throttle({auth:...}) в AuthThrottle()
+Preventive action: named-throttler в forRoot = глобальный default; строгие лимиты задавать только декоратором на роуте. e2e с >5 запросами на один роут — детектор
+Status:            CONFIRMED → фикс в коммите (подтвердит CI)
+Примечание:        второй фейл того же прогона — ошибка данных теста (дубликат ИНН '123456789' UZ/RU → 409 раньше валидации формата); тест исправлен на уникальный номер
+
 # F-016
 Problem:           CI_RED на run api #92 (`6b62169`, inn autofill) и #93 (`2f1bc91`, tasks+country); Claude ошибочно записал #92 как CI_GREEN
 Evidence:          скрин Actions Founder 2026-07-04 08:45 — оба прогона красные; прод при этом работает (Railway деплоит по push, не по CI)
