@@ -122,6 +122,12 @@ export const ru = {
     empty: 'Компаний пока нет',
     deleteConfirm: 'Удалить эту компанию?',
     loadError: 'Не удалось загрузить компании',
+    fillByInn: 'Заполнить по ИНН',
+    innLooking: 'Ищем в ЕГРЮЛ…',
+    innNeedValid: 'Введите ИНН из 10 или 12 цифр',
+    innNotConfigured: 'Автозаполнение не настроено: добавьте DADATA_API_KEY в переменные API-сервиса',
+    innNotFound: 'В ЕГРЮЛ не найдено',
+    innLookupError: 'Не удалось получить данные по ИНН',
   },
 
   calls: {

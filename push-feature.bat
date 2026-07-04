@@ -13,7 +13,7 @@ echo [1/3] git add -A ...
 git add -A
 
 echo [2/3] commit ...
-git commit -m "feat(crm): responsible manager ownerUserId on company and contact"
+git commit -m "feat(companies): egrul autofill by inn via dadata lookup"
 if errorlevel 1 (
   echo [!] Commit failed or nothing to commit. See message above.
   pause

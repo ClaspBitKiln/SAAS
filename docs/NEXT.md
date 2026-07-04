@@ -5,10 +5,17 @@
 ---
 
 CURRENT
-**Ответственный менеджер (ownerUserId) у Company и Contact** (DECISIONS 2026-07-04: «поехали без людей»; обоснование — docs/102-crm-market-analysis.md §1.1). Параллельная веха Founder: первый менеджер + фидбек — остаётся, не блокирует.
+**Компания по ИНН (self-filling, принцип №11):** менеджер вводит ИНН → название/адрес/ОГРН/статус подтягиваются из ЕГРЮЛ автоматически. Внешний API одобрен Founder («да», 2026-07-04).
 
-STATUS
-**Код написан Claude (2026-07-04), ждёт push Founder** (`push-feature.bat` в корне) → CI = истина. Исключение ролей: DECISIONS 2026-07-04 (Cursor без токенов).
+**Код написан Claude (2026-07-04), ждёт push Founder** (`C:\Users\asus\Claude\Projects\SAAS\push-feature.bat`).
+Дизайн: провайдер **DaData findById/party** (10k/сутки бесплатно; Checko-ключ засвечен, API-ФНС всего 800 req). Ключ ТОЛЬКО в env `DADATA_API_KEY` (сервер), graceful `configured:false` без ключа → CI без сети. Endpoint `GET /companies/inn-lookup/:inn` (JWT, формат ИНН 400, сбой сети 502). Web: кнопка «Заполнить по ИНН» в форме компании → name автозаполняется, инфо-строка ОГРН/статус/адрес. Тесты: unit `inn-lookup.mapper.spec.ts` (маппинг DaData) + e2e `company-inn-lookup.e2e-spec.ts` (configured:false · 400 · 401). HTTP через node:https (без новых зависимостей).
+**После CI_GREEN — шаг Founder:** зарегистрироваться на dadata.ru (бесплатно) → скопировать API-ключ → Railway, сервис `api` → Variables → `DADATA_API_KEY` → redeploy.
+
+ПОСЛЕ: Tasks P1 (тип/дедлайн/экран «Сегодня», docs/102) → дубли-предупреждение P2 → Deal pipeline P2.
+Параллельная веха Founder: первый менеджер + фидбек — остаётся, не блокирует.
+
+STATUS (предыдущий шаг)
+✅ **Ответственный менеджер — DONE** (CI_GREEN 2026-07-04, run #91, `293763e`; evidence `STEP_2026-07-04_OWNER_USER.md`). Railway redeploy авто; проверка прода — ниже.
 
 Объём изменений (Claude, файловые правки, локальный прогон невозможен — песочница без VM):
 - API: schema.prisma (+ownerUserId на Company/Contact + индексы) · миграция `20260704120000_owner_user` · entities (+assign через updateDetails) · commands (+ownerUserId, +currentUserId) · handlers (+resolveOwnerUserId: ACTIVE membership в org, иначе 'Owner not found'; default = создатель) · DTOs (+@IsUUID optional; response +ownerUserId) · controllers (+404 mapping) · repositories · modules (+MembershipsModule)

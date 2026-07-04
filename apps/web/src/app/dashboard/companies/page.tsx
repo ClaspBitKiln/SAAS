@@ -35,6 +35,8 @@ export default function CompaniesPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [innLoading, setInnLoading] = useState(false);
+  const [innInfo, setInnInfo] = useState<string | null>(null);
 
   const loadCompanies = useCallback(async () => {
     if (!orgId) {
@@ -80,6 +82,43 @@ export default function CompaniesPage() {
     setShowForm(false);
     setEditingId(null);
     setForm(emptyForm);
+    setInnInfo(null);
+  }
+
+  async function fillByInn() {
+    const inn = form.inn.trim();
+    if (!/^\d{10}$|^\d{12}$/.test(inn)) {
+      setInnInfo(ru.companies.innNeedValid);
+      return;
+    }
+    setInnLoading(true);
+    setInnInfo(ru.companies.innLooking);
+    try {
+      const data = await apiAuthGet<{
+        configured: boolean;
+        found: boolean;
+        name?: string;
+        ogrn?: string;
+        address?: string;
+        status?: string;
+      }>(`/companies/inn-lookup/${inn}`);
+      if (!data.configured) {
+        setInnInfo(ru.companies.innNotConfigured);
+      } else if (!data.found) {
+        setInnInfo(ru.companies.innNotFound);
+      } else {
+        if (data.name) setForm((f) => ({ ...f, name: data.name as string }));
+        setInnInfo(
+          [data.name, data.ogrn && `ОГРН ${data.ogrn}`, data.status, data.address]
+            .filter(Boolean)
+            .join(' · '),
+        );
+      }
+    } catch {
+      setInnInfo(ru.companies.innLookupError);
+    } finally {
+      setInnLoading(false);
+    }
   }
 
   async function onSubmit(e: FormEvent) {
@@ -160,12 +199,23 @@ export default function CompaniesPage() {
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-blue-500"
               />
-              <input
-                placeholder={ru.companies.inn}
-                value={form.inn}
-                onChange={(e) => setForm({ ...form, inn: e.target.value })}
-                className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-blue-500"
-              />
+              <div className="flex gap-2">
+                <input
+                  placeholder={ru.companies.inn}
+                  value={form.inn}
+                  onChange={(e) => setForm({ ...form, inn: e.target.value })}
+                  className="flex-1 rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-blue-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => void fillByInn()}
+                  disabled={innLoading}
+                  className="whitespace-nowrap rounded-md border border-blue-600 px-3 py-2 text-sm text-blue-400 hover:bg-blue-600/10 disabled:opacity-50"
+                >
+                  {ru.companies.fillByInn}
+                </button>
+              </div>
+              {innInfo && <p className="text-xs text-slate-400">{innInfo}</p>}
               <input
                 type="email"
                 placeholder={ru.common.email}

@@ -1,4 +1,5 @@
 import {
+  BadGatewayException,
   BadRequestException,
   Body,
   Controller,
@@ -24,12 +25,32 @@ import {
   UpdateCompanyCommand,
 } from '../../application/commands/company.commands';
 import { GetCompanyQuery, ListCompaniesQuery } from '../../application/queries/company.queries';
+import { InnLookupService } from '../../infrastructure/inn-lookup.service';
+import { InnLookupResponseDto } from '../../application/dto/inn-lookup-response.dto';
 
 @ApiTags('companies')
 @ApiBearerAuth()
 @Controller('companies')
 export class CompanyController {
-  constructor(private readonly commandBus: CommandBus, private readonly queryBus: QueryBus) {}
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+    private readonly innLookup: InnLookupService,
+  ) {}
+
+  /** EGRUL lookup by INN (self-filling). Declared before :id route on purpose. */
+  @Get('inn-lookup/:inn')
+  @ApiOkResponse({ type: InnLookupResponseDto })
+  async lookupByInn(@Param('inn') inn: string): Promise<InnLookupResponseDto> {
+    if (!/^\d{10}$|^\d{12}$/.test(inn)) {
+      throw new BadRequestException('INN must be 10 or 12 digits');
+    }
+    try {
+      return await this.innLookup.lookup(inn);
+    } catch {
+      throw new BadGatewayException('INN lookup failed');
+    }
+  }
 
   @Post()
   @ApiOkResponse({ type: CompanyResponseDto })

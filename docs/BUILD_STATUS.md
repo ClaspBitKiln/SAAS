@@ -7,6 +7,19 @@
 Обновлять при каждом реальном прогоне: команда + вывод (или ссылка на CI artifact / run).
 Источник истины — пайплайн `.github/workflows/api.yml`.
 
+## Owner (responsible manager) — Company + Contact — **DONE** (CI_GREEN 2026-07-04)
+
+| Проверка | Статус | Доказательство |
+|----------|--------|----------------|
+| Lint (husky pre-commit + CI) | CI_GREEN | api run #91 |
+| Prisma migrate + build + unit + integration + e2e | CI_GREEN | api run #91 (1m17s) |
+| e2e owner: default=creator · assign · cross-org 404 · unset | CI_GREEN | `company-owner.e2e-spec.ts` + `contact-owner.e2e-spec.ts` |
+| Web build (RU selects «Ответственный») | CI_GREEN | same run |
+
+**CI proof:** commit `293763e` → workflow `api` #91 → **success** (скрин Founder 2026-07-04 08:08)
+**Исполнитель:** Claude (код) + Founder (push) — исключение ролей DECISIONS 2026-07-04.
+**Evidence:** `docs/EVIDENCE/STEP_2026-07-04_OWNER_USER.md`
+
 ## Tenant (контекст Platform) — **DONE** (CI_GREEN 2026-07-01)
 
 | Проверка | Команда | Статус | Доказательство |
