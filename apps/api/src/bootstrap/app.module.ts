@@ -5,6 +5,7 @@ import { MembershipsModule } from '../modules/memberships/memberships.module';
 import { ContactsModule } from '../modules/contacts/contacts.module';
 import { CompaniesModule } from '../modules/companies/companies.module';
 import { CallsModule } from '../modules/calls/calls.module';
+import { TasksModule } from '../modules/tasks/tasks.module';
 import { AuthModule } from '../modules/auth/auth.module';
 import { EMetallModule } from '../modules/e-metall/e-metall.module';
 import { RequestsModule } from '../modules/requests/requests.module';
@@ -22,6 +23,7 @@ import { PinoLoggerModule } from '../infrastructure/logging/pino-logger.module';
     ContactsModule,
     CompaniesModule,
     CallsModule,
+    TasksModule,
     AuthModule,
     EMetallModule,
     RequestsModule,

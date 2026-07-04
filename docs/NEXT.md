@@ -5,11 +5,20 @@
 ---
 
 CURRENT
-**Компания по ИНН (self-filling, принцип №11):** менеджер вводит ИНН → название/адрес/ОГРН/статус подтягиваются из ЕГРЮЛ автоматически. Внешний API одобрен Founder («да», 2026-07-04).
+**Два слайса написаны Claude (2026-07-04), ждут push Founder** (`C:\Users\asus\Claude\Projects\SAAS\push-feature.bat`):
 
-**Код написан Claude (2026-07-04), ждёт push Founder** (`C:\Users\asus\Claude\Projects\SAAS\push-feature.bat`).
-Дизайн: провайдер **DaData findById/party** (10k/сутки бесплатно; Checko-ключ засвечен, API-ФНС всего 800 req). Ключ ТОЛЬКО в env `DADATA_API_KEY` (сервер), graceful `configured:false` без ключа → CI без сети. Endpoint `GET /companies/inn-lookup/:inn` (JWT, формат ИНН 400, сбой сети 502). Web: кнопка «Заполнить по ИНН» в форме компании → name автозаполняется, инфо-строка ОГРН/статус/адрес. Тесты: unit `inn-lookup.mapper.spec.ts` (маппинг DaData) + e2e `company-inn-lookup.e2e-spec.ts` (configured:false · 400 · 401). HTTP через node:https (без новых зависимостей).
-**После CI_GREEN — шаг Founder:** зарегистрироваться на dadata.ru (бесплатно) → скопировать API-ключ → Railway, сервис `api` → Variables → `DADATA_API_KEY` → redeploy.
+1. **Tasks + «Сегодня»**: модуль tasks (entity/CQRS/controller), `GET /tasks/today` (открытые задачи исполнителя: просроченные+сегодня), complete/cancel, привязка contact/company, assignee default=создатель (org-scoped), миграция `20260704150000_task`; web: пункт меню «Задачи», страница «Сегодня»+«Открытые»+форма; unit 4 + e2e 5 тестов.
+2. **Страна компании (СНГ)**: Company.country (RU/UZ/KZ/KG, default RU), валидация налогового номера по стране (ИНН 10/12 · СТИР 9 · БИН 12 · КГ 14), миграция `20260704160000_company_country`, VO Inn(country), ошибки → 400; web: select страны, динамический label, кнопка «Заполнить по ИНН» только для RU; e2e 5 тестов.
+
+**СЛЕДУЮЩИЙ ПРИОРИТЕТ (Founder, 2026-07-04): Request-to-Quote MVP** — «заявка → расценка (менеджер в v1) → счёт/КП автоматом». Дизайн: Request уже парсит позиции → добавить цены по строкам (ручной ввод менеджером) + итоги → генерация КП/счёта (печатная форма) с реквизитами → отправка вручную. R2 (авторасценка по прайсам) — после сбора данных (прайсы/маржа/доставка, см. backlog/request-to-cash-automation.md). Плюс обзор конкурентов по этой логике (metal-CRM/КП-генераторы) — Claude.
+
+Deal pipeline сдвинут после Request-to-Quote (решение Founder).
+
+ЗАВЕРШЕНО СЕГОДНЯ (2026-07-04):
+- ✅ Ответственный менеджер (ownerUserId) — CI_GREEN run #91, prod LIVE
+- ✅ ИНН-автозаполнение (DaData) — CI_GREEN `6b62169`, prod LIVE, DADATA_API_KEY в Railway (Founder). Ограничение: только РФ; УЗ-контрагенты (СТИР) — в backlog CIS.
+
+Параллельная веха Founder: первый менеджер + фидбек — остаётся.
 
 ПОСЛЕ: Tasks P1 (тип/дедлайн/экран «Сегодня», docs/102) → дубли-предупреждение P2 → Deal pipeline P2.
 Параллельная веха Founder: первый менеджер + фидбек — остаётся, не блокирует.

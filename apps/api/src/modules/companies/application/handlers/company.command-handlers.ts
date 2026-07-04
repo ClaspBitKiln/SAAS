@@ -52,6 +52,7 @@ export class CreateCompanyHandler implements ICommandHandler<CreateCompanyComman
       organizationId: cmd.organizationId,
       ownerUserId,
       name: cmd.name,
+      country: cmd.country,
       inn: cmd.inn,
       website: cmd.website,
       phone: cmd.phone,
@@ -81,6 +82,7 @@ export class UpdateCompanyHandler implements ICommandHandler<UpdateCompanyComman
     const ownerUserId = await resolveOwnerUserId(this.membershipRepo, cmd.organizationId, cmd.ownerUserId);
     company.updateDetails({
       name: cmd.name,
+      country: cmd.country,
       inn: cmd.inn,
       website: cmd.website,
       phone: cmd.phone,

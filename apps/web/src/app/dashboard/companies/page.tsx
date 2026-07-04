@@ -10,6 +10,7 @@ import { useOrgMembers } from '@/lib/use-org-members';
 interface Company {
   id: string;
   name: string;
+  country: string;
   inn: string | null;
   email: string | null;
   phone: string | null;
@@ -17,12 +18,26 @@ interface Company {
   ownerUserId: string | null;
 }
 
+const countryLabels: Record<string, string> = {
+  RU: ru.companies.countryRU,
+  UZ: ru.companies.countryUZ,
+  KZ: ru.companies.countryKZ,
+  KG: ru.companies.countryKG,
+};
+
+const taxIdLabels: Record<string, string> = {
+  RU: ru.companies.taxIdRU,
+  UZ: ru.companies.taxIdUZ,
+  KZ: ru.companies.taxIdKZ,
+  KG: ru.companies.taxIdKG,
+};
+
 interface CompanyList {
   items: Company[];
   total: number;
 }
 
-const emptyForm = { name: '', inn: '', email: '', phone: '', website: '', ownerUserId: '' };
+const emptyForm = { name: '', country: 'RU', inn: '', email: '', phone: '', website: '', ownerUserId: '' };
 
 export default function CompaniesPage() {
   const user = getAuthUser();
@@ -69,6 +84,7 @@ export default function CompaniesPage() {
     setEditingId(c.id);
     setForm({
       name: c.name,
+      country: c.country ?? 'RU',
       inn: c.inn ?? '',
       email: c.email ?? '',
       phone: c.phone ?? '',
@@ -128,6 +144,7 @@ export default function CompaniesPage() {
     try {
       const body = {
         name: form.name,
+        country: form.country,
         inn: form.inn || undefined,
         email: form.email || undefined,
         phone: form.phone || undefined,
@@ -199,21 +216,34 @@ export default function CompaniesPage() {
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-blue-500"
               />
+              <select
+                value={form.country}
+                onChange={(e) => setForm({ ...form, country: e.target.value })}
+                className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-blue-500"
+              >
+                {Object.entries(countryLabels).map(([code, label]) => (
+                  <option key={code} value={code}>
+                    {ru.companies.country}: {label}
+                  </option>
+                ))}
+              </select>
               <div className="flex gap-2">
                 <input
-                  placeholder={ru.companies.inn}
+                  placeholder={taxIdLabels[form.country] ?? ru.companies.inn}
                   value={form.inn}
                   onChange={(e) => setForm({ ...form, inn: e.target.value })}
                   className="flex-1 rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-blue-500"
                 />
-                <button
-                  type="button"
-                  onClick={() => void fillByInn()}
-                  disabled={innLoading}
-                  className="whitespace-nowrap rounded-md border border-blue-600 px-3 py-2 text-sm text-blue-400 hover:bg-blue-600/10 disabled:opacity-50"
-                >
-                  {ru.companies.fillByInn}
-                </button>
+                {form.country === 'RU' && (
+                  <button
+                    type="button"
+                    onClick={() => void fillByInn()}
+                    disabled={innLoading}
+                    className="whitespace-nowrap rounded-md border border-blue-600 px-3 py-2 text-sm text-blue-400 hover:bg-blue-600/10 disabled:opacity-50"
+                  >
+                    {ru.companies.fillByInn}
+                  </button>
+                )}
               </div>
               {innInfo && <p className="text-xs text-slate-400">{innInfo}</p>}
               <input
@@ -270,6 +300,7 @@ export default function CompaniesPage() {
                 <p className="font-medium">{c.name}</p>
                 <p className="text-xs text-slate-400">
                   {[
+                    c.country && c.country !== 'RU' && (countryLabels[c.country] ?? c.country),
                     c.inn && `ИНН ${c.inn}`,
                     c.email,
                     c.phone,

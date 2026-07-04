@@ -1,3 +1,5 @@
+import { CompanyCountryEnum } from '../../domain/value-objects/inn.vo';
+
 export class CreateCompanyCommand {
   constructor(
     readonly organizationId: string,
@@ -8,6 +10,7 @@ export class CreateCompanyCommand {
     readonly email?: string | null,
     readonly ownerUserId?: string | null,
     readonly currentUserId?: string,
+    readonly country?: CompanyCountryEnum,
   ) {}
 }
 
@@ -21,6 +24,7 @@ export class UpdateCompanyCommand {
     readonly phone?: string | null,
     readonly email?: string | null,
     readonly ownerUserId?: string | null,
+    readonly country?: CompanyCountryEnum,
   ) {}
 }
 

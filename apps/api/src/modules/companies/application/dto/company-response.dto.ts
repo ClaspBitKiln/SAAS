@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { CompanyStatusEnum } from '../../domain/value-objects/company-status.vo';
+import { CompanyCountryEnum } from '../../domain/value-objects/inn.vo';
 import { Company } from '../../domain/entities/company.entity';
 
 export class CompanyResponseDto {
@@ -8,6 +9,7 @@ export class CompanyResponseDto {
   @ApiProperty() organizationId!: string;
   @ApiPropertyOptional() ownerUserId!: string | null;
   @ApiProperty() name!: string;
+  @ApiProperty({ enum: CompanyCountryEnum }) country!: CompanyCountryEnum;
   @ApiPropertyOptional() inn!: string | null;
   @ApiPropertyOptional() website!: string | null;
   @ApiPropertyOptional() phone!: string | null;
@@ -23,6 +25,7 @@ export function toCompanyResponse(c: Company): CompanyResponseDto {
     organizationId: c.organizationId,
     ownerUserId: c.ownerUserId,
     name: c.name,
+    country: c.country,
     inn: c.inn,
     website: c.website,
     phone: c.phone,

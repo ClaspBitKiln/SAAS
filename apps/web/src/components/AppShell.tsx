@@ -8,6 +8,7 @@ import { ru } from '@/lib/ru';
 
 const nav = [
   { href: '/dashboard', label: ru.nav.dashboard },
+  { href: '/dashboard/tasks', label: ru.nav.tasks },
   { href: '/dashboard/contacts', label: ru.nav.contacts },
   { href: '/dashboard/companies', label: ru.nav.companies },
   { href: '/dashboard/requests', label: ru.nav.requests },

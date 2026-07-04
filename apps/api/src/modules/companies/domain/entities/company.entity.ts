@@ -1,7 +1,7 @@
 import { AggregateRoot } from '../../../../shared/domain/aggregate-root';
 import { newId } from '../../../../shared/infrastructure/uuid';
 import { CompanyName } from '../value-objects/company-name.vo';
-import { Inn } from '../value-objects/inn.vo';
+import { CompanyCountryEnum, Inn } from '../value-objects/inn.vo';
 import { CompanyStatus, CompanyStatusEnum } from '../value-objects/company-status.vo';
 import { makeCompanyEvent } from '../events/company.events';
 
@@ -9,6 +9,7 @@ export class Company extends AggregateRoot {
   private _organizationId: string;
   private _ownerUserId: string | null;
   private _name: CompanyName;
+  private _country: CompanyCountryEnum;
   private _inn: Inn | null;
   private _website: string | null;
   private _phone: string | null;
@@ -21,6 +22,7 @@ export class Company extends AggregateRoot {
     organizationId: string;
     ownerUserId?: string | null;
     name: CompanyName;
+    country?: CompanyCountryEnum;
     inn: Inn | null;
     website: string | null;
     phone: string | null;
@@ -39,6 +41,7 @@ export class Company extends AggregateRoot {
     });
     this._organizationId = props.organizationId;
     this._ownerUserId = props.ownerUserId ?? null;
+    this._country = props.country ?? CompanyCountryEnum.RU;
     this._name = props.name;
     this._inn = props.inn;
     this._website = props.website;
@@ -52,19 +55,22 @@ export class Company extends AggregateRoot {
     organizationId: string;
     ownerUserId?: string | null;
     name: string;
+    country?: CompanyCountryEnum;
     inn?: string | null;
     website?: string | null;
     phone?: string | null;
     email?: string | null;
   }): Company {
     const id = newId();
+    const country = input.country ?? CompanyCountryEnum.RU;
     const company = new Company({
       id,
       tenantId: input.tenantId,
       organizationId: input.organizationId,
       ownerUserId: input.ownerUserId ?? null,
       name: new CompanyName(input.name),
-      inn: input.inn?.trim() ? new Inn(input.inn) : null,
+      country,
+      inn: input.inn?.trim() ? new Inn(input.inn, country) : null,
       website: input.website?.trim() || null,
       phone: input.phone?.trim() || null,
       email: input.email?.trim().toLowerCase() || null,
@@ -80,6 +86,7 @@ export class Company extends AggregateRoot {
     organizationId: string;
     ownerUserId: string | null;
     name: string;
+    country: CompanyCountryEnum;
     inn: string | null;
     website: string | null;
     phone: string | null;
@@ -95,7 +102,8 @@ export class Company extends AggregateRoot {
       organizationId: props.organizationId,
       ownerUserId: props.ownerUserId,
       name: new CompanyName(props.name),
-      inn: props.inn ? new Inn(props.inn) : null,
+      country: props.country,
+      inn: props.inn ? new Inn(props.inn, props.country) : null,
       website: props.website,
       phone: props.phone,
       email: props.email,
@@ -108,14 +116,16 @@ export class Company extends AggregateRoot {
 
   updateDetails(input: {
     name?: string;
+    country?: CompanyCountryEnum;
     inn?: string | null;
     website?: string | null;
     phone?: string | null;
     email?: string | null;
     ownerUserId?: string | null;
   }): void {
+    if (input.country !== undefined) this._country = input.country;
     if (input.name !== undefined) this._name = new CompanyName(input.name);
-    if (input.inn !== undefined) this._inn = input.inn?.trim() ? new Inn(input.inn) : null;
+    if (input.inn !== undefined) this._inn = input.inn?.trim() ? new Inn(input.inn, this._country) : null;
     if (input.website !== undefined) this._website = input.website?.trim() || null;
     if (input.phone !== undefined) this._phone = input.phone?.trim() || null;
     if (input.email !== undefined) this._email = input.email?.trim().toLowerCase() || null;
@@ -140,6 +150,10 @@ export class Company extends AggregateRoot {
 
   get name(): string {
     return this._name.toString();
+  }
+
+  get country(): CompanyCountryEnum {
+    return this._country;
   }
 
   get inn(): string | null {

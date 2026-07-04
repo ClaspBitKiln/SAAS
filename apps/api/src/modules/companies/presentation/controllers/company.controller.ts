@@ -70,6 +70,7 @@ export class CompanyController {
           dto.email,
           dto.ownerUserId,
           user.sub,
+          dto.country,
         ),
       );
       return this.getOrFail(id, organizationId);
@@ -79,6 +80,9 @@ export class CompanyController {
       }
       if (e instanceof Error && e.message === 'Owner not found') {
         throw new NotFoundException(e.message);
+      }
+      if (e instanceof Error && e.message.startsWith('Inn:')) {
+        throw new BadRequestException(e.message);
       }
       throw e;
     }
@@ -123,11 +127,13 @@ export class CompanyController {
           dto.phone,
           dto.email,
           dto.ownerUserId,
+          dto.country,
         ),
       );
     } catch (e) {
       if (e instanceof Error && e.message === 'Company not found') throw new NotFoundException(e.message);
       if (e instanceof Error && e.message === 'Owner not found') throw new NotFoundException(e.message);
+      if (e instanceof Error && e.message.startsWith('Inn:')) throw new BadRequestException(e.message);
       throw e;
     }
     return this.getOrFail(id, organizationId);

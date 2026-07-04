@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsOptional, IsString, IsUUID, Length, Matches } from 'class-validator';
+import { IsEmail, IsEnum, IsOptional, IsString, IsUUID, Length, Matches } from 'class-validator';
+import { CompanyCountryEnum } from '../../domain/value-objects/inn.vo';
 
 export class CreateCompanyDto {
   @ApiProperty({ minLength: 2, maxLength: 255 })
@@ -7,10 +8,15 @@ export class CreateCompanyDto {
   @Length(2, 255)
   name!: string;
 
-  @ApiPropertyOptional({ description: 'Russian INN: 10 or 12 digits' })
+  @ApiPropertyOptional({ enum: CompanyCountryEnum, default: CompanyCountryEnum.RU })
+  @IsOptional()
+  @IsEnum(CompanyCountryEnum)
+  country?: CompanyCountryEnum;
+
+  @ApiPropertyOptional({ description: 'Tax id: RU ИНН 10/12 · UZ СТИР 9 · KZ БИН 12 · KG ИНН 14' })
   @IsOptional()
   @IsString()
-  @Matches(/^\d{10}$|^\d{12}$/)
+  @Matches(/^\d{9,14}$/)
   inn?: string;
 
   @ApiPropertyOptional()

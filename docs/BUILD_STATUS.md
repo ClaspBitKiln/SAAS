@@ -1,5 +1,16 @@
 # BUILD STATUS (журнал доказательств)
 
+## INN autofill (DaData) — Company — **DONE** (CI_GREEN 2026-07-04)
+
+| Проверка | Статус | Доказательство |
+|----------|--------|----------------|
+| Lint + build + unit + integration + e2e | CI_GREEN | commit `6b62169`, workflow api |
+| e2e: configured:false · 400 bad INN · 401 no auth | CI_GREEN | `company-inn-lookup.e2e-spec.ts` |
+| Unit: DaData mapper | CI_GREEN | `inn-lookup.mapper.spec.ts` |
+| Prod deploy | LIVE | `/companies/inn-lookup/{inn}` в prod OpenAPI (Claude web_fetch) |
+
+**Evidence:** `docs/EVIDENCE/STEP_2026-07-04_INN_AUTOFILL.md`
+
 Правила: ADR-019 (No Assumed Green), ADR-020 (Evidence Driven), ADR-021 (CI = source of truth).
 Статусы прогона: `NOT_RUN` · `LOCAL_GREEN` · `CI_GREEN` · `CI_RED`. Заявление без вывода = `UNPROVEN`.
 **DONE даёт только `CI_GREEN`** (ADR-021). `LOCAL_GREEN` — промежуточный сигнал.

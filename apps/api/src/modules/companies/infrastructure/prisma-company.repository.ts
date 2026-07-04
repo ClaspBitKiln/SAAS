@@ -4,6 +4,7 @@ import { PrismaService } from '../../../database/prisma/prisma.service';
 import { CompanyRepository } from '../domain/repositories/company.repository';
 import { Company } from '../domain/entities/company.entity';
 import { CompanyStatusEnum } from '../domain/value-objects/company-status.vo';
+import { CompanyCountryEnum } from '../domain/value-objects/inn.vo';
 
 @Injectable()
 export class PrismaCompanyRepository implements CompanyRepository {
@@ -59,6 +60,7 @@ export class PrismaCompanyRepository implements CompanyRepository {
       organizationId: company.organizationId,
       ownerUserId: company.ownerUserId,
       name: company.name,
+      country: company.country,
       inn: company.inn,
       website: company.website,
       phone: company.phone,
@@ -88,6 +90,7 @@ export class PrismaCompanyRepository implements CompanyRepository {
     organizationId: string;
     ownerUserId: string | null;
     name: string;
+    country: string;
     inn: string | null;
     website: string | null;
     phone: string | null;
@@ -103,6 +106,7 @@ export class PrismaCompanyRepository implements CompanyRepository {
       organizationId: row.organizationId,
       ownerUserId: row.ownerUserId,
       name: row.name,
+      country: row.country as CompanyCountryEnum,
       inn: row.inn,
       website: row.website,
       phone: row.phone,

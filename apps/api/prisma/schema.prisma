@@ -152,7 +152,8 @@ model Company {
   organizationId String        @db.Uuid
   ownerUserId    String?       @db.Uuid
   name           String        @db.VarChar(255)
-  inn            String?       @db.VarChar(12)
+  country        String        @default("RU") @db.VarChar(2)
+  inn            String?       @db.VarChar(14)
   website        String?       @db.VarChar(2048)
   phone          String?       @db.VarChar(50)
   email          String?       @db.VarChar(255)
@@ -237,6 +238,45 @@ model Call {
   @@index([organizationId])
   @@index([contactId])
   @@map("calls")
+}
+
+// ===== context: crm (Task MVP) =====
+enum TaskType {
+  CALL
+  MESSAGE
+  MEETING
+  TODO
+}
+
+enum TaskStatus {
+  OPEN
+  DONE
+  CANCELLED
+}
+
+model Task {
+  id             String     @id @db.Uuid
+  tenantId       String     @db.Uuid
+  organizationId String     @db.Uuid
+  assigneeUserId String     @db.Uuid
+  contactId      String?    @db.Uuid
+  companyId      String?    @db.Uuid
+  title          String     @db.VarChar(255)
+  type           TaskType   @default(TODO)
+  status         TaskStatus @default(OPEN)
+  dueAt          DateTime
+  completedAt    DateTime?
+  version        Int        @default(0)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  deletedAt      DateTime?
+
+  @@index([tenantId])
+  @@index([organizationId])
+  @@index([assigneeUserId, status, dueAt])
+  @@index([contactId])
+  @@index([companyId])
+  @@map("tasks")
 }
 
 // ===== context: crm (Request / заявка MVP) =====
