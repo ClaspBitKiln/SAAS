@@ -22,4 +22,9 @@ export class CreateContactDto {
   @IsOptional()
   @IsUUID()
   companyId?: string;
+
+  @ApiPropertyOptional({ format: 'uuid', description: 'Responsible manager; defaults to creator' })
+  @IsOptional()
+  @IsUUID()
+  ownerUserId?: string;
 }

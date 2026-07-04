@@ -5,6 +5,7 @@ import { RequireAuth } from '@/components/RequireAuth';
 import { apiAuthDelete, apiAuthGet, apiAuthPatch, apiAuthPost } from '@/lib/api';
 import { getAuthUser } from '@/lib/auth';
 import { ru } from '@/lib/ru';
+import { useOrgMembers } from '@/lib/use-org-members';
 
 interface Company {
   id: string;
@@ -13,6 +14,7 @@ interface Company {
   email: string | null;
   phone: string | null;
   website: string | null;
+  ownerUserId: string | null;
 }
 
 interface CompanyList {
@@ -20,12 +22,13 @@ interface CompanyList {
   total: number;
 }
 
-const emptyForm = { name: '', inn: '', email: '', phone: '', website: '' };
+const emptyForm = { name: '', inn: '', email: '', phone: '', website: '', ownerUserId: '' };
 
 export default function CompaniesPage() {
   const user = getAuthUser();
   const orgId = user?.organizationId;
   const [companies, setCompanies] = useState<Company[]>([]);
+  const members = useOrgMembers(orgId);
   const [search, setSearch] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -68,6 +71,7 @@ export default function CompaniesPage() {
       email: c.email ?? '',
       phone: c.phone ?? '',
       website: c.website ?? '',
+      ownerUserId: c.ownerUserId ?? '',
     });
     setShowForm(true);
   }
@@ -89,9 +93,13 @@ export default function CompaniesPage() {
         email: form.email || undefined,
         phone: form.phone || undefined,
         website: form.website || undefined,
+        ownerUserId: form.ownerUserId || undefined,
       };
       if (editingId) {
-        await apiAuthPatch(`/companies/${editingId}`, body);
+        await apiAuthPatch(`/companies/${editingId}`, {
+          ...body,
+          ownerUserId: form.ownerUserId ? form.ownerUserId : null,
+        });
       } else {
         await apiAuthPost('/companies', body);
       }
@@ -177,6 +185,18 @@ export default function CompaniesPage() {
                 onChange={(e) => setForm({ ...form, website: e.target.value })}
                 className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-blue-500"
               />
+              <select
+                value={form.ownerUserId}
+                onChange={(e) => setForm({ ...form, ownerUserId: e.target.value })}
+                className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-blue-500"
+              >
+                <option value="">{ru.common.noOwner}</option>
+                {members.map((m) => (
+                  <option key={m.userId} value={m.userId}>
+                    {ru.common.owner}: {m.name}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="mt-4 flex gap-2">
               <button
@@ -199,7 +219,16 @@ export default function CompaniesPage() {
               <div>
                 <p className="font-medium">{c.name}</p>
                 <p className="text-xs text-slate-400">
-                  {[c.inn && `ИНН ${c.inn}`, c.email, c.phone].filter(Boolean).join(' · ') || ru.companies.noDetails}
+                  {[
+                    c.inn && `ИНН ${c.inn}`,
+                    c.email,
+                    c.phone,
+                    c.ownerUserId &&
+                      members.find((m) => m.userId === c.ownerUserId) &&
+                      `${ru.common.ownerShort}: ${members.find((m) => m.userId === c.ownerUserId)?.name}`,
+                  ]
+                    .filter(Boolean)
+                    .join(' · ') || ru.companies.noDetails}
                 </p>
               </div>
               <div className="flex gap-2">

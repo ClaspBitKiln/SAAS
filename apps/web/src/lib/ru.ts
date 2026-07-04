@@ -29,6 +29,9 @@ export const ru = {
     saveFailed: 'Не удалось сохранить',
     deleteFailed: 'Не удалось удалить',
     loadFailed: 'Не удалось загрузить данные',
+    owner: 'Ответственный',
+    noOwner: 'Без ответственного',
+    ownerShort: 'Отв.',
   },
 
   home: {

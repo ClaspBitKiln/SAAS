@@ -5,6 +5,8 @@ export class CreateContactCommand {
     readonly phone?: string | null,
     readonly email?: string | null,
     readonly companyId?: string | null,
+    readonly ownerUserId?: string | null,
+    readonly currentUserId?: string,
   ) {}
 }
 
@@ -16,6 +18,7 @@ export class UpdateContactCommand {
     readonly phone?: string | null,
     readonly email?: string | null,
     readonly companyId?: string | null,
+    readonly ownerUserId?: string | null,
   ) {}
 }
 

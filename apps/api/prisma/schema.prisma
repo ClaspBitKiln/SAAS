@@ -150,6 +150,7 @@ model Company {
   id             String        @id @db.Uuid
   tenantId       String        @db.Uuid
   organizationId String        @db.Uuid
+  ownerUserId    String?       @db.Uuid
   name           String        @db.VarChar(255)
   inn            String?       @db.VarChar(12)
   website        String?       @db.VarChar(2048)
@@ -164,6 +165,7 @@ model Company {
   @@unique([organizationId, inn])
   @@index([tenantId])
   @@index([organizationId])
+  @@index([ownerUserId])
   @@map("companies")
 }
 
@@ -172,6 +174,7 @@ model Contact {
   tenantId       String        @db.Uuid
   organizationId String        @db.Uuid
   companyId      String?       @db.Uuid
+  ownerUserId    String?       @db.Uuid
   name           String        @db.VarChar(255)
   phone          String?       @db.VarChar(50)
   email          String?       @db.VarChar(255)
@@ -184,6 +187,7 @@ model Contact {
   @@index([tenantId])
   @@index([organizationId])
   @@index([companyId])
+  @@index([ownerUserId])
   @@map("contacts")
 }
 

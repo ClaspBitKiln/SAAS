@@ -5,10 +5,30 @@
 ---
 
 CURRENT
-**Первый живой пользователь + фидбек** (решение зафиксировано в DECISIONS 2026-07-02). НЕ код.
+**Ответственный менеджер (ownerUserId) у Company и Contact** (DECISIONS 2026-07-04: «поехали без людей»; обоснование — docs/102-crm-market-analysis.md §1.1). Параллельная веха Founder: первый менеджер + фидбек — остаётся, не блокирует.
 
 STATUS
-STOP по коду (MVP-freeze). Активный шаг — за Founder: пригласить одного реального менеджера и собрать фидбек.
+**Код написан Claude (2026-07-04), ждёт push Founder** (`push-feature.bat` в корне) → CI = истина. Исключение ролей: DECISIONS 2026-07-04 (Cursor без токенов).
+
+Объём изменений (Claude, файловые правки, локальный прогон невозможен — песочница без VM):
+- API: schema.prisma (+ownerUserId на Company/Contact + индексы) · миграция `20260704120000_owner_user` · entities (+assign через updateDetails) · commands (+ownerUserId, +currentUserId) · handlers (+resolveOwnerUserId: ACTIVE membership в org, иначе 'Owner not found'; default = создатель) · DTOs (+@IsUUID optional; response +ownerUserId) · controllers (+404 mapping) · repositories · modules (+MembershipsModule)
+- e2e: `company-owner.e2e-spec.ts` (default=creator · assign коллеге · cross-org 404 · unset null) · `contact-owner.e2e-spec.ts`
+- Web: `use-org-members.ts` (hook: ACTIVE участники) · contacts/companies: select «Ответственный», отображение в списках · ru.ts (+owner/noOwner/ownerShort)
+- Проверено статически: все callsites `create()`/`rehydrate()` совместимы (grep), паттерн 1:1 с PR #12.
+
+## Спецификация: ответственный менеджер
+
+Паттерн полностью повторяет Contact→Company link (PR #12):
+1. **Prisma:** `ownerUserId String? @db.Uuid` + index — на Company И Contact. Миграция по образцу `20260702150000`.
+2. **Domain:** поле + `assignOwner()` в обеих entity; событие `*.owner.changed`.
+3. **Валидация (org-scope!):** ownerUserId должен иметь Membership в организации (аналог `resolveCompanyId` → `membershipRepo.findByUserAndOrganization`); чужой/несуществующий → 404 'Owner not found'.
+4. **Default:** при создании ownerUserId = текущий пользователь (из JWT), если не передан.
+5. **DTO:** create/update `@IsUUID @IsOptional ownerUserId`; `null` снимает; response включает ownerUserId.
+6. **Web:** в формах Company/Contact select «Ответственный» (список membership'ов org — endpoint team уже есть); default текущий; колонка в списках.
+7. **e2e:** default=creator · назначение члену org · cross-org user → 404 · unset null.
+DoD: CI_GREEN · prod smoke · BUILD_STATUS/EVIDENCE · отчёт.
+
+ПОСЛЕ этой фичи (порядок из docs/102): Tasks P1 (тип/дедлайн/«Сегодня») → дубли-предупреждение P2 → Deal pipeline P2.
 
 INPUT
 MVP CRM-ядро закрыто и изолировано (Claude review PASS): Contact + Company + Notes + Search + Call + Request scaffold, prod LIVE.
@@ -49,7 +69,11 @@ Deal pipeline · AI · Activity timeline · counterparty-check · RBAC · Commun
 Просто и без боли: без i18n-фреймворка — статичные русские строки (или один `ru.ts` словарь). EN не сохранять. Код/API/БД остаются английскими.
 DoD: в UI нет видимых английских строк на happy path · web-build CI_GREEN · redeploy · скриншот-проверка Founder.
 
-Порядок: 1 → 2 → 3, One Failure At A Time. **После CI_GREEN п.3** — Founder: скриншот RU UI → приглашение первого менеджера.
+✅ **Независимая проверка Claude (2026-07-03):** prod `/login` отдаёт русский UI («Войдите в рабочее пространство», «Пароль», «Войти») — redeploy подтверждён снаружи. Флейк run #88 зафиксирован как F-015 (KNOWN_FAILURES, RCA при рецидиве).
+
+Очередь Cursor пуста — все 3 задания DONE. **Примечание 2026-07-03: у Cursor исчерпаны токены** — не блокирует: активный шаг за Founder, кода в очереди нет.
+
+**Активный шаг (Founder, без кода):** скриншот-проверка RU UI в prod (login → контакты → форма с select компании) → отправить приглашение менеджеру (Кирилл m2 / Артём m5) → watch-session → фидбек в Obsidian `Memory/SAAS/07_ФИДБЕК_ПЕРВЫЙ_ПОЛЬЗОВАТЕЛЬ.md`.
 
 ---
 

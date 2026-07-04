@@ -23,4 +23,9 @@ export class UpdateContactDto {
   @IsOptional()
   @IsUUID()
   companyId?: string | null;
+
+  @ApiPropertyOptional({ format: 'uuid', description: 'Responsible manager; null unsets' })
+  @IsOptional()
+  @IsUUID()
+  ownerUserId?: string | null;
 }

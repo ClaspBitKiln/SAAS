@@ -14,6 +14,19 @@ Filter for **every** product and engineering decision.
 | 8 | **No enterprise complexity** — SMB simplicity beats feature parity |
 | 9 | **Evidence over opinion** — ship, measure, iterate |
 | 10 | **One vertical slice at a time** — working end-to-end beats broad stubs |
+| 11 | **Self-filling system** (Founder, 2026-07-04) — данные появляются в CRM сами, по мере работы менеджера; ручной ввод — исключение, а не норма |
+
+## Принцип 11 — конкретные механики (roadmap-привязка)
+
+| Механика | Что заполняется само | Когда |
+|----------|----------------------|-------|
+| ownerUserId default = создатель | ответственный | CURRENT (в спецификации) |
+| Компания по ИНН | название, адрес, ОГРН, статус — из ЕГРЮЛ/DaData (reuse источников inn-bot!) | кандидат next+1 (⚠ новый внешний API — нужно явное «да» Founder, MVP-freeze правило 3) |
+| Дубль-детект при вводе телефона/email | подтягивает существующую карточку вместо новой | P2 (docs/102) |
+| Звонок → карточка | номер → контакт, звонок в timeline, длительность | телефония |
+| Сообщение мессенджера → карточка | контакт, переписка, вложения | Communications |
+| Заявка → позиции | парсинг текста заявки в строки (R1) | Request-to-Cash |
+| AI summary звонка → заметка | итог разговора без печатания | AI-фаза |
 
 ## Decision test
 

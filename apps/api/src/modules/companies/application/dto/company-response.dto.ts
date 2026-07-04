@@ -6,6 +6,7 @@ export class CompanyResponseDto {
   @ApiProperty() id!: string;
   @ApiProperty() tenantId!: string;
   @ApiProperty() organizationId!: string;
+  @ApiPropertyOptional() ownerUserId!: string | null;
   @ApiProperty() name!: string;
   @ApiPropertyOptional() inn!: string | null;
   @ApiPropertyOptional() website!: string | null;
@@ -20,6 +21,7 @@ export function toCompanyResponse(c: Company): CompanyResponseDto {
     id: c.id,
     tenantId: c.tenantId,
     organizationId: c.organizationId,
+    ownerUserId: c.ownerUserId,
     name: c.name,
     inn: c.inn,
     website: c.website,

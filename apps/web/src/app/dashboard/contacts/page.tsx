@@ -5,6 +5,7 @@ import { RequireAuth } from '@/components/RequireAuth';
 import { apiAuthDelete, apiAuthGet, apiAuthPatch, apiAuthPost } from '@/lib/api';
 import { getAuthUser } from '@/lib/auth';
 import { ru } from '@/lib/ru';
+import { useOrgMembers } from '@/lib/use-org-members';
 
 interface Company {
   id: string;
@@ -17,6 +18,7 @@ interface Contact {
   email: string | null;
   phone: string | null;
   companyId: string | null;
+  ownerUserId: string | null;
 }
 
 interface ContactList {
@@ -30,13 +32,14 @@ interface ContactNote {
   createdAt: string;
 }
 
-const emptyForm = { name: '', email: '', phone: '', companyId: '' };
+const emptyForm = { name: '', email: '', phone: '', companyId: '', ownerUserId: '' };
 
 export default function ContactsPage() {
   const user = getAuthUser();
   const orgId = user?.organizationId;
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
+  const members = useOrgMembers(orgId);
   const [search, setSearch] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -55,6 +58,14 @@ export default function ContactsPage() {
       return companies.find((c) => c.id === id)?.name ?? null;
     },
     [companies],
+  );
+
+  const memberNameById = useCallback(
+    (id: string | null) => {
+      if (!id) return null;
+      return members.find((m) => m.userId === id)?.name ?? null;
+    },
+    [members],
   );
 
   const loadCompanies = useCallback(async () => {
@@ -105,6 +116,7 @@ export default function ContactsPage() {
       email: c.email ?? '',
       phone: c.phone ?? '',
       companyId: c.companyId ?? '',
+      ownerUserId: c.ownerUserId ?? '',
     });
     setShowForm(true);
   }
@@ -125,11 +137,13 @@ export default function ContactsPage() {
         email: form.email || undefined,
         phone: form.phone || undefined,
         companyId: form.companyId || undefined,
+        ownerUserId: form.ownerUserId || undefined,
       };
       if (editingId) {
         await apiAuthPatch(`/contacts/${editingId}`, {
           ...body,
           companyId: form.companyId ? form.companyId : null,
+          ownerUserId: form.ownerUserId ? form.ownerUserId : null,
         });
       } else {
         await apiAuthPost('/contacts', body);
@@ -253,6 +267,18 @@ export default function ContactsPage() {
                   </option>
                 ))}
               </select>
+              <select
+                value={form.ownerUserId}
+                onChange={(e) => setForm({ ...form, ownerUserId: e.target.value })}
+                className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-blue-500"
+              >
+                <option value="">{ru.common.noOwner}</option>
+                {members.map((m) => (
+                  <option key={m.userId} value={m.userId}>
+                    {ru.common.owner}: {m.name}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="mt-3 flex gap-2">
               <button
@@ -280,6 +306,11 @@ export default function ContactsPage() {
                   {c.companyId && (
                     <span className="ml-2 text-slate-400">
                       · {companyNameById(c.companyId) ?? ru.contacts.companyFallback}
+                    </span>
+                  )}
+                  {c.ownerUserId && memberNameById(c.ownerUserId) && (
+                    <span className="ml-2 text-slate-400">
+                      · {ru.common.ownerShort}: {memberNameById(c.ownerUserId)}
                     </span>
                   )}
                 </div>

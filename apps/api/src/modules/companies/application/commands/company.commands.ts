@@ -6,6 +6,8 @@ export class CreateCompanyCommand {
     readonly website?: string | null,
     readonly phone?: string | null,
     readonly email?: string | null,
+    readonly ownerUserId?: string | null,
+    readonly currentUserId?: string,
   ) {}
 }
 
@@ -18,6 +20,7 @@ export class UpdateCompanyCommand {
     readonly website?: string | null,
     readonly phone?: string | null,
     readonly email?: string | null,
+    readonly ownerUserId?: string | null,
   ) {}
 }
 

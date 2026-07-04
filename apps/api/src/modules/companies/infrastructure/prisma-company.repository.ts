@@ -57,6 +57,7 @@ export class PrismaCompanyRepository implements CompanyRepository {
     const data = {
       tenantId: company.tenantId,
       organizationId: company.organizationId,
+      ownerUserId: company.ownerUserId,
       name: company.name,
       inn: company.inn,
       website: company.website,
@@ -85,6 +86,7 @@ export class PrismaCompanyRepository implements CompanyRepository {
     id: string;
     tenantId: string;
     organizationId: string;
+    ownerUserId: string | null;
     name: string;
     inn: string | null;
     website: string | null;
@@ -99,6 +101,7 @@ export class PrismaCompanyRepository implements CompanyRepository {
       id: row.id,
       tenantId: row.tenantId,
       organizationId: row.organizationId,
+      ownerUserId: row.ownerUserId,
       name: row.name,
       inn: row.inn,
       website: row.website,

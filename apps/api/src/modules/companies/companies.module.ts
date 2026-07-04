@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { PrismaService } from '../../database/prisma/prisma.service';
 import { PlatformModule } from '../platform/platform.module';
+import { MembershipsModule } from '../memberships/memberships.module';
 import { COMPANY_REPOSITORY } from './domain/repositories/company.repository';
 import { PrismaCompanyRepository } from './infrastructure/prisma-company.repository';
 import { CompanyController } from './presentation/controllers/company.controller';
@@ -13,7 +14,7 @@ import {
 import { GetCompanyHandler, ListCompaniesHandler } from './application/handlers/company.query-handlers';
 
 @Module({
-  imports: [CqrsModule, PlatformModule],
+  imports: [CqrsModule, PlatformModule, MembershipsModule],
   controllers: [CompanyController],
   providers: [
     PrismaService,

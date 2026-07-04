@@ -50,6 +50,7 @@ export class PrismaContactRepository implements ContactRepository {
       tenantId: contact.tenantId,
       organizationId: contact.organizationId,
       companyId: contact.companyId,
+      ownerUserId: contact.ownerUserId,
       name: contact.name,
       phone: contact.phone,
       email: contact.email,
@@ -77,6 +78,7 @@ export class PrismaContactRepository implements ContactRepository {
     tenantId: string;
     organizationId: string;
     companyId: string | null;
+    ownerUserId: string | null;
     name: string;
     phone: string | null;
     email: string | null;
@@ -90,6 +92,7 @@ export class PrismaContactRepository implements ContactRepository {
       tenantId: row.tenantId,
       organizationId: row.organizationId,
       companyId: row.companyId,
+      ownerUserId: row.ownerUserId,
       name: row.name,
       phone: row.phone,
       email: row.email,

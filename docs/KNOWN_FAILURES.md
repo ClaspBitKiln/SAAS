@@ -118,6 +118,14 @@ Fix:               vitest.config.ts: unplugin-swc with legacyDecorator + decorat
 Preventive action: all NestJS/e2e tests must use SWC transform, not plain esbuild
 Status:            RESOLVED (commit 0e24f73, run 28534981949: e2e passed, CI_GREEN)
 
+# F-015
+Problem:           Флейк e2e: auth.e2e POST /tenants → 500 в CI run #88; rerun (#89) GREEN без изменений кода
+Evidence:          отчёт Cursor 2026-07-03; commit afcde0b (docs: note ci run 88 e2e flake and retrigger)
+Root cause:        не установлена (API-код между прогонами не менялся; вероятно порядок/состояние тестовой БД или гонка при старте)
+Fix:               rerun прошёл; фикс не делали
+Preventive action: мониторить повторение. При втором случае — RCA обязателен (One Failure At A Time), не маскировать rerun'ами
+Status:            CONFIRMED (наблюдение; RCA отложен до рецидива)
+
 # F-014
 Problem:           Локальные e2e-тесты выполнялись против PRODUCTION БД (3×500 на contact tests)
 Evidence:          Отчёт Cursor 2026-07-03, task 2: apps/api/.env DATABASE_URL = Railway prod proxy (hayabusa…); prod-схема без companyId

@@ -7,6 +7,7 @@ import { makeCompanyEvent } from '../events/company.events';
 
 export class Company extends AggregateRoot {
   private _organizationId: string;
+  private _ownerUserId: string | null;
   private _name: CompanyName;
   private _inn: Inn | null;
   private _website: string | null;
@@ -18,6 +19,7 @@ export class Company extends AggregateRoot {
     id: string;
     tenantId: string;
     organizationId: string;
+    ownerUserId?: string | null;
     name: CompanyName;
     inn: Inn | null;
     website: string | null;
@@ -36,6 +38,7 @@ export class Company extends AggregateRoot {
       updatedAt: props.updatedAt,
     });
     this._organizationId = props.organizationId;
+    this._ownerUserId = props.ownerUserId ?? null;
     this._name = props.name;
     this._inn = props.inn;
     this._website = props.website;
@@ -47,6 +50,7 @@ export class Company extends AggregateRoot {
   static create(input: {
     tenantId: string;
     organizationId: string;
+    ownerUserId?: string | null;
     name: string;
     inn?: string | null;
     website?: string | null;
@@ -58,6 +62,7 @@ export class Company extends AggregateRoot {
       id,
       tenantId: input.tenantId,
       organizationId: input.organizationId,
+      ownerUserId: input.ownerUserId ?? null,
       name: new CompanyName(input.name),
       inn: input.inn?.trim() ? new Inn(input.inn) : null,
       website: input.website?.trim() || null,
@@ -73,6 +78,7 @@ export class Company extends AggregateRoot {
     id: string;
     tenantId: string;
     organizationId: string;
+    ownerUserId: string | null;
     name: string;
     inn: string | null;
     website: string | null;
@@ -87,6 +93,7 @@ export class Company extends AggregateRoot {
       id: props.id,
       tenantId: props.tenantId,
       organizationId: props.organizationId,
+      ownerUserId: props.ownerUserId,
       name: new CompanyName(props.name),
       inn: props.inn ? new Inn(props.inn) : null,
       website: props.website,
@@ -105,12 +112,14 @@ export class Company extends AggregateRoot {
     website?: string | null;
     phone?: string | null;
     email?: string | null;
+    ownerUserId?: string | null;
   }): void {
     if (input.name !== undefined) this._name = new CompanyName(input.name);
     if (input.inn !== undefined) this._inn = input.inn?.trim() ? new Inn(input.inn) : null;
     if (input.website !== undefined) this._website = input.website?.trim() || null;
     if (input.phone !== undefined) this._phone = input.phone?.trim() || null;
     if (input.email !== undefined) this._email = input.email?.trim().toLowerCase() || null;
+    if (input.ownerUserId !== undefined) this._ownerUserId = input.ownerUserId;
     this.touch();
     this.addEvent(makeCompanyEvent('company.updated', this, { ...input }));
   }
@@ -123,6 +132,10 @@ export class Company extends AggregateRoot {
 
   get organizationId(): string {
     return this._organizationId;
+  }
+
+  get ownerUserId(): string | null {
+    return this._ownerUserId;
   }
 
   get name(): string {

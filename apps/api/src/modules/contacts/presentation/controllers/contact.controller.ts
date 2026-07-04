@@ -40,7 +40,15 @@ export class ContactController {
     const organizationId = requireOrganizationId(user);
     try {
       const { id } = await this.commandBus.execute(
-        new CreateContactCommand(organizationId, dto.name, dto.phone, dto.email, dto.companyId),
+        new CreateContactCommand(
+          organizationId,
+          dto.name,
+          dto.phone,
+          dto.email,
+          dto.companyId,
+          dto.ownerUserId,
+          user.sub,
+        ),
       );
       return this.getOrFail(id, organizationId);
     } catch (e) {
@@ -48,6 +56,9 @@ export class ContactController {
         throw new BadRequestException(e.message);
       }
       if (e instanceof Error && e.message === 'Company not found') {
+        throw new NotFoundException(e.message);
+      }
+      if (e instanceof Error && e.message === 'Owner not found') {
         throw new NotFoundException(e.message);
       }
       throw e;
@@ -84,11 +95,20 @@ export class ContactController {
     const organizationId = requireOrganizationId(user);
     try {
       await this.commandBus.execute(
-        new UpdateContactCommand(id, organizationId, dto.name, dto.phone, dto.email, dto.companyId),
+        new UpdateContactCommand(
+          id,
+          organizationId,
+          dto.name,
+          dto.phone,
+          dto.email,
+          dto.companyId,
+          dto.ownerUserId,
+        ),
       );
     } catch (e) {
       if (e instanceof Error && e.message === 'Contact not found') throw new NotFoundException(e.message);
       if (e instanceof Error && e.message === 'Company not found') throw new NotFoundException(e.message);
+      if (e instanceof Error && e.message === 'Owner not found') throw new NotFoundException(e.message);
       throw e;
     }
     return this.getOrFail(id, organizationId);

@@ -9,6 +9,11 @@ import {
   COMPANY_REPOSITORY,
   CompanyRepository,
 } from '../../../companies/domain/repositories/company.repository';
+import {
+  MEMBERSHIP_REPOSITORY,
+  MembershipRepository,
+} from '../../../memberships/domain/repositories/membership.repository';
+import { MembershipStatusEnum } from '../../../memberships/domain/value-objects/membership-status.vo';
 import { Contact } from '../../domain/entities/contact.entity';
 import { CreateContactCommand, DeleteContactCommand, UpdateContactCommand } from '../commands/contact.commands';
 
@@ -24,12 +29,28 @@ async function resolveCompanyId(
   return companyId;
 }
 
+/** Org-scoped owner check: user must have an ACTIVE membership in the organization. */
+async function resolveOwnerUserId(
+  membershipRepo: MembershipRepository,
+  organizationId: string,
+  ownerUserId?: string | null,
+): Promise<string | null | undefined> {
+  if (ownerUserId === undefined) return undefined;
+  if (ownerUserId === null) return null;
+  const membership = await membershipRepo.findByUserAndOrganization(ownerUserId, organizationId);
+  if (!membership || membership.status !== MembershipStatusEnum.ACTIVE) {
+    throw new Error('Owner not found');
+  }
+  return ownerUserId;
+}
+
 @CommandHandler(CreateContactCommand)
 export class CreateContactHandler implements ICommandHandler<CreateContactCommand> {
   constructor(
     @Inject(CONTACT_REPOSITORY) private readonly contactRepo: ContactRepository,
     @Inject(ORGANIZATION_REPOSITORY) private readonly orgRepo: OrganizationRepository,
     @Inject(COMPANY_REPOSITORY) private readonly companyRepo: CompanyRepository,
+    @Inject(MEMBERSHIP_REPOSITORY) private readonly membershipRepo: MembershipRepository,
     private readonly eventBus: EventBus,
   ) {}
 
@@ -37,6 +58,9 @@ export class CreateContactHandler implements ICommandHandler<CreateContactComman
     const org = await this.orgRepo.findById(cmd.organizationId);
     if (!org) throw new Error('Organization not found');
     const companyId = await resolveCompanyId(this.companyRepo, cmd.organizationId, cmd.companyId);
+    const resolvedOwner = await resolveOwnerUserId(this.membershipRepo, cmd.organizationId, cmd.ownerUserId);
+    // Self-filling default (PRODUCT_PRINCIPLES #11): creator becomes owner unless explicitly set.
+    const ownerUserId = resolvedOwner ?? cmd.currentUserId ?? null;
     const contact = Contact.create({
       tenantId: org.tenantId,
       organizationId: cmd.organizationId,
@@ -44,6 +68,7 @@ export class CreateContactHandler implements ICommandHandler<CreateContactComman
       phone: cmd.phone,
       email: cmd.email,
       companyId: companyId ?? null,
+      ownerUserId,
     });
     await this.contactRepo.save(contact);
     contact.pullEvents().forEach((e) => this.eventBus.publish(e));
@@ -56,6 +81,7 @@ export class UpdateContactHandler implements ICommandHandler<UpdateContactComman
   constructor(
     @Inject(CONTACT_REPOSITORY) private readonly contactRepo: ContactRepository,
     @Inject(COMPANY_REPOSITORY) private readonly companyRepo: CompanyRepository,
+    @Inject(MEMBERSHIP_REPOSITORY) private readonly membershipRepo: MembershipRepository,
     private readonly eventBus: EventBus,
   ) {}
 
@@ -63,11 +89,13 @@ export class UpdateContactHandler implements ICommandHandler<UpdateContactComman
     const contact = await this.contactRepo.findById(cmd.id, cmd.organizationId);
     if (!contact) throw new Error('Contact not found');
     const companyId = await resolveCompanyId(this.companyRepo, cmd.organizationId, cmd.companyId);
+    const ownerUserId = await resolveOwnerUserId(this.membershipRepo, cmd.organizationId, cmd.ownerUserId);
     contact.updateDetails({
       name: cmd.name,
       phone: cmd.phone,
       email: cmd.email,
       ...(companyId !== undefined ? { companyId } : {}),
+      ...(ownerUserId !== undefined ? { ownerUserId } : {}),
     });
     await this.contactRepo.save(contact);
     contact.pullEvents().forEach((e) => this.eventBus.publish(e));

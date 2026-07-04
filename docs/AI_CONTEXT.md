@@ -1,0 +1,134 @@
+# AI CONTEXT — AI Sales OS (canonical external briefing)
+
+Purpose: paste this entire file into any strong LLM (GPT, Claude, Gemini, Grok, Deep Research) to get a high-quality audit without onboarding.
+Maintained by Claude (project lead AI). Updated after every milestone, reviewed weekly. Last update: **2026-07-03**.
+No secrets inside (no passwords, tokens, DB URLs).
+
+---
+
+## 1. Product
+
+**AI Sales OS** — call-first B2B CRM for small businesses in Russia/CIS (1–100 employees). First niche: **metal trading** (founder owns a real metal trading company, "Magic Metall"). Explicitly NOT a Bitrix24 clone: only Communications + CRM + Telephony + Automation + AI. Anti-goals: no projects, warehouse, HR, wiki, corporate chat, document disk.
+
+A second existing product (inn-bot: Telegram bot for Russian counterparty checks by INN, live in production, separate codebase) will later become a `counterparty-check` module inside Sales OS.
+
+## 2. Why we believe this product can win
+
+Founder runs a real metal trading company and lives this workflow daily:
+
+```
+Customer inquiry (Telegram/MAX/phone)
+  ↓ manager copies messages by hand
+Check supplier prices manually (Excel price lists, calls, e-metall.ru)
+  ↓
+Build quotation in Excel (+ delivery cost by tonnage/route)
+  ↓
+Create invoice manually
+  ↓
+Send PDF manually, follow up manually
+```
+
+Estimated time today: **20–40 minutes per inquiry** (baseline to be measured precisely — see metrics).
+Goal: **under 3 minutes from inquiry to quotation, with human approval before send.**
+
+That is the core differentiation. Bitrix24/amoCRM store cards; they do not price metal, do not build quotations, do not chase suppliers. Hard rule: **money is never computed by an LLM** — pricing/margin/delivery are deterministic formulas over price tables; LLM only parses free-text inquiries and drafts messages.
+
+## 3. Founder constraints
+
+- Single non-developer founder. No engineering team, no hires planned.
+- All development is AI-assisted (one AI plans/reviews, one AI writes code; CI on GitHub Actions is the source of truth). One line, but it works: 14 CI-proven modules shipped in ~10 days.
+- Limited budget. Revenue must come before scaling anything.
+- Market reality: Telegram works in RF via VPN; MAX messenger is used with CIS partners; managers use **personal** phones for business chats.
+
+## 4. Current state (all CI-proven, production LIVE on Railway)
+
+**Stack:** NestJS + TypeScript modular monolith, CQRS-lite, Prisma + PostgreSQL, Redis/BullMQ (reserved), Next.js 15 web, Vitest (44 test files, e2e incl. tenant isolation), pnpm monorepo, GitHub Actions, Docker on Railway. Search = Postgres pg_trgm. No Kafka/Qdrant/k8s — deliberately deferred.
+
+**Architecture (text diagram):**
+
+```
+Browser → Next.js web → NestJS API → Prisma → PostgreSQL
+                          modules: platform (tenant/org/user/membership)
+                                   auth (JWT + sessions + rate limit)
+                                   contacts (+notes, +search, +company link)
+                                   companies (INN unique per org)
+                                   calls (scaffold)
+                                   requests (inquiry parsing scaffold)
+Multi-tenant: every row org-scoped; cross-org access → 404 (e2e-proven)
+```
+
+**Done:** registration → login → dashboard → contacts CRUD + notes + search → companies → contact↔company link (merged today after real-usage feedback) → tenant isolation (P0 security, e2e) → rate limiting + structured logging → prod deploy with /health.
+**In queue:** Russian UI localization (current UI is English — blocker for first real user), then first-user onboarding.
+**Known tech debt (accepted, tracked):** prod schema via `prisma db push` instead of migrate deploy; incomplete migration baseline; dead scaffold packages to delete.
+
+## 5. Current metrics (honest)
+
+```
+Stage:                      founder actively uses product (day 1)
+Real organizations:         1 (founder's company)
+Real contacts:              3 (1 RF + 2 Uzbekistan)
+Real workflows completed:   1 (contact entry; quotation flow not built yet)
+Paying customers / MRR:     0 / 0
+Manual time per inquiry:    unknown (measurement planned; founder estimate 20–40 min)
+Target:                     ≤ 3 min inquiry → quotation (human approves send)
+```
+
+## 6. Success criteria (next milestone — NOT technical)
+
+**1 real manager (not the founder) uses the system for 5 working days without returning to Excel/notebook for contact tracking.** Secondary: activation (signup → login → ≥1 real contact) plus recorded answers to 3 feedback questions.
+
+## 7. Assumptions (ranked by risk)
+
+```
+A1  Managers will allow the CRM to access their business chats
+    (personal phones!).                            Confidence: LOW
+A2  Supplier price lists (Excel/e-metall/23met) can be normalized
+    automatically into a price table.              Confidence: MEDIUM
+A3  Customers accept quotations/invoices generated by the system.
+                                                   Confidence: LOW→MEDIUM (founder's own clients first)
+A4  Telegram integration remains technically/legally feasible in RF
+    (currently via VPN).                           Confidence: MEDIUM
+A5  A simple CRM (no messengers yet) is already better than Excel
+    for a metal-trading manager.                   Confidence: MEDIUM (being tested now)
+```
+
+## 8. Biggest risks
+
+```
+R1  Telegram access becomes impossible/blocked in RF.        Impact: CRITICAL
+R2  Managers refuse to connect personal accounts (privacy).  Impact: CRITICAL
+    Mitigation planned: sync ONLY chats explicitly linked to CRM contacts,
+    or separate work number / bot channel.
+R3  Supplier price sources inconsistent/unparseable.         Impact: HIGH
+R4  Quotation edge cases (non-standard sizes, cutting,
+    delivery combos) exceed deterministic rules.             Impact: HIGH
+R5  Single founder burnout / context loss between AI tools.  Impact: HIGH
+```
+
+## 9. Roadmap draft (subject to your critique)
+
+Now: RU UI → first real manager (5-day test) → feedback.
+Then, current draft order: Deal pipeline → Communications inbox (Telegram + MAX first, WhatsApp later; privacy-first chat linking) → Request-to-Cash automation (R1 parse inquiry → R2 deterministic pricing incl. delivery → R3 quotation/invoice PDF → R4 send via email first) → telephony → AI agents (summaries, follow-ups).
+
+## 10. What NOT to recommend
+
+Please do NOT recommend: microservices, Kafka/event sourcing, Kubernetes, vector databases, LLM-first architecture, Elasticsearch, enterprise features (SSO/audit/compliance suites), HR/ERP/wiki/document management, hiring an engineering team, raising VC funding, rewriting the stack. The stack is fixed (ADR-001); the constraint is founder time, not technology.
+
+## 11. Questions for you
+
+1. **If you had only 8 weeks and one AI developer, what exact week-by-week roadmap would you execute** to get the first paying metal-trading company? Be specific.
+2. **What would you delete from our roadmap draft (§9)?**
+3. **Which assumption (§7) would you validate first, and what is the cheapest experiment to do it?**
+4. Telegram in RF: which integration path is most durable for business chats — MTProto user-session (e.g. self-hosted), Bot API, or gateway providers? Legal and ban risks?
+5. MAX messenger: what business API access actually exists today?
+6. How do existing products (Kommo, Wazzup, Pact, umnico etc.) solve "personal phone = personal chats" consent/filtering — and what do their users complain about?
+7. Metal pricing: proven patterns to ingest supplier price lists (Excel/OCR/marketplace APIs like e-metall, 23met)? How do competitors automate quotation for metal specifically?
+8. Uzbekistan/CIS expansion: what must the data model support early (currencies, STIR vs INN, local requisites) so it doesn't require a rewrite later?
+9. Pricing model for micro-B2B in RF to reach the first 10 paying companies: per-seat, per-tenant flat, or paid pilot? Anchor numbers?
+
+## 12. Final instruction
+
+**Optimize for shipping a product that 10 real metal trading companies will pay for. Do not optimize for engineering elegance.**
+
+---
+Code (if needed): https://github.com/ClaspBitKiln/SAAS · main `e135e41` · prod: web-production-e22e3.up.railway.app / api-production-7f43a.up.railway.app
