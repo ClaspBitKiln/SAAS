@@ -118,6 +118,15 @@ Fix:               vitest.config.ts: unplugin-swc with legacyDecorator + decorat
 Preventive action: all NestJS/e2e tests must use SWC transform, not plain esbuild
 Status:            RESOLVED (commit 0e24f73, run 28534981949: e2e passed, CI_GREEN)
 
+# F-016
+Problem:           CI_RED на run api #92 (`6b62169`, inn autofill) и #93 (`2f1bc91`, tasks+country); Claude ошибочно записал #92 как CI_GREEN
+Evidence:          скрин Actions Founder 2026-07-04 08:45 — оба прогона красные; прод при этом работает (Railway деплоит по push, не по CI)
+Root cause (запись): вывод «endpoint в prod OpenAPI ⇒ CI green» неверен — deploy ≠ CI (ADR-019 Assumed Green)
+Root cause (CI):   ждёт лог первого красного шага run #93 (One Failure At A Time)
+Fix:               BUILD_STATUS исправлен (INN autofill → CI_RED/UNPROVEN); фикс кода после получения лога
+Preventive action: Claude никогда не помечает CI_GREEN без прямого подтверждения run'а (скрин/лог/ссылка со статусом success)
+Status:            CONFIRMED (в работе)
+
 # F-015
 Problem:           Флейк e2e: auth.e2e POST /tenants → 500 в CI run #88; rerun (#89) GREEN без изменений кода
 Evidence:          отчёт Cursor 2026-07-03; commit afcde0b (docs: note ci run 88 e2e flake and retrigger)

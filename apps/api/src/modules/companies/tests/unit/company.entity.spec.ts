@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { Company } from '../../domain/entities/company.entity';
+import { CompanyCountryEnum } from '../../domain/value-objects/inn.vo';
 
 describe('Company entity', () => {
   const tenantId = '0192a1b2-c3d4-7890-abcd-ef1234567890';
@@ -29,6 +30,20 @@ describe('Company entity', () => {
   it('rejects invalid INN', () => {
     expect(() =>
       Company.create({ tenantId, organizationId: orgId, name: 'Bad INN Co', inn: '123' }),
-    ).toThrow('Inn: must be 10 or 12 digits');
+    ).toThrow('Inn: invalid tax id format for RU');
+  });
+
+  it('accepts UZ 9-digit СТИР and rejects it for RU', () => {
+    const uz = Company.create({
+      tenantId,
+      organizationId: orgId,
+      name: 'UZ Co',
+      country: CompanyCountryEnum.UZ,
+      inn: '123456789',
+    });
+    expect(uz.inn).toBe('123456789');
+    expect(() =>
+      Company.create({ tenantId, organizationId: orgId, name: 'RU Co', inn: '123456789' }),
+    ).toThrow('Inn: invalid tax id format for RU');
   });
 });

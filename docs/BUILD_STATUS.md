@@ -1,6 +1,10 @@
 # BUILD STATUS (журнал доказательств)
 
-## INN autofill (DaData) — Company — **DONE** (CI_GREEN 2026-07-04)
+## INN autofill (DaData) — Company — **CI_RED → в работе** (исправлено 2026-07-04, F-016)
+
+⚠ Ранее ошибочно записано CI_GREEN по факту деплоя. Факт: run api #92 (`6b62169`) = **CI_RED**; run #93 (`2f1bc91`, tasks+country) = **CI_RED**. Прод работает (Railway деплоит по push). Ждём лог первого красного шага.
+
+## ~~INN autofill (DaData) — Company — DONE (CI_GREEN 2026-07-04)~~ [НЕВЕРНАЯ ЗАПИСЬ, см. выше]
 
 | Проверка | Статус | Доказательство |
 |----------|--------|----------------|
