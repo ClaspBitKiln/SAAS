@@ -5,23 +5,11 @@
 ---
 
 CURRENT
-**Два слайса написаны Claude (2026-07-04), ждут push Founder** (`C:\Users\asus\Claude\Projects\SAAS\push-feature.bat`):
+**STOP по коду** — Tasks + Country + INN autofill + throttle fix = **DONE** (CI_GREEN run #95, `1641dbd`, 2026-07-04).
 
-1. **Tasks + «Сегодня»**: модуль tasks (entity/CQRS/controller), `GET /tasks/today` (открытые задачи исполнителя: просроченные+сегодня), complete/cancel, привязка contact/company, assignee default=создатель (org-scoped), миграция `20260704150000_task`; web: пункт меню «Задачи», страница «Сегодня»+«Открытые»+форма; unit 4 + e2e 5 тестов.
-2. **Страна компании (СНГ)**: Company.country (RU/UZ/KZ/KG, default RU), валидация налогового номера по стране (ИНН 10/12 · СТИР 9 · БИН 12 · КГ 14), миграция `20260704160000_company_country`, VO Inn(country), ошибки → 400; web: select страны, динамический label, кнопка «Заполнить по ИНН» только для RU; e2e 5 тестов.
+**Следующий приоритет (Founder → Claude, не Cursor):** Request-to-Quote MVP — дизайн «заявка → расценка менеджером → КП/счёт». См. backlog/request-to-cash-automation.md.
 
-**СЛЕДУЮЩИЙ ПРИОРИТЕТ (Founder, 2026-07-04): Request-to-Quote MVP** — «заявка → расценка (менеджер в v1) → счёт/КП автоматом». Дизайн: Request уже парсит позиции → добавить цены по строкам (ручной ввод менеджером) + итоги → генерация КП/счёта (печатная форма) с реквизитами → отправка вручную. R2 (авторасценка по прайсам) — после сбора данных (прайсы/маржа/доставка, см. backlog/request-to-cash-automation.md). Плюс обзор конкурентов по этой логике (metal-CRM/КП-генераторы) — Claude.
-
-Deal pipeline сдвинут после Request-to-Quote (решение Founder).
-
-ЗАВЕРШЕНО СЕГОДНЯ (2026-07-04):
-- ✅ Ответственный менеджер (ownerUserId) — CI_GREEN run #91, prod LIVE
-- ✅ ИНН-автозаполнение (DaData) — CI_GREEN `6b62169`, prod LIVE, DADATA_API_KEY в Railway (Founder). Ограничение: только РФ; УЗ-контрагенты (СТИР) — в backlog CIS.
-
-Параллельная веха Founder: первый менеджер + фидбек — остаётся.
-
-ПОСЛЕ: Tasks P1 (тип/дедлайн/экран «Сегодня», docs/102) → дубли-предупреждение P2 → Deal pipeline P2.
-Параллельная веха Founder: первый менеджер + фидбек — остаётся, не блокирует.
+**Параллельно (Founder, без кода):** первый менеджер + фидбек (скриншот RU UI → приглашение Кирилл m2 / Артём m5 → watch-session).
 
 STATUS (предыдущий шаг)
 ✅ **Ответственный менеджер — DONE** (CI_GREEN 2026-07-04, run #91, `293763e`; evidence `STEP_2026-07-04_OWNER_USER.md`). Railway redeploy авто; проверка прода — ниже.
@@ -108,7 +96,7 @@ Platform+Auth · Contact+Notes+Search · Company CRUD+search (`fab5d9f`, run #78
 web https://web-production-e22e3.up.railway.app · api https://api-production-7f43a.up.railway.app · `/health` ok
 
 BLOCKERS
-Founder: скриншот-проверка RU UI + приглашение менеджера — **после** CI_GREEN RU UI push.
+Founder: prod smoke Tasks/Country (меню «Задачи», select страны) + приглашение менеджера. Claude: Request-to-Quote дизайн — до нового задания Cursor.
 
 ## Примечание (док↔код) — RESOLVED 2026-07-03
 Claude подтвердил: связка Contact→Company частично внедрена (schema+migration+e2e+UI), но не закоммичена и не проверена CI → статус UNPROVEN. Решение: изолировать в ветку (см. chore выше), не расширять до фидбека.

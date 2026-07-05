@@ -1,10 +1,18 @@
 # BUILD STATUS (журнал доказательств)
 
-## INN autofill (DaData) — Company — **CI_RED → в работе** (исправлено 2026-07-04, F-016)
+## Tasks + Company country (CIS) + throttle fix + INN autofill — **DONE** (CI_GREEN 2026-07-04, run #95)
 
-⚠ Ранее ошибочно записано CI_GREEN по факту деплоя. Факт: run api #92 (`6b62169`) = **CI_RED**; run #93 (`2f1bc91`, tasks+country) = **CI_RED**. Прод работает (Railway деплоит по push). Ждём лог первого красного шага.
+| Проверка | Статус | Доказательство |
+|----------|--------|----------------|
+| Lint · Prisma · Build · Unit · Integration · E2E · web-build | CI_GREEN | run **api #95**, commit `1641dbd` (скрин Founder 08:57) |
+| Tasks: default assignee · today · complete · cross-org 404 · 401 | CI_GREEN | `task.e2e-spec.ts` (5) + unit (4) |
+| Country: RU default · UZ 9 · KZ 12 · KG 14 · RU reject · enum 400 | CI_GREEN | `company-country.e2e-spec.ts` |
+| INN autofill: configured:false · 400 · 401 + mapper unit | CI_GREEN | включено в тот же прогон |
+| F-017 fix: 6+ POST /companies за минуту без 429 | CI_GREEN | тот же прогон |
 
-## ~~INN autofill (DaData) — Company — DONE (CI_GREEN 2026-07-04)~~ [НЕВЕРНАЯ ЗАПИСЬ, см. выше]
+**Путь к зелёному (LOOP):** #92 RED (не разобран, перекрыт) → #93 RED unit (текст ошибки Inn VO → F-016 assumed-green урок) → #94 RED e2e (дубль ИНН в тесте + **прод-баг F-017**: глобальный 5rpm лимит) → **#95 GREEN**.
+**Исполнитель:** Claude (код) + Founder (push), исключение ролей DECISIONS 2026-07-04.
+**Evidence:** `docs/EVIDENCE/STEP_2026-07-04_TASKS_COUNTRY.md`
 
 | Проверка | Статус | Доказательство |
 |----------|--------|----------------|

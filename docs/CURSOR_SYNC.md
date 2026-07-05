@@ -11,12 +11,11 @@ Web: https://web-production-e22e3.up.railway.app
 API: https://api-production-7f43a.up.railway.app
 Health: OK
 
-## Completed
-✅ Tenant  ✅ Organization  ✅ User  ✅ Membership  ✅ Auth/JWT
-✅ Contact  ✅ Notes  ✅ Search  ✅ Company
-
 ## Current
-RU UI DONE (CI_GREEN run #89). STOP — Founder: скриншот RU UI в prod → приглашение менеджера.
+Tasks + Country + INN autofill + throttle fix DONE (CI_GREEN #95). STOP — Founder: prod smoke + менеджер; Claude: Request-to-Quote.
+
+## Completed (recent)
+✅ Owner (ownerUserId)  ✅ INN DaData  ✅ Tasks «Сегодня»  ✅ Company.country CIS  ✅ RU UI
 
 ## Rules
 - NEXT.md = единственный источник «что делать»
