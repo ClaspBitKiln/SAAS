@@ -14,12 +14,12 @@
     "lint": "eslint \"src/**/*.ts\""
   },
   "dependencies": {
-    "@nestjs/common": "^10.4.0",
-    "@nestjs/core": "^10.4.0",
-    "@nestjs/cqrs": "^10.2.7",
+    "@nestjs/common": "^11.1.27",
+    "@nestjs/core": "^11.1.27",
+    "@nestjs/cqrs": "^11.0.3",
     "@nestjs/jwt": "^11.0.2",
-    "@nestjs/platform-express": "^10.4.0",
-    "@nestjs/swagger": "^7.4.0",
+    "@nestjs/platform-express": "^11.1.27",
+    "@nestjs/swagger": "^11.4.5",
     "@nestjs/throttler": "^6.5.0",
     "@prisma/client": "^5.18.0",
     "bcryptjs": "^3.0.3",
@@ -32,7 +32,7 @@
     "uuidv7": "^1.0.2"
   },
   "devDependencies": {
-    "@nestjs/testing": "^10.4.0",
+    "@nestjs/testing": "^11.1.27",
     "@swc/core": "^1.15.43",
     "@types/bcryptjs": "^3.0.0",
     "@types/node": "^22.0.0",
