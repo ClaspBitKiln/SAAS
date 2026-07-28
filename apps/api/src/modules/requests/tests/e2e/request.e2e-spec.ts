@@ -56,6 +56,36 @@ describe('Request E2E', () => {
     expect(list.body.total).toBeGreaterThanOrEqual(1);
   });
 
+  it('rejects a quote with a follow-up date in the past', async () => {
+    const created = await request(app.getHttpServer())
+      .post('/requests')
+      .set(authHeader(token))
+      .send({
+        title: 'Past follow-up E2E',
+        source: 'MANUAL',
+        lines: [{ rawLine: 'Лист 6 мм Ст3 — 1 т', quantity: '1', unit: 'т' }],
+      })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post(`/requests/${created.body.id}/quote`)
+      .set(authHeader(token))
+      .send({
+        lines: [{
+          lineId: created.body.lines[0].id,
+          purchaseAmount: 50000,
+          saleAmount: 70000,
+        }],
+        currency: 'RUB',
+        sellerName: 'ООО Мэджик Металл',
+        logisticsCost: 0,
+        otherCosts: 0,
+        proposalValidityDays: 5,
+        followUpAt: '2000-01-01T00:00:00.000Z',
+      })
+      .expect(400);
+  });
+
   it('prepares quote, calculates profit and creates follow-up task', async () => {
     const created = await request(app.getHttpServer())
       .post('/requests')
