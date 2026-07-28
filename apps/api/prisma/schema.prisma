@@ -288,6 +288,7 @@ enum RequestSource {
 enum RequestStatus {
   DRAFT
   SEARCHED
+  QUOTED
 }
 
 model Request {
@@ -299,8 +300,17 @@ model Request {
   notes          String?       @db.VarChar(2000)
   source         RequestSource @default(MANUAL)
   status         RequestStatus @default(DRAFT)
-  searchResult   Json?
-  version        Int           @default(0)
+  searchResult          Json?
+  currency              String        @default("RUB") @db.VarChar(3)
+  sellerName            String?       @db.VarChar(255)
+  deliveryTerms         String?       @db.VarChar(500)
+  logisticsCost         Decimal       @default(0) @db.Decimal(15, 2)
+  otherCosts             Decimal       @default(0) @db.Decimal(15, 2)
+  proposalNumber         String?       @db.VarChar(64)
+  proposalIssuedAt       DateTime?
+  proposalValidityDays   Int           @default(5)
+  followUpAt             DateTime?
+  version                Int           @default(0)
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   deletedAt      DateTime?
@@ -309,6 +319,7 @@ model Request {
   @@index([tenantId])
   @@index([organizationId])
   @@index([contactId])
+  @@index([organizationId, status, followUpAt])
   @@map("requests")
 }
 
@@ -325,8 +336,10 @@ model RequestLine {
   coating     String? @db.VarChar(64)
   quantity    String? @db.VarChar(32)
   unit        String? @db.VarChar(16)
-  rawLine     String? @db.VarChar(500)
-  request     Request @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  rawLine       String? @db.VarChar(500)
+  purchaseAmount Decimal? @db.Decimal(15, 2)
+  saleAmount     Decimal? @db.Decimal(15, 2)
+  request        Request @relation(fields: [requestId], references: [id], onDelete: Cascade)
 
   @@index([requestId])
   @@map("request_lines")
