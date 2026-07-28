@@ -209,6 +209,9 @@ export class Request extends AggregateRoot {
       throw new Error('Request quote: validity must be 1..90 days');
     }
     if (Number.isNaN(input.followUpAt.getTime())) throw new Error('Request quote: follow-up date is invalid');
+    if (input.followUpAt.getTime() <= input.proposalIssuedAt.getTime()) {
+      throw new Error('Request quote: follow-up date must be in the future');
+    }
 
     const amounts = new Map(input.lines.map((line) => [line.lineId, line]));
     if (amounts.size !== this._lines.length) {
