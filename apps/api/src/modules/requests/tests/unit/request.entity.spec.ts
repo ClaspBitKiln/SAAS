@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { Request } from '../../domain/entities/request.entity';
+import { ProposalSentViaEnum } from '../../domain/value-objects/proposal-sent-via.vo';
 import { RequestSourceEnum } from '../../domain/value-objects/request-source.vo';
 import { RequestStatusEnum } from '../../domain/value-objects/request-status.vo';
 
@@ -92,5 +93,32 @@ describe('Request entity', () => {
         followUpAt: new Date('2026-07-29T12:00:00.000Z'),
       }),
     ).toThrow('every line');
+  });
+
+  it('records proposal delivery only after a quote is prepared', () => {
+    const request = makeRequest();
+    expect(() =>
+      request.markProposalSent(ProposalSentViaEnum.EMAIL, new Date('2026-07-28T13:00:00.000Z')),
+    ).toThrow('quote must be prepared');
+
+    request.prepareQuote({
+      lines: [{ lineId: request.lines[0].id, purchaseAmount: 50000, saleAmount: 70000 }],
+      currency: 'RUB',
+      sellerName: 'ООО Мэджик Металл',
+      logisticsCost: 0,
+      otherCosts: 0,
+      proposalNumber: 'КП-1',
+      proposalIssuedAt: new Date('2026-07-28T12:00:00.000Z'),
+      proposalValidityDays: 5,
+      followUpAt: new Date('2026-07-29T12:00:00.000Z'),
+    });
+    request.markProposalSent(
+      ProposalSentViaEnum.EMAIL,
+      new Date('2026-07-28T13:00:00.000Z'),
+    );
+
+    expect(request.status).toBe(RequestStatusEnum.SENT);
+    expect(request.proposalSentVia).toBe(ProposalSentViaEnum.EMAIL);
+    expect(request.proposalSentAt?.toISOString()).toBe('2026-07-28T13:00:00.000Z');
   });
 });

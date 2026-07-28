@@ -1,4 +1,5 @@
 import { QuoteLineInput } from '../../domain/entities/request.entity';
+import { ProposalSentViaEnum } from '../../domain/value-objects/proposal-sent-via.vo';
 import { RequestLineProps } from '../../domain/value-objects/request-line.vo';
 import { RequestSourceEnum } from '../../domain/value-objects/request-source.vo';
 
@@ -37,6 +38,14 @@ export class PrepareQuoteCommand {
     readonly otherCosts: number,
     readonly proposalValidityDays: number,
     readonly followUpAt: Date,
+  ) {}
+}
+
+export class MarkProposalSentCommand {
+  constructor(
+    readonly id: string,
+    readonly organizationId: string,
+    readonly sentVia: ProposalSentViaEnum,
   ) {}
 }
 

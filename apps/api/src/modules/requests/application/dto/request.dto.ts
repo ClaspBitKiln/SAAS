@@ -17,6 +17,7 @@ import {
 } from 'class-validator';
 import { RequestSourceEnum } from '../../domain/value-objects/request-source.vo';
 import { RequestStatusEnum } from '../../domain/value-objects/request-status.vo';
+import { ProposalSentViaEnum } from '../../domain/value-objects/proposal-sent-via.vo';
 
 export class RequestLineDto {
   @ApiPropertyOptional() @IsOptional() @IsString() gost?: string;
@@ -100,6 +101,12 @@ export class PrepareQuoteDto {
   followUpAt!: string;
 }
 
+export class MarkProposalSentDto {
+  @ApiProperty({ enum: ProposalSentViaEnum })
+  @IsEnum(ProposalSentViaEnum)
+  sentVia!: ProposalSentViaEnum;
+}
+
 export class ParseRequestDto {
   @ApiProperty() @IsString() @Length(1, 100000) rawText!: string;
 }
@@ -143,6 +150,8 @@ export class RequestResponseDto {
   @ApiPropertyOptional() proposalNumber!: string | null;
   @ApiPropertyOptional() proposalIssuedAt!: string | null;
   @ApiProperty() proposalValidityDays!: number;
+  @ApiPropertyOptional() proposalSentAt!: string | null;
+  @ApiPropertyOptional({ enum: ProposalSentViaEnum }) proposalSentVia!: ProposalSentViaEnum | null;
   @ApiPropertyOptional() followUpAt!: string | null;
   @ApiProperty({ type: [RequestLineResponseDto] }) lines!: RequestLineResponseDto[];
   @ApiProperty() createdAt!: string;

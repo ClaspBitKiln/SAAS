@@ -2,6 +2,7 @@ export enum RequestStatusEnum {
   DRAFT = 'DRAFT',
   SEARCHED = 'SEARCHED',
   QUOTED = 'QUOTED',
+  SENT = 'SENT',
 }
 
 export class RequestStatus {
@@ -21,5 +22,9 @@ export class RequestStatus {
 
   static quoted(): RequestStatus {
     return new RequestStatus(RequestStatusEnum.QUOTED);
+  }
+
+  static sent(): RequestStatus {
+    return new RequestStatus(RequestStatusEnum.SENT);
   }
 }

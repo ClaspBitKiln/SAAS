@@ -86,7 +86,7 @@ describe('Request E2E', () => {
       .expect(400);
   });
 
-  it('prepares quote, calculates profit and creates follow-up task', async () => {
+  it('prepares quote, creates follow-up task and records proposal delivery', async () => {
     const created = await request(app.getHttpServer())
       .post('/requests')
       .set(authHeader(token))
@@ -130,5 +130,20 @@ describe('Request E2E', () => {
       .set(authHeader(token))
       .expect(200);
     expect(tasks.body.items.some((task: { title: string }) => task.title.includes(quoted.body.proposalNumber))).toBe(true);
+
+    const sent = await request(app.getHttpServer())
+      .post(`/requests/${created.body.id}/sent`)
+      .set(authHeader(token))
+      .send({ sentVia: 'EMAIL' })
+      .expect(201);
+    expect(sent.body.status).toBe('SENT');
+    expect(sent.body.proposalSentVia).toBe('EMAIL');
+    expect(new Date(sent.body.proposalSentAt).getTime()).toBeGreaterThan(0);
+
+    await request(app.getHttpServer())
+      .post(`/requests/${created.body.id}/sent`)
+      .set(authHeader(token))
+      .send({ sentVia: 'EMAIL' })
+      .expect(400);
   });
 });
