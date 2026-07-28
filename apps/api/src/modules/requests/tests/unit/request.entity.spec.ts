@@ -60,6 +60,23 @@ describe('Request entity', () => {
     expect(request.followUpAt?.toISOString()).toBe('2026-07-29T09:00:00.000Z');
   });
 
+  it('rejects a follow-up date that is not after the proposal date', () => {
+    const request = makeRequest();
+    expect(() =>
+      request.prepareQuote({
+        lines: [{ lineId: request.lines[0].id, purchaseAmount: 50000, saleAmount: 70000 }],
+        currency: 'RUB',
+        sellerName: 'ООО Мэджик Металл',
+        logisticsCost: 0,
+        otherCosts: 0,
+        proposalNumber: 'КП-1',
+        proposalIssuedAt: new Date('2026-07-28T12:00:00.000Z'),
+        proposalValidityDays: 5,
+        followUpAt: new Date('2026-07-28T11:59:59.000Z'),
+      }),
+    ).toThrow('must be in the future');
+  });
+
   it('requires commercial amounts for every request line', () => {
     const request = makeRequest();
     expect(() =>
