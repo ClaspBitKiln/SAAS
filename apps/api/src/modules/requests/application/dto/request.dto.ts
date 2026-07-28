@@ -2,11 +2,17 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsArray,
+  IsDateString,
   IsEnum,
+  IsInt,
+  IsNumber,
   IsOptional,
   IsString,
   IsUUID,
   Length,
+  Matches,
+  Max,
+  Min,
   ValidateNested,
 } from 'class-validator';
 import { RequestSourceEnum } from '../../domain/value-objects/request-source.vo';
@@ -49,6 +55,51 @@ export class UpdateRequestDto {
   lines?: RequestLineDto[];
 }
 
+export class QuoteLineDto {
+  @ApiProperty({ format: 'uuid' }) @IsUUID() lineId!: string;
+  @ApiProperty({ minimum: 0 }) @Type(() => Number) @IsNumber() @Min(0) purchaseAmount!: number;
+  @ApiProperty({ minimum: 0 }) @Type(() => Number) @IsNumber() @Min(0) saleAmount!: number;
+}
+
+export class PrepareQuoteDto {
+  @ApiProperty({ type: [QuoteLineDto] })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => QuoteLineDto)
+  lines!: QuoteLineDto[];
+
+  @ApiProperty({ example: 'RUB' })
+  @IsString()
+  @Matches(/^[A-Za-z]{3}$/)
+  currency!: string;
+
+  @ApiProperty({ example: 'ООО «Мэджик Металл»' })
+  @IsString()
+  @Length(2, 255)
+  sellerName!: string;
+
+  @ApiPropertyOptional({ example: 'DAP Ташкент, срок поставки 20–25 дней' })
+  @IsOptional()
+  @IsString()
+  @Length(0, 500)
+  deliveryTerms?: string;
+
+  @ApiProperty({ minimum: 0 }) @Type(() => Number) @IsNumber() @Min(0) logisticsCost!: number;
+  @ApiProperty({ minimum: 0 }) @Type(() => Number) @IsNumber() @Min(0) otherCosts!: number;
+
+  @ApiPropertyOptional({ default: 5, minimum: 1, maximum: 90 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(90)
+  proposalValidityDays?: number;
+
+  @ApiProperty({ description: 'ISO datetime for the mandatory next contact' })
+  @IsDateString()
+  followUpAt!: string;
+}
+
 export class ParseRequestDto {
   @ApiProperty() @IsString() @Length(1, 100000) rawText!: string;
 }
@@ -66,6 +117,8 @@ export class RequestLineResponseDto {
   @ApiPropertyOptional() quantity?: string | null;
   @ApiPropertyOptional() unit?: string | null;
   @ApiPropertyOptional() rawLine?: string | null;
+  @ApiPropertyOptional() purchaseAmount?: number | null;
+  @ApiPropertyOptional() saleAmount?: number | null;
 }
 
 export class RequestResponseDto {
@@ -78,6 +131,19 @@ export class RequestResponseDto {
   @ApiProperty({ enum: RequestSourceEnum }) source!: RequestSourceEnum;
   @ApiProperty({ enum: RequestStatusEnum }) status!: RequestStatusEnum;
   @ApiPropertyOptional() searchResult?: Record<string, unknown> | null;
+  @ApiProperty() currency!: string;
+  @ApiPropertyOptional() sellerName!: string | null;
+  @ApiPropertyOptional() deliveryTerms!: string | null;
+  @ApiProperty() logisticsCost!: number;
+  @ApiProperty() otherCosts!: number;
+  @ApiProperty() purchaseTotal!: number;
+  @ApiProperty() saleTotal!: number;
+  @ApiProperty() profitAmount!: number;
+  @ApiProperty() marginPercent!: number;
+  @ApiPropertyOptional() proposalNumber!: string | null;
+  @ApiPropertyOptional() proposalIssuedAt!: string | null;
+  @ApiProperty() proposalValidityDays!: number;
+  @ApiPropertyOptional() followUpAt!: string | null;
   @ApiProperty({ type: [RequestLineResponseDto] }) lines!: RequestLineResponseDto[];
   @ApiProperty() createdAt!: string;
 }
