@@ -19,6 +19,7 @@ import { AccessTokenPayload } from '../../../auth/infrastructure/access-token.se
 import { requireOrganizationId } from '../../../auth/infrastructure/require-organization';
 import {
   CreateRequestDto,
+  MarkProposalSentDto,
   ParseRequestDto,
   ParseRequestResponseDto,
   PrepareQuoteDto,
@@ -28,6 +29,7 @@ import {
 } from '../../application/dto/request.dto';
 import {
   CreateRequestCommand,
+  MarkProposalSentCommand,
   PrepareQuoteCommand,
   SearchRequestCommand,
   UpdateRequestCommand,
@@ -162,6 +164,26 @@ export class RequestController {
       if (e instanceof Error) {
         if (e.message === 'Request not found') throw new NotFoundException(e.message);
         if (e.message.startsWith('Request quote:')) throw new BadRequestException(e.message);
+      }
+      throw e;
+    }
+    return this.getOrFail(id, organizationId);
+  }
+
+  @Post(':id/sent')
+  @ApiOkResponse({ type: RequestResponseDto })
+  async markProposalSent(
+    @CurrentUser() user: AccessTokenPayload,
+    @Param('id') id: string,
+    @Body() dto: MarkProposalSentDto,
+  ): Promise<RequestResponseDto> {
+    const organizationId = requireOrganizationId(user);
+    try {
+      await this.commandBus.execute(new MarkProposalSentCommand(id, organizationId, dto.sentVia));
+    } catch (e) {
+      if (e instanceof Error) {
+        if (e.message === 'Request not found') throw new NotFoundException(e.message);
+        if (e.message.startsWith('Request proposal:')) throw new BadRequestException(e.message);
       }
       throw e;
     }

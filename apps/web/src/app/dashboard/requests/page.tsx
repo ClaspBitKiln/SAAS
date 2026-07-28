@@ -16,6 +16,8 @@ interface RequestItem {
   profitAmount: number;
   currency: string;
   proposalNumber: string | null;
+  proposalSentAt: string | null;
+  proposalSentVia: string | null;
   followUpAt: string | null;
   createdAt: string;
 }
@@ -62,15 +64,22 @@ export default function RequestsPage() {
               <div>
                 <div className="font-medium">{r.title ?? ru.requests.untitled}</div>
                 <div className="text-sm text-slate-500">
-                  {ru.requests.lines(r.lines.length)} · {r.source} · {r.status === 'QUOTED' ? ru.requests.quoted : r.status}
+                  {ru.requests.lines(r.lines.length)} · {r.source} ·{' '}
+                  {r.status === 'SENT' ? ru.requests.sent : r.status === 'QUOTED' ? ru.requests.quoted : r.status}
                 </div>
-                {r.status === 'QUOTED' && (
+                {['QUOTED', 'SENT'].includes(r.status) && (
                   <div className="mt-1 text-xs text-emerald-400">
                     {r.proposalNumber} · {ru.requests.profit}: {new Intl.NumberFormat('ru-RU', {
                       style: 'currency',
                       currency: r.currency,
                       maximumFractionDigits: 2,
                     }).format(r.profitAmount)}
+                    {r.proposalSentAt
+                      ? ` · ${ru.requests.sentAt(
+                          new Intl.DateTimeFormat('ru-RU').format(new Date(r.proposalSentAt)),
+                          ru.requests.sentViaLabel(r.proposalSentVia ?? '—'),
+                        )}`
+                      : ''}
                     {r.followUpAt ? ` · Следующий контакт ${new Intl.DateTimeFormat('ru-RU').format(new Date(r.followUpAt))}` : ''}
                   </div>
                 )}

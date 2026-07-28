@@ -7,6 +7,7 @@ import {
 import { PrismaService } from '../../../database/prisma/prisma.service';
 import { Request } from '../domain/entities/request.entity';
 import { RequestRepository } from '../domain/repositories/request.repository';
+import { ProposalSentViaEnum } from '../domain/value-objects/proposal-sent-via.vo';
 import { RequestSourceEnum } from '../domain/value-objects/request-source.vo';
 import { RequestStatusEnum } from '../domain/value-objects/request-status.vo';
 
@@ -60,6 +61,8 @@ export class PrismaRequestRepository implements RequestRepository {
       proposalNumber: request.proposalNumber,
       proposalIssuedAt: request.proposalIssuedAt,
       proposalValidityDays: request.proposalValidityDays,
+      proposalSentAt: request.proposalSentAt,
+      proposalSentVia: request.proposalSentVia,
       followUpAt: request.followUpAt,
       deletedAt: request.deletedAt,
     };
@@ -141,6 +144,8 @@ export class PrismaRequestRepository implements RequestRepository {
     proposalNumber: string | null;
     proposalIssuedAt: Date | null;
     proposalValidityDays: number;
+    proposalSentAt: Date | null;
+    proposalSentVia: string | null;
     followUpAt: Date | null;
     version: number;
     createdAt: Date;
@@ -180,6 +185,8 @@ export class PrismaRequestRepository implements RequestRepository {
       proposalNumber: row.proposalNumber,
       proposalIssuedAt: row.proposalIssuedAt,
       proposalValidityDays: row.proposalValidityDays,
+      proposalSentAt: row.proposalSentAt,
+      proposalSentVia: row.proposalSentVia as ProposalSentViaEnum | null,
       followUpAt: row.followUpAt,
       lines: row.lines.map((line) => ({
         ...line,

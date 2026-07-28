@@ -27,6 +27,8 @@ export function toRequestResponse(request: Request): RequestResponseDto {
     proposalNumber: request.proposalNumber,
     proposalIssuedAt: request.proposalIssuedAt?.toISOString() ?? null,
     proposalValidityDays: request.proposalValidityDays,
+    proposalSentAt: request.proposalSentAt?.toISOString() ?? null,
+    proposalSentVia: request.proposalSentVia,
     followUpAt: request.followUpAt?.toISOString() ?? null,
     lines: request.lines.map((l) => ({
       id: l.id,

@@ -5,7 +5,8 @@ type RequestEventName =
   | 'request.created'
   | 'request.updated'
   | 'request.searched'
-  | 'request.quoted';
+  | 'request.quoted'
+  | 'request.proposal_sent';
 
 export function makeRequestEvent(
   name: RequestEventName,

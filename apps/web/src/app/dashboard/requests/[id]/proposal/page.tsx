@@ -3,7 +3,7 @@
 import { useParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { RequireAuth } from '@/components/RequireAuth';
-import { apiAuthGet } from '@/lib/api';
+import { apiAuthGet, apiAuthPost } from '@/lib/api';
 import { downloadProposalPdf } from '@/lib/proposal-pdf';
 import { ru } from '@/lib/ru';
 
@@ -29,6 +29,8 @@ interface RequestDetail {
   proposalNumber: string | null;
   proposalIssuedAt: string | null;
   proposalValidityDays: number;
+  proposalSentAt: string | null;
+  proposalSentVia: string | null;
   lines: RequestLine[];
 }
 
@@ -70,6 +72,9 @@ export default function ProposalPage() {
   const [error, setError] = useState<string | null>(null);
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState<string | null>(null);
+  const [sentVia, setSentVia] = useState('EMAIL');
+  const [markingSent, setMarkingSent] = useState(false);
+  const [sentError, setSentError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -104,6 +109,19 @@ export default function ProposalPage() {
     }
   }
 
+  async function onMarkSent() {
+    if (!request) return;
+    setMarkingSent(true);
+    setSentError(null);
+    try {
+      setRequest(await apiAuthPost<RequestDetail>(`/requests/${id}/sent`, { sentVia }));
+    } catch {
+      setSentError(ru.requests.markSentFailed);
+    } finally {
+      setMarkingSent(false);
+    }
+  }
+
   if (!request && !error) {
     return (
       <RequireAuth>
@@ -112,7 +130,7 @@ export default function ProposalPage() {
     );
   }
 
-  if (!request || request.status !== 'QUOTED') {
+  if (!request || !['QUOTED', 'SENT'].includes(request.status)) {
     return (
       <RequireAuth>
         <p className="text-amber-400">{error ?? ru.requests.proposalNotReady}</p>
@@ -143,6 +161,37 @@ export default function ProposalPage() {
           >
             {downloading ? ru.requests.downloadingProposal : ru.requests.downloadProposal}
           </button>
+          {request.status === 'SENT' ? (
+            <span className="rounded bg-emerald-100 px-4 py-2 text-sm text-emerald-800">
+              {ru.requests.sentAt(
+                date(request.proposalSentAt),
+                ru.requests.sentViaLabel(request.proposalSentVia ?? '—'),
+              )}
+            </span>
+          ) : (
+            <>
+              <select
+                value={sentVia}
+                onChange={(event) => setSentVia(event.target.value)}
+                aria-label={ru.requests.sentVia}
+                className="rounded border border-slate-300 bg-white px-3 py-2 text-sm"
+              >
+                <option value="EMAIL">{ru.requests.sentViaEmail}</option>
+                <option value="TELEGRAM">{ru.requests.sentViaTelegram}</option>
+                <option value="WHATSAPP">{ru.requests.sentViaWhatsapp}</option>
+                <option value="MAX">{ru.requests.sentViaMax}</option>
+                <option value="MANUAL">{ru.requests.sentViaManual}</option>
+              </select>
+              <button
+                type="button"
+                onClick={() => void onMarkSent()}
+                disabled={markingSent}
+                className="rounded bg-emerald-700 px-4 py-2 text-sm text-white disabled:opacity-60"
+              >
+                {markingSent ? ru.requests.markingSent : ru.requests.markSent}
+              </button>
+            </>
+          )}
           <button
             type="button"
             onClick={() => window.print()}
@@ -152,6 +201,7 @@ export default function ProposalPage() {
           </button>
         </div>
         {downloadError && <p className="print:hidden mb-4 text-right text-sm text-red-700">{downloadError}</p>}
+        {sentError && <p className="print:hidden mb-4 text-right text-sm text-red-700">{sentError}</p>}
 
         <header className="border-b-2 border-slate-900 pb-6">
           <div className="text-sm uppercase tracking-[0.2em] text-slate-500">{request.sellerName}</div>

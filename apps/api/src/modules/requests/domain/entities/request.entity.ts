@@ -1,6 +1,7 @@
 import { AggregateRoot } from '../../../../shared/domain/aggregate-root';
 import { newId } from '../../../../shared/infrastructure/uuid';
 import { makeRequestEvent } from '../events/request.events';
+import { ProposalSentViaEnum } from '../value-objects/proposal-sent-via.vo';
 import { RequestLine, RequestLineProps } from '../value-objects/request-line.vo';
 import { RequestSource, RequestSourceEnum } from '../value-objects/request-source.vo';
 import { RequestStatus, RequestStatusEnum } from '../value-objects/request-status.vo';
@@ -38,6 +39,8 @@ export class Request extends AggregateRoot {
   private _proposalNumber: string | null;
   private _proposalIssuedAt: Date | null;
   private _proposalValidityDays: number;
+  private _proposalSentAt: Date | null;
+  private _proposalSentVia: ProposalSentViaEnum | null;
   private _followUpAt: Date | null;
   private _lines: RequestLine[];
 
@@ -59,6 +62,8 @@ export class Request extends AggregateRoot {
     proposalNumber: string | null;
     proposalIssuedAt: Date | null;
     proposalValidityDays: number;
+    proposalSentAt: Date | null;
+    proposalSentVia: ProposalSentViaEnum | null;
     followUpAt: Date | null;
     lines: RequestLine[];
     version?: number;
@@ -87,6 +92,8 @@ export class Request extends AggregateRoot {
     this._proposalNumber = props.proposalNumber;
     this._proposalIssuedAt = props.proposalIssuedAt;
     this._proposalValidityDays = props.proposalValidityDays;
+    this._proposalSentAt = props.proposalSentAt;
+    this._proposalSentVia = props.proposalSentVia;
     this._followUpAt = props.followUpAt;
     this._lines = props.lines;
   }
@@ -121,6 +128,8 @@ export class Request extends AggregateRoot {
       proposalNumber: null,
       proposalIssuedAt: null,
       proposalValidityDays: 5,
+      proposalSentAt: null,
+      proposalSentVia: null,
       followUpAt: null,
       lines,
     });
@@ -146,6 +155,8 @@ export class Request extends AggregateRoot {
     proposalNumber: string | null;
     proposalIssuedAt: Date | null;
     proposalValidityDays: number;
+    proposalSentAt: Date | null;
+    proposalSentVia: ProposalSentViaEnum | null;
     followUpAt: Date | null;
     lines: Array<{ id: string; sortOrder: number } & RequestLineProps>;
     version: number;
@@ -230,6 +241,8 @@ export class Request extends AggregateRoot {
     this._proposalNumber = input.proposalNumber.trim();
     this._proposalIssuedAt = input.proposalIssuedAt;
     this._proposalValidityDays = input.proposalValidityDays;
+    this._proposalSentAt = null;
+    this._proposalSentVia = null;
     this._followUpAt = input.followUpAt;
     this._status = RequestStatus.quoted();
     this.touch();
@@ -237,6 +250,31 @@ export class Request extends AggregateRoot {
       proposalNumber: this._proposalNumber,
       profitAmount: this.profitAmount,
       followUpAt: this._followUpAt.toISOString(),
+    }));
+  }
+
+  markProposalSent(sentVia: ProposalSentViaEnum, sentAt: Date): void {
+    if (this._status.value !== RequestStatusEnum.QUOTED) {
+      throw new Error('Request proposal: quote must be prepared before marking sent');
+    }
+    if (!this._proposalIssuedAt) {
+      throw new Error('Request proposal: proposal issue date is missing');
+    }
+    if (Number.isNaN(sentAt.getTime()) || sentAt.getTime() < this._proposalIssuedAt.getTime()) {
+      throw new Error('Request proposal: sent date is invalid');
+    }
+    if (!Object.values(ProposalSentViaEnum).includes(sentVia)) {
+      throw new Error('Request proposal: sent channel is invalid');
+    }
+
+    this._proposalSentAt = sentAt;
+    this._proposalSentVia = sentVia;
+    this._status = RequestStatus.sent();
+    this.touch();
+    this.addEvent(makeRequestEvent('request.proposal_sent', this, {
+      proposalNumber: this._proposalNumber,
+      sentAt: sentAt.toISOString(),
+      sentVia,
     }));
   }
 
@@ -248,6 +286,8 @@ export class Request extends AggregateRoot {
     this._proposalNumber = null;
     this._proposalIssuedAt = null;
     this._proposalValidityDays = 5;
+    this._proposalSentAt = null;
+    this._proposalSentVia = null;
     this._followUpAt = null;
   }
 
@@ -266,6 +306,8 @@ export class Request extends AggregateRoot {
   get proposalNumber(): string | null { return this._proposalNumber; }
   get proposalIssuedAt(): Date | null { return this._proposalIssuedAt; }
   get proposalValidityDays(): number { return this._proposalValidityDays; }
+  get proposalSentAt(): Date | null { return this._proposalSentAt; }
+  get proposalSentVia(): ProposalSentViaEnum | null { return this._proposalSentVia; }
   get followUpAt(): Date | null { return this._followUpAt; }
   get lines(): RequestLine[] { return [...this._lines]; }
 

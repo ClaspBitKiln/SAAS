@@ -246,10 +246,15 @@ export default function RequestDetailPage() {
           <div>
             <h1 className="text-2xl font-semibold">{request?.title ?? ru.requests.detailTitle}</h1>
             <p className="mt-1 text-sm text-slate-500">
-              {ru.requests.status}: {request?.status === 'QUOTED' ? ru.requests.quoted : request?.status}
+              {ru.requests.status}:{' '}
+              {request?.status === 'SENT'
+                ? ru.requests.sent
+                : request?.status === 'QUOTED'
+                  ? ru.requests.quoted
+                  : request?.status}
             </p>
           </div>
-          {request?.status === 'QUOTED' && (
+          {request && ['QUOTED', 'SENT'].includes(request.status) && (
             <Link
               href={`/dashboard/requests/${id}/proposal`}
               className="rounded-md border border-emerald-500 px-4 py-2 text-sm text-emerald-300 hover:bg-emerald-950"
