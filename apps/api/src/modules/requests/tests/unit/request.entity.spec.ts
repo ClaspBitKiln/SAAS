@@ -87,9 +87,9 @@ describe('Request entity', () => {
         logisticsCost: 0,
         otherCosts: 0,
         proposalNumber: 'КП-1',
-        proposalIssuedAt: new Date(),
+        proposalIssuedAt: new Date('2026-07-28T12:00:00.000Z'),
         proposalValidityDays: 5,
-        followUpAt: new Date(),
+        followUpAt: new Date('2026-07-29T12:00:00.000Z'),
       }),
     ).toThrow('every line');
   });
