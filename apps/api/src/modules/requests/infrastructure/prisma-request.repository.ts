@@ -52,6 +52,15 @@ export class PrismaRequestRepository implements RequestRepository {
       status: request.status as PrismaRequestStatus,
       searchResult:
         request.searchResult != null ? (request.searchResult as Prisma.InputJsonValue) : undefined,
+      currency: request.currency,
+      sellerName: request.sellerName,
+      deliveryTerms: request.deliveryTerms,
+      logisticsCost: request.logisticsCost,
+      otherCosts: request.otherCosts,
+      proposalNumber: request.proposalNumber,
+      proposalIssuedAt: request.proposalIssuedAt,
+      proposalValidityDays: request.proposalValidityDays,
+      followUpAt: request.followUpAt,
       deletedAt: request.deletedAt,
     };
 
@@ -75,6 +84,8 @@ export class PrismaRequestRepository implements RequestRepository {
             quantity: l.quantity,
             unit: l.unit,
             rawLine: l.rawLine,
+            purchaseAmount: l.purchaseAmount,
+            saleAmount: l.saleAmount,
           })),
         }),
       ]);
@@ -104,6 +115,8 @@ export class PrismaRequestRepository implements RequestRepository {
             quantity: l.quantity,
             unit: l.unit,
             rawLine: l.rawLine,
+            purchaseAmount: l.purchaseAmount,
+            saleAmount: l.saleAmount,
           })),
         });
       }
@@ -120,6 +133,15 @@ export class PrismaRequestRepository implements RequestRepository {
     source: PrismaRequestSource;
     status: PrismaRequestStatus;
     searchResult: Prisma.JsonValue | null;
+    currency: string;
+    sellerName: string | null;
+    deliveryTerms: string | null;
+    logisticsCost: Prisma.Decimal;
+    otherCosts: Prisma.Decimal;
+    proposalNumber: string | null;
+    proposalIssuedAt: Date | null;
+    proposalValidityDays: number;
+    followUpAt: Date | null;
     version: number;
     createdAt: Date;
     updatedAt: Date;
@@ -136,6 +158,8 @@ export class PrismaRequestRepository implements RequestRepository {
       quantity: string | null;
       unit: string | null;
       rawLine: string | null;
+      purchaseAmount: Prisma.Decimal | null;
+      saleAmount: Prisma.Decimal | null;
     }>;
   }): Request {
     return Request.rehydrate({
@@ -148,7 +172,20 @@ export class PrismaRequestRepository implements RequestRepository {
       source: row.source as RequestSourceEnum,
       status: row.status as RequestStatusEnum,
       searchResult: (row.searchResult as Record<string, unknown> | null) ?? null,
-      lines: row.lines,
+      currency: row.currency,
+      sellerName: row.sellerName,
+      deliveryTerms: row.deliveryTerms,
+      logisticsCost: Number(row.logisticsCost),
+      otherCosts: Number(row.otherCosts),
+      proposalNumber: row.proposalNumber,
+      proposalIssuedAt: row.proposalIssuedAt,
+      proposalValidityDays: row.proposalValidityDays,
+      followUpAt: row.followUpAt,
+      lines: row.lines.map((line) => ({
+        ...line,
+        purchaseAmount: line.purchaseAmount == null ? null : Number(line.purchaseAmount),
+        saleAmount: line.saleAmount == null ? null : Number(line.saleAmount),
+      })),
       version: row.version,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,

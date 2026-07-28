@@ -1,7 +1,11 @@
 import { DomainEvent } from '../../../../shared/domain/domain-event';
 import { newId } from '../../../../shared/infrastructure/uuid';
 
-type RequestEventName = 'request.created' | 'request.updated' | 'request.searched';
+type RequestEventName =
+  | 'request.created'
+  | 'request.updated'
+  | 'request.searched'
+  | 'request.quoted';
 
 export function makeRequestEvent(
   name: RequestEventName,

@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 
@@ -11,12 +12,13 @@ export interface E2eAuthContext {
 }
 
 export async function bootstrapE2eAuth(app: INestApplication): Promise<E2eAuthContext> {
-  const email = `e2e-auth-${Date.now()}@example.com`;
+  const runId = randomUUID();
+  const email = `e2e-auth-${runId}@example.com`;
   const password = 'securepass1';
 
   const tenantRes = await request(app.getHttpServer())
     .post('/tenants')
-    .send({ name: 'E2E Auth Tenant', slug: `e2e-auth-${Date.now()}` })
+    .send({ name: 'E2E Auth Tenant', slug: `e2e-auth-${runId}` })
     .expect(201);
   const tenantId = tenantRes.body.id;
 

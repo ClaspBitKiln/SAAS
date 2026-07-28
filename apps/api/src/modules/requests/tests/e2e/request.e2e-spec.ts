@@ -55,4 +55,80 @@ describe('Request E2E', () => {
     const list = await request(app.getHttpServer()).get('/requests').set(authHeader(token)).expect(200);
     expect(list.body.total).toBeGreaterThanOrEqual(1);
   });
+
+  it('rejects a quote with a follow-up date in the past', async () => {
+    const created = await request(app.getHttpServer())
+      .post('/requests')
+      .set(authHeader(token))
+      .send({
+        title: 'Past follow-up E2E',
+        source: 'MANUAL',
+        lines: [{ rawLine: 'Лист 6 мм Ст3 — 1 т', quantity: '1', unit: 'т' }],
+      })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post(`/requests/${created.body.id}/quote`)
+      .set(authHeader(token))
+      .send({
+        lines: [{
+          lineId: created.body.lines[0].id,
+          purchaseAmount: 50000,
+          saleAmount: 70000,
+        }],
+        currency: 'RUB',
+        sellerName: 'ООО Мэджик Металл',
+        logisticsCost: 0,
+        otherCosts: 0,
+        proposalValidityDays: 5,
+        followUpAt: '2000-01-01T00:00:00.000Z',
+      })
+      .expect(400);
+  });
+
+  it('prepares quote, calculates profit and creates follow-up task', async () => {
+    const created = await request(app.getHttpServer())
+      .post('/requests')
+      .set(authHeader(token))
+      .send({
+        title: 'Quote E2E',
+        source: 'MANUAL',
+        lines: [{ rawLine: 'Лист 6 мм Ст3 — 10 т', quantity: '10', unit: 'т' }],
+      })
+      .expect(201);
+
+    const followUpAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+    const quoted = await request(app.getHttpServer())
+      .post(`/requests/${created.body.id}/quote`)
+      .set(authHeader(token))
+      .send({
+        lines: [{
+          lineId: created.body.lines[0].id,
+          purchaseAmount: 50000,
+          saleAmount: 70000,
+        }],
+        currency: 'RUB',
+        sellerName: 'ООО Мэджик Металл',
+        deliveryTerms: 'DAP Ташкент',
+        logisticsCost: 2000,
+        otherCosts: 1000,
+        proposalValidityDays: 5,
+        followUpAt,
+      })
+      .expect(201);
+
+    expect(quoted.body.status).toBe('QUOTED');
+    expect(quoted.body.purchaseTotal).toBe(50000);
+    expect(quoted.body.saleTotal).toBe(70000);
+    expect(quoted.body.profitAmount).toBe(17000);
+    expect(quoted.body.marginPercent).toBe(24.29);
+    expect(quoted.body.proposalNumber).toMatch(/^КП-\d{8}-/);
+    expect(quoted.body.followUpAt).toBe(followUpAt);
+
+    const tasks = await request(app.getHttpServer())
+      .get('/tasks?status=OPEN&size=100')
+      .set(authHeader(token))
+      .expect(200);
+    expect(tasks.body.items.some((task: { title: string }) => task.title.includes(quoted.body.proposalNumber))).toBe(true);
+  });
 });

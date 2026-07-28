@@ -21,12 +21,14 @@ import {
   CreateRequestDto,
   ParseRequestDto,
   ParseRequestResponseDto,
+  PrepareQuoteDto,
   RequestListResponseDto,
   RequestResponseDto,
   UpdateRequestDto,
 } from '../../application/dto/request.dto';
 import {
   CreateRequestCommand,
+  PrepareQuoteCommand,
   SearchRequestCommand,
   UpdateRequestCommand,
 } from '../../application/commands/request.commands';
@@ -126,6 +128,40 @@ export class RequestController {
       if (e instanceof Error) {
         if (e.message === 'Request not found') throw new NotFoundException(e.message);
         if (e.message === 'Contact not found') throw new BadRequestException(e.message);
+      }
+      throw e;
+    }
+    return this.getOrFail(id, organizationId);
+  }
+
+  @Post(':id/quote')
+  @ApiOkResponse({ type: RequestResponseDto })
+  async prepareQuote(
+    @CurrentUser() user: AccessTokenPayload,
+    @Param('id') id: string,
+    @Body() dto: PrepareQuoteDto,
+  ): Promise<RequestResponseDto> {
+    const organizationId = requireOrganizationId(user);
+    try {
+      await this.commandBus.execute(
+        new PrepareQuoteCommand(
+          id,
+          organizationId,
+          user.sub,
+          dto.lines,
+          dto.currency,
+          dto.sellerName,
+          dto.deliveryTerms,
+          dto.logisticsCost,
+          dto.otherCosts,
+          dto.proposalValidityDays ?? 5,
+          new Date(dto.followUpAt),
+        ),
+      );
+    } catch (e) {
+      if (e instanceof Error) {
+        if (e.message === 'Request not found') throw new NotFoundException(e.message);
+        if (e.message.startsWith('Request quote:')) throw new BadRequestException(e.message);
       }
       throw e;
     }

@@ -1,5 +1,5 @@
 import { Inject } from '@nestjs/common';
-import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
+import { CommandBus, CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
 import {
   ORGANIZATION_REPOSITORY,
   OrganizationRepository,
@@ -9,10 +9,13 @@ import {
   ContactRepository,
 } from '../../../contacts/domain/repositories/contact.repository';
 import { EMetallIntegrationService } from '../../../e-metall/application/services/e-metall-integration.service';
+import { CreateTaskCommand } from '../../../tasks/application/commands/task.commands';
+import { TaskTypeEnum } from '../../../tasks/domain/value-objects/task-enums';
 import { Request } from '../../domain/entities/request.entity';
 import { REQUEST_REPOSITORY, RequestRepository } from '../../domain/repositories/request.repository';
 import {
   CreateRequestCommand,
+  PrepareQuoteCommand,
   SearchRequestCommand,
   UpdateRequestCommand,
 } from '../commands/request.commands';
@@ -71,6 +74,51 @@ export class UpdateRequestHandler implements ICommandHandler<UpdateRequestComman
     });
     await this.requestRepo.save(request);
     request.pullEvents().forEach((e) => this.eventBus.publish(e));
+  }
+}
+
+@CommandHandler(PrepareQuoteCommand)
+export class PrepareQuoteHandler implements ICommandHandler<PrepareQuoteCommand> {
+  constructor(
+    @Inject(REQUEST_REPOSITORY) private readonly requestRepo: RequestRepository,
+    private readonly commandBus: CommandBus,
+    private readonly eventBus: EventBus,
+  ) {}
+
+  async execute(cmd: PrepareQuoteCommand): Promise<void> {
+    const request = await this.requestRepo.findById(cmd.id, cmd.organizationId);
+    if (!request) throw new Error('Request not found');
+
+    const issuedAt = new Date();
+    const datePart = issuedAt.toISOString().slice(0, 10).replace(/-/g, '');
+    const proposalNumber = request.proposalNumber ?? `КП-${datePart}-${request.id.slice(0, 6).toUpperCase()}`;
+    request.prepareQuote({
+      lines: cmd.lines,
+      currency: cmd.currency,
+      sellerName: cmd.sellerName,
+      deliveryTerms: cmd.deliveryTerms,
+      logisticsCost: cmd.logisticsCost,
+      otherCosts: cmd.otherCosts,
+      proposalNumber,
+      proposalIssuedAt: issuedAt,
+      proposalValidityDays: cmd.proposalValidityDays,
+      followUpAt: cmd.followUpAt,
+    });
+    await this.requestRepo.save(request);
+    request.pullEvents().forEach((e) => this.eventBus.publish(e));
+
+    await this.commandBus.execute(
+      new CreateTaskCommand(
+        cmd.organizationId,
+        `Связаться по ${proposalNumber}: ${request.title ?? 'заявка на металл'}`,
+        cmd.followUpAt,
+        TaskTypeEnum.CALL,
+        undefined,
+        request.contactId,
+        undefined,
+        cmd.currentUserId,
+      ),
+    );
   }
 }
 
