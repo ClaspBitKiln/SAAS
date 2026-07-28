@@ -9,6 +9,16 @@ export interface RequestLineProps {
   quantity?: string | null;
   unit?: string | null;
   rawLine?: string | null;
+  purchaseAmount?: number | null;
+  saleAmount?: number | null;
+}
+
+function money(value: number | null | undefined, field: string): number | null {
+  if (value === null || value === undefined) return null;
+  if (!Number.isFinite(value) || value < 0) {
+    throw new Error(`Request quote: ${field} must be a non-negative number`);
+  }
+  return Math.round(value * 100) / 100;
 }
 
 export class RequestLine {
@@ -24,6 +34,8 @@ export class RequestLine {
   readonly quantity: string | null;
   readonly unit: string | null;
   readonly rawLine: string | null;
+  readonly purchaseAmount: number | null;
+  readonly saleAmount: number | null;
 
   private constructor(id: string, sortOrder: number, props: RequestLineProps) {
     this.id = id;
@@ -38,6 +50,8 @@ export class RequestLine {
     this.quantity = props.quantity?.trim() || null;
     this.unit = props.unit?.trim() || null;
     this.rawLine = props.rawLine?.trim() || null;
+    this.purchaseAmount = money(props.purchaseAmount, 'purchase amount');
+    this.saleAmount = money(props.saleAmount, 'sale amount');
   }
 
   static create(id: string, sortOrder: number, props: RequestLineProps): RequestLine {
@@ -49,5 +63,22 @@ export class RequestLine {
 
   static rehydrate(id: string, sortOrder: number, props: RequestLineProps): RequestLine {
     return new RequestLine(id, sortOrder, props);
+  }
+
+  withCommercials(purchaseAmount: number, saleAmount: number): RequestLine {
+    return new RequestLine(this.id, this.sortOrder, {
+      gost: this.gost,
+      steelGrade: this.steelGrade,
+      productType: this.productType,
+      dimensions: this.dimensions,
+      length: this.length,
+      thickness: this.thickness,
+      coating: this.coating,
+      quantity: this.quantity,
+      unit: this.unit,
+      rawLine: this.rawLine,
+      purchaseAmount,
+      saleAmount,
+    });
   }
 }
