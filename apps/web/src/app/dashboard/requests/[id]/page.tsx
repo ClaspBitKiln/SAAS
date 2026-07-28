@@ -69,9 +69,15 @@ function toLocalDateTime(value: string | null): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
+function parseAmount(value: string): number | null {
+  const normalized = value.replace(/\s/g, '').replace(',', '.');
+  if (!/^\d+(?:\.\d+)?$/.test(normalized)) return null;
+  const parsed = Number(normalized);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+}
+
 function numberValue(value: string): number {
-  const parsed = Number(value.replace(',', '.').replace(/\s/g, ''));
-  return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
+  return parseAmount(value) ?? 0;
 }
 
 function money(value: number, currency: string): string {
@@ -166,6 +172,28 @@ export default function RequestDetailPage() {
       setError(ru.requests.quoteEveryLine);
       return;
     }
+    const amountValues = [
+      ...request.lines.flatMap((line) => [
+        commercials[line.id].purchaseAmount,
+        commercials[line.id].saleAmount,
+      ]),
+      logisticsCost,
+      otherCosts,
+    ];
+    if (amountValues.some((value) => parseAmount(value) === null)) {
+      setError(ru.requests.quoteInvalidAmount);
+      return;
+    }
+    const validity = Number(validityDays);
+    if (!Number.isInteger(validity) || validity < 1 || validity > 90) {
+      setError(ru.requests.quoteInvalidValidity);
+      return;
+    }
+    const followUpDate = new Date(followUpAt);
+    if (Number.isNaN(followUpDate.getTime()) || followUpDate.getTime() <= Date.now()) {
+      setError(ru.requests.quoteFollowUpFuture);
+      return;
+    }
     setSavingQuote(true);
     setError(null);
     try {
@@ -180,8 +208,8 @@ export default function RequestDetailPage() {
         deliveryTerms: deliveryTerms || undefined,
         logisticsCost: numberValue(logisticsCost),
         otherCosts: numberValue(otherCosts),
-        proposalValidityDays: Number(validityDays),
-        followUpAt: new Date(followUpAt).toISOString(),
+        proposalValidityDays: validity,
+        followUpAt: followUpDate.toISOString(),
       });
       applyRequest(data);
     } catch (caught) {
@@ -336,6 +364,7 @@ export default function RequestDetailPage() {
               <input
                 required
                 type="datetime-local"
+                min={toLocalDateTime(new Date().toISOString())}
                 value={followUpAt}
                 onChange={(event) => setFollowUpAt(event.target.value)}
                 className="mt-1 w-full rounded border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white"
