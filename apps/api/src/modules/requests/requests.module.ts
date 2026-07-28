@@ -4,11 +4,13 @@ import { PrismaService } from '../../database/prisma/prisma.service';
 import { PlatformModule } from '../platform/platform.module';
 import { ContactsModule } from '../contacts/contacts.module';
 import { EMetallModule } from '../e-metall/e-metall.module';
+import { TasksModule } from '../tasks/tasks.module';
 import { REQUEST_REPOSITORY } from './domain/repositories/request.repository';
 import { PrismaRequestRepository } from './infrastructure/prisma-request.repository';
 import { RequestController } from './presentation/controllers/request.controller';
 import {
   CreateRequestHandler,
+  PrepareQuoteHandler,
   SearchRequestHandler,
   UpdateRequestHandler,
 } from './application/handlers/request.command-handlers';
@@ -16,7 +18,7 @@ import { GetRequestHandler, ListRequestsHandler } from './application/handlers/r
 import { RequestParseService } from './application/services/request-parse.service';
 
 @Module({
-  imports: [CqrsModule, PlatformModule, ContactsModule, EMetallModule],
+  imports: [CqrsModule, PlatformModule, ContactsModule, EMetallModule, TasksModule],
   controllers: [RequestController],
   providers: [
     PrismaService,
@@ -24,6 +26,7 @@ import { RequestParseService } from './application/services/request-parse.servic
     RequestParseService,
     CreateRequestHandler,
     UpdateRequestHandler,
+    PrepareQuoteHandler,
     SearchRequestHandler,
     GetRequestHandler,
     ListRequestsHandler,
