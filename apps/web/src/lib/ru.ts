@@ -225,7 +225,10 @@ export const ru = {
     quoteFollowUpFuture: 'Дата следующего контакта должна быть в будущем.',
     quoteFailed: 'Не удалось сформировать КП',
     openProposal: 'Открыть КП',
-    printProposal: 'Печать / сохранить PDF',
+    downloadProposal: 'Скачать PDF',
+    downloadingProposal: 'Готовим PDF…',
+    downloadProposalFailed: 'Не удалось скачать PDF. Используйте печать как запасной вариант.',
+    printProposal: 'Печать',
     proposalNotReady: 'Сначала выполните расчёт и сформируйте КП.',
   },
 

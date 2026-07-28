@@ -4,6 +4,7 @@ import { useParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { RequireAuth } from '@/components/RequireAuth';
 import { apiAuthGet } from '@/lib/api';
+import { downloadProposalPdf } from '@/lib/proposal-pdf';
 import { ru } from '@/lib/ru';
 
 interface RequestLine {
@@ -67,6 +68,8 @@ export default function ProposalPage() {
   const [contact, setContact] = useState<Contact | null>(null);
   const [company, setCompany] = useState<Company | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -87,6 +90,19 @@ export default function ProposalPage() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  async function onDownloadPdf() {
+    if (!request) return;
+    setDownloading(true);
+    setDownloadError(null);
+    try {
+      await downloadProposalPdf({ request, contact, company });
+    } catch {
+      setDownloadError(ru.requests.downloadProposalFailed);
+    } finally {
+      setDownloading(false);
+    }
+  }
 
   if (!request && !error) {
     return (
@@ -111,7 +127,7 @@ export default function ProposalPage() {
   return (
     <RequireAuth>
       <div className="proposal mx-auto max-w-4xl bg-white p-10 text-slate-950 shadow-xl">
-        <div className="print:hidden mb-6 flex justify-end gap-3">
+        <div className="print:hidden mb-6 flex flex-wrap justify-end gap-3">
           <button
             type="button"
             onClick={() => window.history.back()}
@@ -121,12 +137,21 @@ export default function ProposalPage() {
           </button>
           <button
             type="button"
+            onClick={() => void onDownloadPdf()}
+            disabled={downloading}
+            className="rounded bg-blue-700 px-4 py-2 text-sm text-white disabled:opacity-60"
+          >
+            {downloading ? ru.requests.downloadingProposal : ru.requests.downloadProposal}
+          </button>
+          <button
+            type="button"
             onClick={() => window.print()}
-            className="rounded bg-blue-700 px-4 py-2 text-sm text-white"
+            className="rounded border border-slate-300 px-4 py-2 text-sm"
           >
             {ru.requests.printProposal}
           </button>
         </div>
+        {downloadError && <p className="print:hidden mb-4 text-right text-sm text-red-700">{downloadError}</p>}
 
         <header className="border-b-2 border-slate-900 pb-6">
           <div className="text-sm uppercase tracking-[0.2em] text-slate-500">{request.sellerName}</div>
