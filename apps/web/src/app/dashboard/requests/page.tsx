@@ -13,6 +13,10 @@ interface RequestItem {
   status: string;
   source: string;
   lines: { rawLine?: string | null; steelGrade?: string | null }[];
+  profitAmount: number;
+  currency: string;
+  proposalNumber: string | null;
+  followUpAt: string | null;
   createdAt: string;
 }
 
@@ -58,8 +62,18 @@ export default function RequestsPage() {
               <div>
                 <div className="font-medium">{r.title ?? ru.requests.untitled}</div>
                 <div className="text-sm text-slate-500">
-                  {ru.requests.lines(r.lines.length)} · {r.source} · {r.status}
+                  {ru.requests.lines(r.lines.length)} · {r.source} · {r.status === 'QUOTED' ? ru.requests.quoted : r.status}
                 </div>
+                {r.status === 'QUOTED' && (
+                  <div className="mt-1 text-xs text-emerald-400">
+                    {r.proposalNumber} · {ru.requests.profit}: {new Intl.NumberFormat('ru-RU', {
+                      style: 'currency',
+                      currency: r.currency,
+                      maximumFractionDigits: 2,
+                    }).format(r.profitAmount)}
+                    {r.followUpAt ? ` · Следующий контакт ${new Intl.DateTimeFormat('ru-RU').format(new Date(r.followUpAt))}` : ''}
+                  </div>
+                )}
               </div>
               <Link href={`/dashboard/requests/${r.id}`} className="text-sm text-blue-400 hover:underline">
                 {ru.common.open}
