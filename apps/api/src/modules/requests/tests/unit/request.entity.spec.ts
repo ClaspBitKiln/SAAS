@@ -209,6 +209,7 @@ describe('Request entity', () => {
     request.markProposalSent(
       ProposalSentViaEnum.EMAIL,
       new Date('2026-07-28T13:00:00.000Z'),
+      'buyer@example.com',
     );
     request.recordOutcome(
       RequestOutcomeEnum.WON,
