@@ -65,7 +65,14 @@ export class RequestController {
     @UploadedFile() file: { buffer: Buffer; mimetype: string; originalname: string } | undefined,
   ): Promise<ParseRequestResponseDto> {
     if (!file) throw new BadRequestException('file required');
-    return this.parseService.parseFileBuffer(file.buffer, file.mimetype, file.originalname);
+    try {
+      return await this.parseService.parseFileBuffer(file.buffer, file.mimetype, file.originalname);
+    } catch (error) {
+      if (error instanceof Error && error.message === 'Unsupported request file type') {
+        throw new BadRequestException(error.message);
+      }
+      throw error;
+    }
   }
 
   @Post()
@@ -82,6 +89,7 @@ export class RequestController {
           dto.contactId,
           dto.title,
           dto.notes,
+          dto.sourceText,
           dto.source ?? RequestSourceEnum.MANUAL,
           dto.lines,
         ),
