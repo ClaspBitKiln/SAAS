@@ -28,6 +28,7 @@ export class Request extends AggregateRoot {
   private _contactId: string | null;
   private _title: string | null;
   private _notes: string | null;
+  private _sourceText: string | null;
   private _source: RequestSource;
   private _status: RequestStatus;
   private _searchResult: Record<string, unknown> | null;
@@ -51,6 +52,7 @@ export class Request extends AggregateRoot {
     contactId: string | null;
     title: string | null;
     notes: string | null;
+    sourceText: string | null;
     source: RequestSource;
     status: RequestStatus;
     searchResult: Record<string, unknown> | null;
@@ -81,6 +83,7 @@ export class Request extends AggregateRoot {
     this._contactId = props.contactId;
     this._title = props.title;
     this._notes = props.notes;
+    this._sourceText = props.sourceText;
     this._source = props.source;
     this._status = props.status;
     this._searchResult = props.searchResult;
@@ -104,6 +107,7 @@ export class Request extends AggregateRoot {
     contactId?: string | null;
     title?: string | null;
     notes?: string | null;
+    sourceText?: string | null;
     source: RequestSourceEnum;
     lines: RequestLineProps[];
   }): Request {
@@ -117,7 +121,13 @@ export class Request extends AggregateRoot {
       contactId: input.contactId ?? null,
       title: input.title?.trim() || null,
       notes: input.notes?.trim() || null,
-      source: input.source === RequestSourceEnum.FILE ? RequestSource.file() : RequestSource.manual(),
+      sourceText: input.sourceText?.trim() || null,
+      source:
+        input.source === RequestSourceEnum.FILE
+          ? RequestSource.file()
+          : input.source === RequestSourceEnum.PASTED
+            ? RequestSource.pasted()
+            : RequestSource.manual(),
       status: RequestStatus.draft(),
       searchResult: null,
       currency: 'RUB',
@@ -144,6 +154,7 @@ export class Request extends AggregateRoot {
     contactId: string | null;
     title: string | null;
     notes: string | null;
+    sourceText: string | null;
     source: RequestSourceEnum;
     status: RequestStatusEnum;
     searchResult: Record<string, unknown> | null;
@@ -295,6 +306,7 @@ export class Request extends AggregateRoot {
   get contactId(): string | null { return this._contactId; }
   get title(): string | null { return this._title; }
   get notes(): string | null { return this._notes; }
+  get sourceText(): string | null { return this._sourceText; }
   get source(): RequestSourceEnum { return this._source.value; }
   get status(): RequestStatusEnum { return this._status.value; }
   get searchResult(): Record<string, unknown> | null { return this._searchResult; }
