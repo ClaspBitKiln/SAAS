@@ -128,6 +128,12 @@ describe('Request E2E', () => {
     expect(quoted.body.proposalNumber).toMatch(/^КП-\d{8}-/);
     expect(quoted.body.followUpAt).toBe(followUpAt);
 
+    await request(app.getHttpServer())
+      .post(`/requests/${created.body.id}/send-email`)
+      .set(authHeader(token))
+      .send({ to: 'buyer@example.com' })
+      .expect(503);
+
     const downloaded = await request(app.getHttpServer())
       .post(`/requests/${created.body.id}/downloaded`)
       .set(authHeader(token))

@@ -305,9 +305,9 @@ export const ru = {
     sentViaManual: 'Другой канал',
     sentTo: 'Адресат: e-mail, телефон или аккаунт',
     sentToRequired: 'Укажите адресата для выбранного канала отправки.',
-    markSent: 'Отметить отправленным',
-    markingSent: 'Сохраняем…',
-    markSentFailed: 'Не удалось отметить КП отправленным.',
+    markSent: 'Отправить / отметить',
+    markingSent: 'Отправляем…',
+    markSentFailed: 'Не удалось отправить или отметить КП.',
     sentViaLabel: (channel: string) =>
       ({
         EMAIL: 'Email',

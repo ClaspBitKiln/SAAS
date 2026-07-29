@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+tool_cache="${repo_root}/.tool-cache"
+
+export COREPACK_HOME="${tool_cache}/corepack"
+export PNPM_HOME="${tool_cache}/pnpm"
+export npm_config_store_dir="${tool_cache}/pnpm-store"
+export XDG_CACHE_HOME="${tool_cache}/xdg"
+export XDG_CONFIG_HOME="${tool_cache}/xdg-config"
+export XDG_DATA_HOME="${tool_cache}/xdg-data"
+export XDG_STATE_HOME="${tool_cache}/xdg-state"
+
+exec corepack pnpm "$@"

@@ -128,10 +128,14 @@ export default function ProposalPage() {
     setSentError(null);
     try {
       setRequest(
-        await apiAuthPost<RequestDetail>(`/requests/${id}/sent`, {
-          sentVia,
-          sentTo: sentTo.trim() || undefined,
-        }),
+        sentVia === 'EMAIL'
+          ? await apiAuthPost<RequestDetail>(`/requests/${id}/send-email`, {
+              to: sentTo.trim(),
+            })
+          : await apiAuthPost<RequestDetail>(`/requests/${id}/sent`, {
+              sentVia,
+              sentTo: sentTo.trim() || undefined,
+            }),
       );
     } catch {
       setSentError(ru.requests.markSentFailed);

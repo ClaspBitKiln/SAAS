@@ -3,6 +3,7 @@ import { Type } from 'class-transformer';
 import {
   IsArray,
   IsDateString,
+  IsEmail,
   IsEnum,
   IsInt,
   IsNumber,
@@ -126,6 +127,13 @@ export class MarkProposalSentDto {
   @IsString()
   @Length(1, 255)
   sentTo?: string;
+}
+
+export class SendProposalEmailDto {
+  @ApiProperty({ example: 'buyer@example.com' })
+  @IsEmail()
+  @Length(3, 255)
+  to!: string;
 }
 
 export class RecordRequestOutcomeDto {

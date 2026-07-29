@@ -19,6 +19,11 @@ import {
 } from './application/handlers/request.command-handlers';
 import { GetRequestHandler, ListRequestsHandler } from './application/handlers/request.query-handlers';
 import { RequestParseService } from './application/services/request-parse.service';
+import {
+  PROPOSAL_EMAIL_SENDER,
+  ProposalEmailService,
+} from './application/services/proposal-email.service';
+import { SmtpProposalEmailSender } from './infrastructure/smtp-proposal-email.sender';
 
 @Module({
   imports: [CqrsModule, PlatformModule, ContactsModule, EMetallModule, TasksModule],
@@ -27,6 +32,8 @@ import { RequestParseService } from './application/services/request-parse.servic
     PrismaService,
     { provide: REQUEST_REPOSITORY, useClass: PrismaRequestRepository },
     RequestParseService,
+    ProposalEmailService,
+    { provide: PROPOSAL_EMAIL_SENDER, useClass: SmtpProposalEmailSender },
     CreateRequestHandler,
     UpdateRequestHandler,
     PrepareQuoteHandler,
