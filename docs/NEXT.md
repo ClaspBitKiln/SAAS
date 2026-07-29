@@ -4,12 +4,21 @@
 
 ---
 
-CURRENT
-**STOP по коду** — Tasks + Country + INN autofill + throttle fix = **DONE** (CI_GREEN run #95, `1641dbd`, 2026-07-04).
+CURRENT (обновлено 2026-07-29)
 
-**Следующий приоритет (Founder → Claude, не Cursor):** Request-to-Quote MVP — дизайн «заявка → расценка менеджером → КП/счёт». См. backlog/request-to-cash-automation.md.
+**Кодовый Golden Path завершён:** заявка → проверка распознавания → детерминированная
+расценка из XLSX/CSV → PDF-КП → подтверждённая отправка по SMTP → follow-up →
+результат → хронология. Последние этапы: PR #33–#38, `main` = `1e26718`.
 
-**Параллельно (Founder, без кода):** первый менеджер + фидбек (скриншот RU UI → приглашение Кирилл m2 / Артём m5 → watch-session).
+**Активный шаг A6 (Founder, без нового кода):** один реальный менеджер проходит
+production-путь без помощи; записываются базовое время и ответы на 3 вопроса.
+
+**Не начинать до пилота:** новые модули, R5–R6 рассылки поставщикам, мессенджеры,
+телефония, AI-решения по цене/риску и полная загрузка CRM на 17 752 строки.
+
+**Внешняя настройка:** SMTP-код готов, но реальные письма возможны только после
+добавления `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM`
+в Railway. Секреты не хранить в git/документации/чате.
 
 STATUS (предыдущий шаг)
 ✅ **Ответственный менеджер — DONE** (CI_GREEN 2026-07-04, run #91, `293763e`; evidence `STEP_2026-07-04_OWNER_USER.md`). Railway redeploy авто; проверка прода — ниже.
@@ -96,7 +105,10 @@ Platform+Auth · Contact+Notes+Search · Company CRUD+search (`fab5d9f`, run #78
 web https://web-production-e22e3.up.railway.app · api https://api-production-7f43a.up.railway.app · `/health` ok
 
 BLOCKERS
-Founder: prod smoke Tasks/Country (меню «Задачи», select страны) + приглашение менеджера. Claude: Request-to-Quote дизайн — до нового задания Cursor.
+Founder: выбрать одного реального менеджера и провести A6 watch-session.
+Для реальной e-mail-отправки: настроить корпоративный SMTP в Railway.
+Это внешние шаги; они не должны блокировать локальную разработку или CI, но до
+пилота новая продуктовая функциональность не выбирается.
 
 ## Примечание (док↔код) — RESOLVED 2026-07-03
 Claude подтвердил: связка Contact→Company частично внедрена (schema+migration+e2e+UI), но не закоммичена и не проверена CI → статус UNPROVEN. Решение: изолировать в ветку (см. chore выше), не расширять до фидбека.
