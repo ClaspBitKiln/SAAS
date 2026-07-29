@@ -282,6 +282,7 @@ model Task {
 // ===== context: crm (Request / заявка MVP) =====
 enum RequestSource {
   MANUAL
+  PASTED
   FILE
 }
 
@@ -299,6 +300,7 @@ model Request {
   contactId      String?       @db.Uuid
   title          String?       @db.VarChar(255)
   notes          String?       @db.VarChar(2000)
+  sourceText     String?       @db.Text
   source         RequestSource @default(MANUAL)
   status         RequestStatus @default(DRAFT)
   searchResult          Json?

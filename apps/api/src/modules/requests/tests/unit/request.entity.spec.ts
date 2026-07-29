@@ -20,6 +20,19 @@ describe('Request entity', () => {
     expect(request.status).toBe(RequestStatusEnum.DRAFT);
   });
 
+  it('retains pasted source text for manager review', () => {
+    const request = Request.create({
+      tenantId: '019f21bd-fa4e-786c-a1d5-9963d27fde55',
+      organizationId: '019f21bd-fa86-79a2-beb6-f2f3c74371d8',
+      source: RequestSourceEnum.PASTED,
+      sourceText: 'Добрый день!\nЛист 5х1500х6000 09Г2С — 10 т',
+      lines: [{ rawLine: 'Лист 5х1500х6000 09Г2С — 10 т' }],
+    });
+
+    expect(request.source).toBe(RequestSourceEnum.PASTED);
+    expect(request.sourceText).toContain('Добрый день!');
+  });
+
   it('rejects empty lines', () => {
     expect(() =>
       Request.create({

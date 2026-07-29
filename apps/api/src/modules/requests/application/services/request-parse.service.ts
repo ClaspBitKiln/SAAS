@@ -3,32 +3,117 @@ import { EMetallIntegrationService } from '../../../e-metall/application/service
 import { EMetallParsedLineDto } from '../../../e-metall/application/dto/e-metall.dto';
 import { RequestLineDto } from '../dto/request.dto';
 
+const PRODUCT_TYPES: Array<[RegExp, string]> = [
+  [/(?<![А-Яа-яЁё])лист(?:ы|овой|овая)?(?![А-Яа-яЁё])/iu, 'Лист'],
+  [/(?<![А-Яа-яЁё])труб(?:а|ы|у|ой)(?![А-Яа-яЁё])/iu, 'Труба'],
+  [/(?<![А-Яа-яЁё])швеллер(?![А-Яа-яЁё])/iu, 'Швеллер'],
+  [/(?<![А-Яа-яЁё])(?:двутавр|балка)(?![А-Яа-яЁё])/iu, 'Балка'],
+  [/(?<![А-Яа-яЁё])уголок(?![А-Яа-яЁё])/iu, 'Уголок'],
+  [/(?<![А-Яа-яЁё])круг(?![А-Яа-яЁё])/iu, 'Круг'],
+  [/(?<![А-Яа-яЁё])арматур(?:а|ы)(?![А-Яа-яЁё])/iu, 'Арматура'],
+  [/(?<![А-Яа-яЁё])полос(?:а|ы)(?![А-Яа-яЁё])/iu, 'Полоса'],
+  [/(?<![А-Яа-яЁё])рулон(?![А-Яа-яЁё])/iu, 'Рулон'],
+  [/(?<![А-Яа-яЁё])проволок(?:а|и)(?![А-Яа-яЁё])/iu, 'Проволока'],
+];
+
+const UNIT_ALIASES: Array<[RegExp, string]> = [
+  [/(?:т|тн|тонн(?:а|ы)?)\.?/iu, 'т'],
+  [/(?:кг|килограмм(?:а|ов)?)\.?/iu, 'кг'],
+  [/(?:шт|штук(?:а|и)?)\.?/iu, 'шт'],
+  [/(?:м2|м²|кв\.?\s*м)\.?/iu, 'м²'],
+  [/(?:м|мп|п\.?\s*м\.?|метр(?:а|ов)?)\.?/iu, 'м'],
+  [/(?:компл(?:ект(?:а|ов)?)?)\.?/iu, 'компл.'],
+];
+
 @Injectable()
 export class RequestParseService {
   constructor(private readonly eMetall: EMetallIntegrationService) {}
 
-  async parseRawText(rawText: string): Promise<{ lines: RequestLineDto[]; parser: 'e-metall' | 'fallback' }> {
+  async parseRawText(rawText: string): Promise<{ lines: RequestLineDto[]; parser: 'e-metall' | 'built-in' }> {
     const result = await this.eMetall.parse({ rawText });
     if (result.status === 'OK' && result.lines.length > 0) {
       return { lines: result.lines.map((l) => this.toLineDto(l)), parser: 'e-metall' };
     }
-    return { lines: this.fallbackParse(rawText), parser: 'fallback' };
+    return { lines: this.builtInParse(rawText), parser: 'built-in' };
   }
 
-  parseFileBuffer(buffer: Buffer, mimeType: string, fileName: string): Promise<{ lines: RequestLineDto[]; parser: 'e-metall' | 'fallback' }> {
+  async parseFileBuffer(
+    buffer: Buffer,
+    mimeType: string,
+    fileName: string,
+  ): Promise<{ lines: RequestLineDto[]; parser: 'e-metall' | 'built-in' }> {
     const textTypes = ['text/plain', 'text/csv', 'application/csv'];
     if (textTypes.includes(mimeType) || fileName.endsWith('.txt') || fileName.endsWith('.csv')) {
       return this.parseRawText(buffer.toString('utf-8'));
     }
-    return this.parseRawText(`[file:${fileName}] ${buffer.toString('utf-8', 0, Math.min(buffer.length, 8000))}`);
+    throw new Error('Unsupported request file type');
   }
 
-  private fallbackParse(rawText: string): RequestLineDto[] {
-    return rawText
+  private builtInParse(rawText: string): RequestLineDto[] {
+    const rows = rawText
       .split(/\r?\n/)
-      .map((line) => line.trim())
-      .filter(Boolean)
-      .map((rawLine) => ({ rawLine }));
+      .map((line) => line.replace(/^\s*(?:[-–—•*]|\d+[.)])\s*/, '').trim())
+      .filter(Boolean);
+    const candidates = rows.filter((line) => this.looksLikeProductLine(line));
+    return (candidates.length > 0 ? candidates : rows).map((rawLine) => this.parseLine(rawLine));
+  }
+
+  private looksLikeProductLine(line: string): boolean {
+    return (
+      PRODUCT_TYPES.some(([pattern]) => pattern.test(line)) ||
+      /(?<![А-Яа-яЁё])(?:ГОСТ|ТУ|ОСТ)(?![А-Яа-яЁё])/iu.test(line) ||
+      /(?:\d+(?:[.,]\d+)?\s*[xх×*]\s*){1,2}\d+(?:[.,]\d+)?/u.test(line) ||
+      (this.extractGrade(line) != null && this.extractQuantity(line) != null)
+    );
+  }
+
+  private parseLine(rawLine: string): RequestLineDto {
+    const productType = PRODUCT_TYPES.find(([pattern]) => pattern.test(rawLine))?.[1];
+    const dimensions = rawLine.match(
+      /\b\d+(?:[.,]\d+)?\s*[xх×*]\s*\d+(?:[.,]\d+)?(?:\s*[xх×*]\s*\d+(?:[.,]\d+)?)?\b/u,
+    )?.[0].replace(/\s*[xх×*]\s*/gu, 'х');
+    const explicitThickness = rawLine.match(
+      /(?:толщин(?:а|ой)?|толщ\.?|s)\s*[:=]?\s*(\d+(?:[.,]\d+)?)\s*(?:мм)?/iu,
+    )?.[1];
+    const thickness =
+      explicitThickness ??
+      (productType === 'Лист' && dimensions ? dimensions.split('х')[0] : undefined);
+    const quantity = this.extractQuantity(rawLine);
+
+    return {
+      rawLine,
+      productType,
+      steelGrade: this.extractGrade(rawLine) ?? undefined,
+      gost: rawLine.match(
+        /(?<![А-Яа-яЁё])(?:ГОСТ|ТУ|ОСТ)\s*[A-ZА-Я0-9./-]+/iu,
+      )?.[0],
+      dimensions,
+      thickness: thickness?.replace(',', '.'),
+      quantity: quantity?.value,
+      unit: quantity?.unit,
+    };
+  }
+
+  private extractGrade(line: string): string | null {
+    return (
+      line.match(/\bAISI\s*\d{3,4}[A-Z]?\b/iu)?.[0].toUpperCase() ??
+      line
+        .match(/(?<![0-9A-Za-zА-Яа-яЁё])Ст\s*\d{1,2}(?:кп|пс|сп)?(?![0-9A-Za-zА-Яа-яЁё])/iu)?.[0]
+        .replace(/\s+/g, '') ??
+      line.match(
+        /(?<![0-9A-Za-zА-Яа-яЁё])\d{1,2}(?:Х|Г|Н|М|Ф|С|Ю|Т|В|Д|Б|Р|К|Ц)[0-9А-Я]*(?![0-9A-Za-zА-Яа-яЁё])/u,
+      )?.[0] ??
+      line.match(/\b(?:K55|L80|P110|N80|J55|Q125)\b/iu)?.[0].toUpperCase() ??
+      null
+    );
+  }
+
+  private extractQuantity(line: string): { value: string; unit: string } | null {
+    for (const [unitPattern, unit] of UNIT_ALIASES) {
+      const match = line.match(new RegExp(`(\\d+(?:[.,]\\d+)?)\\s*(${unitPattern.source})(?=\\s|$|[,;.)])`, 'iu'));
+      if (match) return { value: match[1].replace(',', '.'), unit };
+    }
+    return null;
   }
 
   private toLineDto(line: EMetallParsedLineDto): RequestLineDto {

@@ -1,5 +1,6 @@
 export enum RequestSourceEnum {
   MANUAL = 'MANUAL',
+  PASTED = 'PASTED',
   FILE = 'FILE',
 }
 
@@ -12,6 +13,10 @@ export class RequestSource {
 
   static manual(): RequestSource {
     return new RequestSource(RequestSourceEnum.MANUAL);
+  }
+
+  static pasted(): RequestSource {
+    return new RequestSource(RequestSourceEnum.PASTED);
   }
 
   static file(): RequestSource {

@@ -1,0 +1,4 @@
+ALTER TYPE "RequestSource" ADD VALUE IF NOT EXISTS 'PASTED';
+
+ALTER TABLE "requests"
+  ADD COLUMN IF NOT EXISTS "sourceText" TEXT;

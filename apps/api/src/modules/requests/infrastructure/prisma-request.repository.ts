@@ -49,6 +49,7 @@ export class PrismaRequestRepository implements RequestRepository {
       contactId: request.contactId,
       title: request.title,
       notes: request.notes,
+      sourceText: request.sourceText,
       source: request.source as PrismaRequestSource,
       status: request.status as PrismaRequestStatus,
       searchResult:
@@ -133,6 +134,7 @@ export class PrismaRequestRepository implements RequestRepository {
     contactId: string | null;
     title: string | null;
     notes: string | null;
+    sourceText: string | null;
     source: PrismaRequestSource;
     status: PrismaRequestStatus;
     searchResult: Prisma.JsonValue | null;
@@ -174,6 +176,7 @@ export class PrismaRequestRepository implements RequestRepository {
       contactId: row.contactId,
       title: row.title,
       notes: row.notes,
+      sourceText: row.sourceText,
       source: row.source as RequestSourceEnum,
       status: row.status as RequestStatusEnum,
       searchResult: (row.searchResult as Record<string, unknown> | null) ?? null,

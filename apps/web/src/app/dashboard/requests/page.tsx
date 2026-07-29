@@ -133,7 +133,7 @@ export default function RequestsPage() {
                 <div>
                   <div className="font-medium">{r.title ?? ru.requests.untitled}</div>
                   <div className="text-sm text-slate-500">
-                    {ru.requests.lines(r.lines.length)} · {r.source} ·{' '}
+                    {ru.requests.lines(r.lines.length)} · {ru.requests.sourceLabel(r.source)} ·{' '}
                     {r.status === 'SENT'
                       ? ru.requests.sent
                       : r.status === 'QUOTED'
