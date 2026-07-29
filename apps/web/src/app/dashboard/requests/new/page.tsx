@@ -45,6 +45,7 @@ export default function NewRequestPage() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [rawText, setRawText] = useState('');
   const [parser, setParser] = useState<string | null>(null);
+  const [intakeSource, setIntakeSource] = useState<'MANUAL' | 'PASTED' | 'FILE'>('MANUAL');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -55,11 +56,15 @@ export default function NewRequestPage() {
       .catch(() => undefined);
   }, [orgId]);
 
-  const applyParsedLines = useCallback((parsed: RequestLine[], parserName: string) => {
-    setLines(parsed.length > 0 ? parsed : [emptyLine()]);
-    setParser(parserName);
-    setTab('manual');
-  }, []);
+  const applyParsedLines = useCallback(
+    (parsed: RequestLine[], parserName: string, source: 'PASTED' | 'FILE') => {
+      setLines(parsed.length > 0 ? parsed : [emptyLine()]);
+      setParser(parserName);
+      setIntakeSource(source);
+      setTab('manual');
+    },
+    [],
+  );
 
   async function onParseText(e: FormEvent) {
     e.preventDefault();
@@ -69,7 +74,7 @@ export default function NewRequestPage() {
       const result = await apiAuthPost<{ lines: RequestLine[]; parser: string }>('/requests/parse', {
         rawText,
       });
-      applyParsedLines(result.lines, result.parser);
+      applyParsedLines(result.lines, result.parser, 'PASTED');
     } catch {
       setError(ru.requests.parseFailed);
     } finally {
@@ -86,7 +91,7 @@ export default function NewRequestPage() {
         '/requests/parse/file',
         file,
       );
-      applyParsedLines(result.lines, result.parser);
+      applyParsedLines(result.lines, result.parser, 'FILE');
     } catch {
       setError(ru.requests.fileParseFailed);
     } finally {
@@ -101,12 +106,18 @@ export default function NewRequestPage() {
     setError(null);
     try {
       const filtered = lines.filter((l) => l.rawLine || l.steelGrade || l.gost);
+      if (filtered.length === 0) {
+        setError(ru.requests.linesRequired);
+        setLoading(false);
+        return;
+      }
       const created = await apiAuthPost<{ id: string }>('/requests', {
         organizationId: orgId,
         contactId: contactId || undefined,
         title: title || undefined,
         notes: notes || undefined,
-        source: tab === 'file' || parser ? 'FILE' : 'MANUAL',
+        sourceText: intakeSource === 'PASTED' ? rawText.trim() || undefined : undefined,
+        source: intakeSource,
         lines: filtered,
       });
       router.push(`/dashboard/requests/${created.id}`);
@@ -119,6 +130,10 @@ export default function NewRequestPage() {
 
   function updateLine(index: number, field: keyof RequestLine, value: string) {
     setLines((prev) => prev.map((l, i) => (i === index ? { ...l, [field]: value } : l)));
+  }
+
+  function removeLine(index: number) {
+    setLines((prev) => (prev.length === 1 ? [emptyLine()] : prev.filter((_, i) => i !== index)));
   }
 
   return (
@@ -142,7 +157,7 @@ export default function NewRequestPage() {
             onClick={() => setTab('file')}
             className={`rounded-md px-4 py-2 text-sm ${tab === 'file' ? 'bg-slate-800' : 'text-slate-400'}`}
           >
-            {ru.requests.upload}
+            {ru.requests.fromMessage}
           </button>
         </div>
 
@@ -170,7 +185,7 @@ export default function NewRequestPage() {
               <span className="mb-1 block text-slate-400">{ru.requests.uploadLabel}</span>
               <input
                 type="file"
-                accept=".txt,.csv,.pdf,.xlsx,.xls,.doc,.docx,image/*"
+                accept=".txt,.csv,text/plain,text/csv"
                 onChange={(e) => void onFileChange(e.target.files?.[0] ?? null)}
                 className="text-sm text-slate-400"
               />
@@ -179,7 +194,11 @@ export default function NewRequestPage() {
         )}
 
         <form onSubmit={onSave} className="mt-6 space-y-4">
-          {parser && <p className="text-xs text-slate-500">{ru.requests.parsedWith(parser)}</p>}
+          {parser && (
+            <div className="rounded-md border border-amber-700/60 bg-amber-950/30 p-3 text-sm text-amber-200">
+              {ru.requests.parsedWith(parser)} {ru.requests.reviewRequired}
+            </div>
+          )}
           <input
             placeholder={ru.requests.titleField}
             value={title}
@@ -219,11 +238,27 @@ export default function NewRequestPage() {
             </div>
             {lines.map((line, i) => (
               <div key={i} className="grid gap-2 rounded-md border border-slate-800 p-3 sm:grid-cols-2">
+                <div className="flex gap-2 sm:col-span-2">
+                  <input
+                    placeholder={ru.requests.rawLine}
+                    value={line.rawLine ?? ''}
+                    onChange={(e) => updateLine(i, 'rawLine', e.target.value)}
+                    className="min-w-0 flex-1 rounded border border-slate-700 bg-slate-950 px-2 py-1 text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeLine(i)}
+                    className="rounded border border-slate-700 px-3 py-1 text-sm text-slate-400 hover:text-white"
+                    aria-label={ru.requests.removeLine}
+                  >
+                    ×
+                  </button>
+                </div>
                 <input
-                  placeholder={ru.requests.rawLine}
-                  value={line.rawLine ?? ''}
-                  onChange={(e) => updateLine(i, 'rawLine', e.target.value)}
-                  className="rounded border border-slate-700 bg-slate-950 px-2 py-1 text-sm sm:col-span-2"
+                  placeholder={ru.requests.productType}
+                  value={line.productType ?? ''}
+                  onChange={(e) => updateLine(i, 'productType', e.target.value)}
+                  className="rounded border border-slate-700 bg-slate-950 px-2 py-1 text-sm"
                 />
                 <input
                   placeholder={ru.requests.steelGrade}
@@ -238,6 +273,12 @@ export default function NewRequestPage() {
                   className="rounded border border-slate-700 bg-slate-950 px-2 py-1 text-sm"
                 />
                 <input
+                  placeholder={ru.requests.dimensions}
+                  value={line.dimensions ?? ''}
+                  onChange={(e) => updateLine(i, 'dimensions', e.target.value)}
+                  className="rounded border border-slate-700 bg-slate-950 px-2 py-1 text-sm"
+                />
+                <input
                   placeholder={ru.requests.thickness}
                   value={line.thickness ?? ''}
                   onChange={(e) => updateLine(i, 'thickness', e.target.value)}
@@ -247,6 +288,12 @@ export default function NewRequestPage() {
                   placeholder={ru.requests.qty}
                   value={line.quantity ?? ''}
                   onChange={(e) => updateLine(i, 'quantity', e.target.value)}
+                  className="rounded border border-slate-700 bg-slate-950 px-2 py-1 text-sm"
+                />
+                <input
+                  placeholder={ru.requests.unit}
+                  value={line.unit ?? ''}
+                  onChange={(e) => updateLine(i, 'unit', e.target.value)}
                   className="rounded border border-slate-700 bg-slate-950 px-2 py-1 text-sm"
                 />
               </div>
