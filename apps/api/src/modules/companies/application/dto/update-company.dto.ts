@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsEnum, IsOptional, IsString, IsUUID, Length, Matches } from 'class-validator';
+import { IsDateString, IsEmail, IsEnum, IsIn, IsOptional, IsString, IsUrl, IsUUID, Length, Matches } from 'class-validator';
 import { CompanyCountryEnum } from '../../domain/value-objects/inn.vo';
 
 export class UpdateCompanyDto {
@@ -41,4 +41,13 @@ export class UpdateCompanyDto {
   @IsOptional()
   @IsUUID()
   ownerUserId?: string | null;
+
+  @IsOptional() @IsString() @Length(2, 120) city?: string | null;
+  @IsOptional() @IsString() @Length(2, 160) industry?: string | null;
+  @IsOptional() @IsIn(['A', 'B', 'C']) leadPriority?: string | null;
+  @IsOptional() @IsString() @Length(3, 5000) potentialNeed?: string | null;
+  @IsOptional() @IsString() @Length(3, 5000) managerComment?: string | null;
+  @IsOptional() @IsUrl({ require_protocol: true }) sourceUrl?: string | null;
+  @IsOptional() @IsString() @Length(2, 255) sourceName?: string | null;
+  @IsOptional() @IsDateString() verifiedAt?: string | null;
 }

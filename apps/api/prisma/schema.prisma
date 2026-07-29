@@ -157,6 +157,14 @@ model Company {
   website        String?       @db.VarChar(2048)
   phone          String?       @db.VarChar(50)
   email          String?       @db.VarChar(255)
+  city           String?       @db.VarChar(120)
+  industry       String?       @db.VarChar(160)
+  leadPriority   String?       @db.VarChar(1)
+  potentialNeed  String?       @db.Text
+  managerComment String?       @db.Text
+  sourceUrl      String?       @db.VarChar(2048)
+  sourceName     String?       @db.VarChar(255)
+  verifiedAt     DateTime?
   status         CompanyStatus @default(ACTIVE)
   version        Int           @default(0)
   createdAt      DateTime      @default(now())

@@ -38,6 +38,9 @@ export class PrismaCompanyRepository implements CompanyRepository {
               { name: { contains: q, mode: 'insensitive' as const } },
               { inn: { contains: q, mode: 'insensitive' as const } },
               { email: { contains: q, mode: 'insensitive' as const } },
+              { city: { contains: q, mode: 'insensitive' as const } },
+              { industry: { contains: q, mode: 'insensitive' as const } },
+              { potentialNeed: { contains: q, mode: 'insensitive' as const } },
             ],
           }
         : {}),
@@ -65,6 +68,14 @@ export class PrismaCompanyRepository implements CompanyRepository {
       website: company.website,
       phone: company.phone,
       email: company.email,
+      city: company.city,
+      industry: company.industry,
+      leadPriority: company.leadPriority,
+      potentialNeed: company.potentialNeed,
+      managerComment: company.managerComment,
+      sourceUrl: company.sourceUrl,
+      sourceName: company.sourceName,
+      verifiedAt: company.verifiedAt,
       status: company.status as PrismaCompanyStatus,
       deletedAt: company.deletedAt,
     };
@@ -95,6 +106,14 @@ export class PrismaCompanyRepository implements CompanyRepository {
     website: string | null;
     phone: string | null;
     email: string | null;
+    city: string | null;
+    industry: string | null;
+    leadPriority: string | null;
+    potentialNeed: string | null;
+    managerComment: string | null;
+    sourceUrl: string | null;
+    sourceName: string | null;
+    verifiedAt: Date | null;
     status: PrismaCompanyStatus;
     version: number;
     createdAt: Date;
@@ -111,6 +130,14 @@ export class PrismaCompanyRepository implements CompanyRepository {
       website: row.website,
       phone: row.phone,
       email: row.email,
+      city: row.city,
+      industry: row.industry,
+      leadPriority: row.leadPriority,
+      potentialNeed: row.potentialNeed,
+      managerComment: row.managerComment,
+      sourceUrl: row.sourceUrl,
+      sourceName: row.sourceName,
+      verifiedAt: row.verifiedAt,
       status: row.status as CompanyStatusEnum,
       version: row.version,
       createdAt: row.createdAt,
