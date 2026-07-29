@@ -17,6 +17,7 @@ import {
   CreateRequestCommand,
   MarkProposalSentCommand,
   PrepareQuoteCommand,
+  RecordRequestOutcomeCommand,
   SearchRequestCommand,
   UpdateRequestCommand,
 } from '../commands/request.commands';
@@ -136,6 +137,23 @@ export class MarkProposalSentHandler implements ICommandHandler<MarkProposalSent
     if (!request) throw new Error('Request not found');
 
     request.markProposalSent(cmd.sentVia, new Date());
+    await this.requestRepo.save(request);
+    request.pullEvents().forEach((event) => this.eventBus.publish(event));
+  }
+}
+
+@CommandHandler(RecordRequestOutcomeCommand)
+export class RecordRequestOutcomeHandler implements ICommandHandler<RecordRequestOutcomeCommand> {
+  constructor(
+    @Inject(REQUEST_REPOSITORY) private readonly requestRepo: RequestRepository,
+    private readonly eventBus: EventBus,
+  ) {}
+
+  async execute(cmd: RecordRequestOutcomeCommand): Promise<void> {
+    const request = await this.requestRepo.findById(cmd.id, cmd.organizationId);
+    if (!request) throw new Error('Request not found');
+
+    request.recordOutcome(cmd.outcome, cmd.reason, new Date());
     await this.requestRepo.save(request);
     request.pullEvents().forEach((event) => this.eventBus.publish(event));
   }
