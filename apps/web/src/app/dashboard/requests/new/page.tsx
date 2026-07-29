@@ -19,6 +19,8 @@ interface RequestLine {
   quantity?: string;
   unit?: string;
   rawLine?: string;
+  recognitionConfidence?: number;
+  reviewWarnings?: string[];
 }
 
 interface Contact {
@@ -32,6 +34,19 @@ const emptyLine = (): RequestLine => ({
   gost: '',
   thickness: '',
   quantity: '',
+});
+
+const toSavableLine = (line: RequestLine): RequestLine => ({
+  gost: line.gost,
+  steelGrade: line.steelGrade,
+  productType: line.productType,
+  dimensions: line.dimensions,
+  length: line.length,
+  thickness: line.thickness,
+  coating: line.coating,
+  quantity: line.quantity,
+  unit: line.unit,
+  rawLine: line.rawLine,
 });
 
 export default function NewRequestPage() {
@@ -113,7 +128,9 @@ export default function NewRequestPage() {
     setLoading(true);
     setError(null);
     try {
-      const filtered = lines.filter((l) => l.rawLine || l.steelGrade || l.gost);
+      const filtered = lines
+        .filter((l) => l.rawLine || l.steelGrade || l.gost)
+        .map(toSavableLine);
       if (filtered.length === 0) {
         setError(ru.requests.linesRequired);
         setLoading(false);
@@ -257,7 +274,30 @@ export default function NewRequestPage() {
               </button>
             </div>
             {lines.map((line, i) => (
-              <div key={i} className="grid gap-2 rounded-md border border-slate-800 p-3 sm:grid-cols-2">
+              <div
+                key={i}
+                className={`grid gap-2 rounded-md border p-3 sm:grid-cols-2 ${
+                  line.reviewWarnings?.length ? 'border-amber-700/70' : 'border-slate-800'
+                }`}
+              >
+                {line.recognitionConfidence != null && (
+                  <div className="flex flex-wrap items-center gap-2 text-xs sm:col-span-2">
+                    <span
+                      className={`rounded-full px-2 py-1 ${
+                        line.recognitionConfidence === 100
+                          ? 'bg-emerald-950 text-emerald-300'
+                          : 'bg-amber-950 text-amber-200'
+                      }`}
+                    >
+                      {ru.requests.recognitionConfidence(line.recognitionConfidence)}
+                    </span>
+                    {line.reviewWarnings?.map((warning) => (
+                      <span key={warning} className="text-amber-300">
+                        {ru.requests.reviewWarning(warning)}
+                      </span>
+                    ))}
+                  </div>
+                )}
                 <div className="flex gap-2 sm:col-span-2">
                   <input
                     placeholder={ru.requests.rawLine}

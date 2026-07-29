@@ -3,7 +3,7 @@ import ExcelJS from 'exceljs';
 import { PDFParse } from 'pdf-parse';
 import { EMetallIntegrationService } from '../../../e-metall/application/services/e-metall-integration.service';
 import { EMetallParsedLineDto } from '../../../e-metall/application/dto/e-metall.dto';
-import { RequestLineDto } from '../dto/request.dto';
+import { ParsedRequestLineDto, RequestLineDto } from '../dto/request.dto';
 
 const PRODUCT_TYPES: Array<[RegExp, string]> = [
   [/(?<![А-Яа-яЁё])лист(?:ы|овой|овая)?(?![А-Яа-яЁё])/iu, 'Лист'],
@@ -31,12 +31,20 @@ const UNIT_ALIASES: Array<[RegExp, string]> = [
 export class RequestParseService {
   constructor(private readonly eMetall: EMetallIntegrationService) {}
 
-  async parseRawText(rawText: string): Promise<{ lines: RequestLineDto[]; parser: 'e-metall' | 'built-in' }> {
+  async parseRawText(
+    rawText: string,
+  ): Promise<{ lines: ParsedRequestLineDto[]; parser: 'e-metall' | 'built-in' }> {
     const result = await this.eMetall.parse({ rawText });
     if (result.status === 'OK' && result.lines.length > 0) {
-      return { lines: result.lines.map((l) => this.toLineDto(l)), parser: 'e-metall' };
+      return {
+        lines: result.lines.map((line) => this.withReviewAssessment(this.toLineDto(line))),
+        parser: 'e-metall',
+      };
     }
-    return { lines: this.builtInParse(rawText), parser: 'built-in' };
+    return {
+      lines: this.builtInParse(rawText).map((line) => this.withReviewAssessment(line)),
+      parser: 'built-in',
+    };
   }
 
   async parseFileBuffer(
@@ -44,7 +52,7 @@ export class RequestParseService {
     mimeType: string,
     fileName: string,
   ): Promise<{
-    lines: RequestLineDto[];
+    lines: ParsedRequestLineDto[];
     parser: 'e-metall' | 'built-in';
     sourceText: string;
     sourceFileName: string;
@@ -181,6 +189,25 @@ export class RequestParseService {
       if (match) return { value: match[1].replace(',', '.'), unit };
     }
     return null;
+  }
+
+  private withReviewAssessment(line: RequestLineDto): ParsedRequestLineDto {
+    const checks: Array<[keyof RequestLineDto, number, string]> = [
+      ['productType', 20, 'productType'],
+      ['steelGrade', 20, 'steelGrade'],
+      ['dimensions', 20, 'dimensions'],
+      ['quantity', 20, 'quantity'],
+      ['unit', 20, 'unit'],
+    ];
+    const reviewWarnings = checks
+      .filter(([field]) => !line[field])
+      .map(([, , warning]) => warning);
+    const recognitionConfidence = checks.reduce(
+      (score, [field, weight]) => score + (line[field] ? weight : 0),
+      0,
+    );
+
+    return { ...line, recognitionConfidence, reviewWarnings };
   }
 
   private toLineDto(line: EMetallParsedLineDto): RequestLineDto {
