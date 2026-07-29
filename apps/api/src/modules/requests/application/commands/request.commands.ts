@@ -9,6 +9,7 @@ export class CreateRequestCommand {
     readonly contactId: string | null | undefined,
     readonly title: string | null | undefined,
     readonly notes: string | null | undefined,
+    readonly sourceText: string | null | undefined,
     readonly source: RequestSourceEnum,
     readonly lines: RequestLineProps[],
   ) {}
