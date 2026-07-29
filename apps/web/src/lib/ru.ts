@@ -89,6 +89,22 @@ export const ru = {
     inviteMembers: 'Пригласить коллег',
     completedCalls: 'Завершённые звонки',
     aiSummaryNext: 'AI-сводка — в следующем спринте',
+    pilotTitle: 'Подготовка к пилоту',
+    pilotSubtitle: 'Пройдите полный путь продажи на одной реальной заявке.',
+    pilotCompleted: (completed: number, total: number) => `${completed} из ${total} шагов`,
+    pilotLoadFailed: 'Не удалось загрузить прогресс. Обновите страницу.',
+    pilotStep: (step: string) =>
+      ({
+        company: 'Создайте компанию клиента',
+        contact: 'Добавьте контакт закупщика',
+        request: 'Создайте заявку из сообщения клиента',
+        quote: 'Рассчитайте и сформируйте КП',
+        sent: 'Скачайте PDF и отметьте отправку',
+        outcome: 'Зафиксируйте результат по КП',
+      })[step] ?? step,
+    pilotNext: 'Следующий шаг',
+    pilotContinue: 'Продолжить пилот',
+    pilotReady: 'Сценарий пройден. Система готова к сессии обратной связи с менеджером.',
   },
 
   contacts: {
