@@ -9,6 +9,7 @@
     "test:e2e": "turbo run test:e2e",
     "lint": "turbo run lint",
     "dev": "turbo run dev",
+    "verify:local": "bash scripts/verify-local.sh",
     "db:up": "docker compose up -d postgres redis",
     "db:down": "docker compose down",
     "prepare": "husky",

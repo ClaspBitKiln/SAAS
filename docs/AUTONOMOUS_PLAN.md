@@ -13,6 +13,10 @@ This is the execution plan for autonomous development of AI Sales OS.
 - A slice is done only after lint, build, tests, CI, merge, and evidence.
 - Low-risk changes may be merged autonomously after all required checks pass.
 - Payments, secrets, customer communication, and irreversible external actions require a real configured channel and explicit safeguards.
+- Missing local `gh` is not a blocker: use local `git` for push and the connected
+  GitHub integration for PR, checks, and merge.
+- Run local validation through `bash scripts/verify-local.sh` so tool caches stay inside
+  the workspace.
 
 ## North-star workflow
 
@@ -47,6 +51,10 @@ Progress toward A8: XLSX/CSV price imports are matched by normalized product
 description, unit prices are multiplied by the request quantity, rows without a
 positive numeric quantity are left untouched, and the source filename is
 retained with the prepared quote.
+
+Client-base import foundation is merged in PR #33. The 17,752-row CRM upload is
+deferred until it no longer blocks product work; it must run separately in
+bounded batches with deduplication and an import report.
 
 ## Deferred until evidence
 

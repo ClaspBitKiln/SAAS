@@ -1,4 +1,5 @@
 node_modules/
+.tool-cache/
 dist/
 .next/
 .env
