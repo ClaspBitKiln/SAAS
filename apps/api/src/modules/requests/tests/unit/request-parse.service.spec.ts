@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import ExcelJS from 'exceljs';
 import { RequestParseService } from '../../application/services/request-parse.service';
 import { EMetallIntegrationService } from '../../../e-metall/application/services/e-metall-integration.service';
 import { HttpEMetallApiClient } from '../../../e-metall/infrastructure/e-metall-api.client';
@@ -75,5 +76,40 @@ describe('RequestParseService built-in parser', () => {
     expect(result.sourceText).toBe(sourceText);
     expect(result.sourceFileName).toBe('заявка клиента.txt');
     expect(result.lines[0]).toMatchObject({ steelGrade: '09Г2С', quantity: '10', unit: 'т' });
+  });
+
+  it('extracts request lines from an XLSX workbook for review', async () => {
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet('Заявка');
+    sheet.addRow(['Наименование', 'Количество']);
+    sheet.addRow(['Лист 5х1500х6000 09Г2С ГОСТ 19281-2014', '10 т']);
+    sheet.addRow(['Труба 57х3,5 Ст20', '200 м']);
+    const buffer = Buffer.from(await workbook.xlsx.writeBuffer());
+
+    const result = await service.parseFileBuffer(
+      buffer,
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'заявка.xlsx',
+    );
+
+    expect(result.sourceFileName).toBe('заявка.xlsx');
+    expect(result.sourceText).toContain('Лист 5х1500х6000 09Г2С');
+    expect(result.lines).toHaveLength(2);
+    expect(result.lines[0]).toMatchObject({
+      productType: 'Лист',
+      steelGrade: '09Г2С',
+      quantity: '10',
+      unit: 'т',
+    });
+  });
+
+  it('rejects a corrupt XLSX file', async () => {
+    await expect(
+      service.parseFileBuffer(
+        Buffer.from('not an xlsx archive'),
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'заявка.xlsx',
+      ),
+    ).rejects.toThrow('Invalid request file');
   });
 });
