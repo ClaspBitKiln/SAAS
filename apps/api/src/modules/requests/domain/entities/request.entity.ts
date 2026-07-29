@@ -1,6 +1,7 @@
 import { AggregateRoot } from '../../../../shared/domain/aggregate-root';
 import { newId } from '../../../../shared/infrastructure/uuid';
 import { makeRequestEvent } from '../events/request.events';
+import { RequestOutcomeEnum } from '../value-objects/request-outcome.vo';
 import { ProposalSentViaEnum } from '../value-objects/proposal-sent-via.vo';
 import { RequestLine, RequestLineProps } from '../value-objects/request-line.vo';
 import { RequestSource, RequestSourceEnum } from '../value-objects/request-source.vo';
@@ -43,6 +44,9 @@ export class Request extends AggregateRoot {
   private _proposalSentAt: Date | null;
   private _proposalSentVia: ProposalSentViaEnum | null;
   private _followUpAt: Date | null;
+  private _outcome: RequestOutcomeEnum | null;
+  private _outcomeReason: string | null;
+  private _outcomeAt: Date | null;
   private _lines: RequestLine[];
 
   private constructor(props: {
@@ -67,6 +71,9 @@ export class Request extends AggregateRoot {
     proposalSentAt: Date | null;
     proposalSentVia: ProposalSentViaEnum | null;
     followUpAt: Date | null;
+    outcome: RequestOutcomeEnum | null;
+    outcomeReason: string | null;
+    outcomeAt: Date | null;
     lines: RequestLine[];
     version?: number;
     createdAt?: Date;
@@ -98,6 +105,9 @@ export class Request extends AggregateRoot {
     this._proposalSentAt = props.proposalSentAt;
     this._proposalSentVia = props.proposalSentVia;
     this._followUpAt = props.followUpAt;
+    this._outcome = props.outcome;
+    this._outcomeReason = props.outcomeReason;
+    this._outcomeAt = props.outcomeAt;
     this._lines = props.lines;
   }
 
@@ -141,6 +151,9 @@ export class Request extends AggregateRoot {
       proposalSentAt: null,
       proposalSentVia: null,
       followUpAt: null,
+      outcome: null,
+      outcomeReason: null,
+      outcomeAt: null,
       lines,
     });
     request.addEvent(makeRequestEvent('request.created', request, { lineCount: lines.length }));
@@ -169,6 +182,9 @@ export class Request extends AggregateRoot {
     proposalSentAt: Date | null;
     proposalSentVia: ProposalSentViaEnum | null;
     followUpAt: Date | null;
+    outcome: RequestOutcomeEnum | null;
+    outcomeReason: string | null;
+    outcomeAt: Date | null;
     lines: Array<{ id: string; sortOrder: number } & RequestLineProps>;
     version: number;
     createdAt: Date;
@@ -289,6 +305,32 @@ export class Request extends AggregateRoot {
     }));
   }
 
+  recordOutcome(outcome: RequestOutcomeEnum, reason: string, recordedAt: Date): void {
+    if (this._status.value !== RequestStatusEnum.SENT || !this._proposalSentAt) {
+      throw new Error('Request outcome: proposal must be sent first');
+    }
+    if (!Object.values(RequestOutcomeEnum).includes(outcome)) {
+      throw new Error('Request outcome: invalid outcome');
+    }
+    const normalizedReason = reason.trim();
+    if (normalizedReason.length < 2 || normalizedReason.length > 500) {
+      throw new Error('Request outcome: reason must be 2..500 chars');
+    }
+    if (Number.isNaN(recordedAt.getTime()) || recordedAt.getTime() < this._proposalSentAt.getTime()) {
+      throw new Error('Request outcome: date is invalid');
+    }
+
+    this._outcome = outcome;
+    this._outcomeReason = normalizedReason;
+    this._outcomeAt = recordedAt;
+    this.touch();
+    this.addEvent(makeRequestEvent('request.outcome_recorded', this, {
+      outcome,
+      reason: normalizedReason,
+      outcomeAt: recordedAt.toISOString(),
+    }));
+  }
+
   private clearQuote(): void {
     this._sellerName = null;
     this._deliveryTerms = null;
@@ -300,6 +342,9 @@ export class Request extends AggregateRoot {
     this._proposalSentAt = null;
     this._proposalSentVia = null;
     this._followUpAt = null;
+    this._outcome = null;
+    this._outcomeReason = null;
+    this._outcomeAt = null;
   }
 
   get organizationId(): string { return this._organizationId; }
@@ -321,6 +366,9 @@ export class Request extends AggregateRoot {
   get proposalSentAt(): Date | null { return this._proposalSentAt; }
   get proposalSentVia(): ProposalSentViaEnum | null { return this._proposalSentVia; }
   get followUpAt(): Date | null { return this._followUpAt; }
+  get outcome(): RequestOutcomeEnum | null { return this._outcome; }
+  get outcomeReason(): string | null { return this._outcomeReason; }
+  get outcomeAt(): Date | null { return this._outcomeAt; }
   get lines(): RequestLine[] { return [...this._lines]; }
 
   get purchaseTotal(): number {
