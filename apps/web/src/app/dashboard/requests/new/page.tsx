@@ -200,7 +200,7 @@ export default function NewRequestPage() {
               <span className="mb-1 block text-slate-400">{ru.requests.uploadLabel}</span>
               <input
                 type="file"
-                accept=".txt,.csv,.xlsx,text/plain,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                accept=".txt,.csv,.xlsx,.pdf,text/plain,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/pdf"
                 onChange={(e) => void onFileChange(e.target.files?.[0] ?? null)}
                 className="text-sm text-slate-400"
               />

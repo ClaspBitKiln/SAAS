@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import ExcelJS from 'exceljs';
+import { PDFParse } from 'pdf-parse';
 import { EMetallIntegrationService } from '../../../e-metall/application/services/e-metall-integration.service';
 import { EMetallParsedLineDto } from '../../../e-metall/application/dto/e-metall.dto';
 import { RequestLineDto } from '../dto/request.dto';
@@ -72,6 +73,17 @@ export class RequestParseService {
       const parsed = await this.parseRawText(sourceText);
       return { ...parsed, sourceText, sourceFileName: fileName };
     }
+    if (mimeType === 'application/pdf' || normalizedFileName.endsWith('.pdf')) {
+      let sourceText: string;
+      try {
+        sourceText = await this.extractPdfText(buffer);
+      } catch {
+        throw new Error('Invalid request file');
+      }
+      if (!sourceText) throw new Error('PDF has no text layer');
+      const parsed = await this.parseRawText(sourceText);
+      return { ...parsed, sourceText, sourceFileName: fileName };
+    }
     throw new Error('Unsupported request file type');
   }
 
@@ -92,6 +104,16 @@ export class RequestParseService {
     });
 
     return rows.join('\n');
+  }
+
+  private async extractPdfText(buffer: Buffer): Promise<string> {
+    const parser = new PDFParse({ data: buffer });
+    try {
+      const result = await parser.getText();
+      return result.text.trim();
+    } finally {
+      await parser.destroy();
+    }
   }
 
   private builtInParse(rawText: string): RequestLineDto[] {

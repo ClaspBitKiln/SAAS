@@ -73,7 +73,9 @@ export class RequestController {
     } catch (error) {
       if (
         error instanceof Error &&
-        ['Unsupported request file type', 'Invalid request file'].includes(error.message)
+        ['Unsupported request file type', 'Invalid request file', 'PDF has no text layer'].includes(
+          error.message,
+        )
       ) {
         throw new BadRequestException(error.message);
       }

@@ -192,7 +192,7 @@ export const ru = {
     pastePlaceholder:
       'Например:\nДобрый день! Нужны:\n1. Лист 5х1500х6000 09Г2С — 10 т\n2. Труба 57х3,5 Ст20 — 200 м',
     parseText: 'Распознать позиции',
-    uploadLabel: 'Или загрузите файл TXT / CSV / XLSX',
+    uploadLabel: 'Или загрузите файл TXT / CSV / XLSX / PDF',
     sourceFile: 'Исходный файл',
     parsedWith: (p: string) =>
       p === 'e-metall'
