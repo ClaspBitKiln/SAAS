@@ -61,6 +61,8 @@ describe('RequestParseService built-in parser', () => {
       thickness: '5',
       quantity: '10',
       unit: 'т',
+      recognitionConfidence: 100,
+      reviewWarnings: [],
     });
     expect(result.lines[1]).toMatchObject({
       productType: 'Труба',
@@ -68,6 +70,19 @@ describe('RequestParseService built-in parser', () => {
       dimensions: '57х3,5',
       quantity: '200',
       unit: 'м',
+      recognitionConfidence: 100,
+      reviewWarnings: [],
+    });
+  });
+
+  it('reports deterministic completeness and missing fields for manager review', async () => {
+    const result = await service.parseRawText('Лист 09Г2С');
+
+    expect(result.lines[0]).toMatchObject({
+      productType: 'Лист',
+      steelGrade: '09Г2С',
+      recognitionConfidence: 40,
+      reviewWarnings: ['dimensions', 'quantity', 'unit'],
     });
   });
 

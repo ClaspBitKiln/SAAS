@@ -33,6 +33,13 @@ export class RequestLineDto {
   @ApiPropertyOptional() @IsOptional() @IsString() rawLine?: string;
 }
 
+export class ParsedRequestLineDto extends RequestLineDto {
+  @ApiPropertyOptional({ minimum: 0, maximum: 100 })
+  recognitionConfidence!: number;
+  @ApiPropertyOptional({ type: [String] })
+  reviewWarnings!: string[];
+}
+
 export class CreateRequestDto {
   @ApiPropertyOptional({ format: 'uuid' }) @IsOptional() @IsUUID() contactId?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() @Length(0, 255) title?: string;
@@ -192,7 +199,7 @@ export class RequestResponseDto {
 }
 
 export class ParseRequestResponseDto {
-  @ApiProperty({ type: [RequestLineDto] }) lines!: RequestLineDto[];
+  @ApiProperty({ type: [ParsedRequestLineDto] }) lines!: ParsedRequestLineDto[];
   @ApiProperty() parser!: 'e-metall' | 'built-in';
   @ApiPropertyOptional() sourceText?: string;
   @ApiPropertyOptional() sourceFileName?: string;

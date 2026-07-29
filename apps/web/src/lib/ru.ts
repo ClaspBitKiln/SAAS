@@ -199,6 +199,17 @@ export const ru = {
         ? 'Позиции распознаны через E‑Metall.'
         : 'Позиции распознаны встроенным разбором.',
     reviewRequired: 'Проверьте каждую позицию перед сохранением.',
+    recognitionConfidence: (value: number) => `Распознано: ${value}%`,
+    reviewWarning: (field: string) =>
+      `Проверьте: ${
+        ({
+          productType: 'вид продукции',
+          steelGrade: 'марку стали',
+          dimensions: 'размеры',
+          quantity: 'количество',
+          unit: 'единицу измерения',
+        } as Record<string, string>)[field] ?? field
+      }`,
     titleField: 'Название',
     contactOptional: 'Контакт (необязательно)',
     notes: 'Примечания',
