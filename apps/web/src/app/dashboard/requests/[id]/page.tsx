@@ -46,6 +46,9 @@ interface RequestDetail {
   proposalNumber: string | null;
   proposalValidityDays: number;
   followUpAt: string | null;
+  outcome: 'WON' | 'LOST' | 'NO_RESPONSE' | null;
+  outcomeReason: string | null;
+  outcomeAt: string | null;
   lines: RequestLine[];
   searchResult?: { offers?: Offer[]; status?: string } | null;
 }
@@ -101,9 +104,12 @@ export default function RequestDetailPage() {
   const [otherCosts, setOtherCosts] = useState('0');
   const [validityDays, setValidityDays] = useState('5');
   const [followUpAt, setFollowUpAt] = useState(defaultFollowUp());
+  const [outcome, setOutcome] = useState<'WON' | 'LOST' | 'NO_RESPONSE'>('WON');
+  const [outcomeReason, setOutcomeReason] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [searching, setSearching] = useState(false);
   const [savingQuote, setSavingQuote] = useState(false);
+  const [savingOutcome, setSavingOutcome] = useState(false);
 
   const applyRequest = useCallback((data: RequestDetail) => {
     setRequest(data);
@@ -220,6 +226,27 @@ export default function RequestDetailPage() {
     }
   }
 
+  async function onRecordOutcome() {
+    if (outcomeReason.trim().length < 2) {
+      setError(ru.requests.outcomeReasonRequired);
+      return;
+    }
+    setSavingOutcome(true);
+    setError(null);
+    try {
+      const data = await apiAuthPost<RequestDetail>(`/requests/${id}/outcome`, {
+        outcome,
+        reason: outcomeReason.trim(),
+      });
+      applyRequest(data);
+      setOutcomeReason('');
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : ru.requests.outcomeFailed);
+    } finally {
+      setSavingOutcome(false);
+    }
+  }
+
   function updateCommercial(lineId: string, field: keyof CommercialLine, value: string) {
     setCommercials((current) => ({
       ...current,
@@ -274,6 +301,57 @@ export default function RequestDetailPage() {
               {request.sourceText}
             </pre>
           </details>
+        )}
+
+        {request?.status === 'SENT' && (
+          <section className="mt-6 rounded-lg border border-slate-800 bg-slate-900 p-5">
+            <h2 className="font-medium">{ru.requests.outcomeTitle}</h2>
+            {request.outcome ? (
+              <div className="mt-3">
+                <div className="text-lg font-semibold text-emerald-300">
+                  {ru.requests.outcomeLabel(request.outcome)}
+                </div>
+                <p className="mt-1 text-sm text-slate-300">{request.outcomeReason}</p>
+                {request.outcomeAt && (
+                  <p className="mt-1 text-xs text-slate-500">
+                    {new Intl.DateTimeFormat('ru-RU', {
+                      dateStyle: 'short',
+                      timeStyle: 'short',
+                    }).format(new Date(request.outcomeAt))}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div className="mt-4 grid gap-3 sm:grid-cols-[220px_1fr_auto]">
+                <select
+                  value={outcome}
+                  onChange={(event) =>
+                    setOutcome(event.target.value as 'WON' | 'LOST' | 'NO_RESPONSE')
+                  }
+                  className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
+                >
+                  <option value="WON">{ru.requests.outcomeWon}</option>
+                  <option value="LOST">{ru.requests.outcomeLost}</option>
+                  <option value="NO_RESPONSE">{ru.requests.outcomeNoResponse}</option>
+                </select>
+                <input
+                  value={outcomeReason}
+                  onChange={(event) => setOutcomeReason(event.target.value)}
+                  placeholder={ru.requests.outcomeReason}
+                  maxLength={500}
+                  className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={() => void onRecordOutcome()}
+                  disabled={savingOutcome || outcomeReason.trim().length < 2}
+                  className="rounded-md bg-blue-600 px-4 py-2 text-sm disabled:opacity-50"
+                >
+                  {savingOutcome ? ru.common.saving : ru.requests.saveOutcome}
+                </button>
+              </div>
+            )}
+          </section>
         )}
 
         <section className="mt-8">
