@@ -45,6 +45,7 @@ export class Request extends AggregateRoot {
   private _proposalDownloadedAt: Date | null;
   private _proposalSentAt: Date | null;
   private _proposalSentVia: ProposalSentViaEnum | null;
+  private _proposalSentTo: string | null;
   private _followUpAt: Date | null;
   private _outcome: RequestOutcomeEnum | null;
   private _outcomeReason: string | null;
@@ -74,6 +75,7 @@ export class Request extends AggregateRoot {
     proposalDownloadedAt: Date | null;
     proposalSentAt: Date | null;
     proposalSentVia: ProposalSentViaEnum | null;
+    proposalSentTo?: string | null;
     followUpAt: Date | null;
     outcome: RequestOutcomeEnum | null;
     outcomeReason: string | null;
@@ -110,6 +112,7 @@ export class Request extends AggregateRoot {
     this._proposalDownloadedAt = props.proposalDownloadedAt;
     this._proposalSentAt = props.proposalSentAt;
     this._proposalSentVia = props.proposalSentVia;
+    this._proposalSentTo = props.proposalSentTo?.trim() || null;
     this._followUpAt = props.followUpAt;
     this._outcome = props.outcome;
     this._outcomeReason = props.outcomeReason;
@@ -158,6 +161,7 @@ export class Request extends AggregateRoot {
       proposalDownloadedAt: null,
       proposalSentAt: null,
       proposalSentVia: null,
+      proposalSentTo: null,
       followUpAt: null,
       outcome: null,
       outcomeReason: null,
@@ -191,6 +195,7 @@ export class Request extends AggregateRoot {
     proposalDownloadedAt: Date | null;
     proposalSentAt: Date | null;
     proposalSentVia: ProposalSentViaEnum | null;
+    proposalSentTo?: string | null;
     followUpAt: Date | null;
     outcome: RequestOutcomeEnum | null;
     outcomeReason: string | null;
@@ -283,6 +288,7 @@ export class Request extends AggregateRoot {
     this._proposalDownloadedAt = null;
     this._proposalSentAt = null;
     this._proposalSentVia = null;
+    this._proposalSentTo = null;
     this._followUpAt = input.followUpAt;
     this._status = RequestStatus.quoted();
     this.touch();
@@ -316,7 +322,7 @@ export class Request extends AggregateRoot {
     }));
   }
 
-  markProposalSent(sentVia: ProposalSentViaEnum, sentAt: Date): void {
+  markProposalSent(sentVia: ProposalSentViaEnum, sentAt: Date, sentTo?: string | null): void {
     if (this._status.value !== RequestStatusEnum.QUOTED) {
       throw new Error('Request proposal: quote must be prepared before marking sent');
     }
@@ -329,15 +335,21 @@ export class Request extends AggregateRoot {
     if (!Object.values(ProposalSentViaEnum).includes(sentVia)) {
       throw new Error('Request proposal: sent channel is invalid');
     }
+    const normalizedSentTo = sentTo?.trim() || null;
+    if (normalizedSentTo && normalizedSentTo.length > 255) {
+      throw new Error('Request proposal: recipient must be at most 255 chars');
+    }
 
     this._proposalSentAt = sentAt;
     this._proposalSentVia = sentVia;
+    this._proposalSentTo = normalizedSentTo;
     this._status = RequestStatus.sent();
     this.touch();
     this.addEvent(makeRequestEvent('request.proposal_sent', this, {
       proposalNumber: this._proposalNumber,
       sentAt: sentAt.toISOString(),
       sentVia,
+      sentTo: normalizedSentTo ?? '',
     }));
   }
 
@@ -379,6 +391,7 @@ export class Request extends AggregateRoot {
     this._proposalDownloadedAt = null;
     this._proposalSentAt = null;
     this._proposalSentVia = null;
+    this._proposalSentTo = null;
     this._followUpAt = null;
     this._outcome = null;
     this._outcomeReason = null;
@@ -405,6 +418,7 @@ export class Request extends AggregateRoot {
   get proposalDownloadedAt(): Date | null { return this._proposalDownloadedAt; }
   get proposalSentAt(): Date | null { return this._proposalSentAt; }
   get proposalSentVia(): ProposalSentViaEnum | null { return this._proposalSentVia; }
+  get proposalSentTo(): string | null { return this._proposalSentTo; }
   get followUpAt(): Date | null { return this._followUpAt; }
   get outcome(): RequestOutcomeEnum | null { return this._outcome; }
   get outcomeReason(): string | null { return this._outcomeReason; }

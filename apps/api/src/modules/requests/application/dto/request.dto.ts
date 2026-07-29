@@ -120,6 +120,12 @@ export class MarkProposalSentDto {
   @ApiProperty({ enum: ProposalSentViaEnum })
   @IsEnum(ProposalSentViaEnum)
   sentVia!: ProposalSentViaEnum;
+
+  @ApiPropertyOptional({ description: 'Email, phone, account, or other recipient reference' })
+  @IsOptional()
+  @IsString()
+  @Length(1, 255)
+  sentTo?: string;
 }
 
 export class RecordRequestOutcomeDto {
@@ -196,6 +202,7 @@ export class RequestResponseDto {
   @ApiPropertyOptional() proposalDownloadedAt!: string | null;
   @ApiPropertyOptional() proposalSentAt!: string | null;
   @ApiPropertyOptional({ enum: ProposalSentViaEnum }) proposalSentVia!: ProposalSentViaEnum | null;
+  @ApiPropertyOptional() proposalSentTo!: string | null;
   @ApiPropertyOptional() followUpAt!: string | null;
   @ApiPropertyOptional({ enum: RequestOutcomeEnum }) outcome!: RequestOutcomeEnum | null;
   @ApiPropertyOptional() outcomeReason!: string | null;

@@ -29,6 +29,7 @@ function requestActivity(request: Request): RequestActivityResponseDto[] {
   push(RequestActivityType.PROPOSAL_DOWNLOADED, request.proposalDownloadedAt);
   push(RequestActivityType.PROPOSAL_SENT, request.proposalSentAt, {
     sentVia: request.proposalSentVia ?? '',
+    sentTo: request.proposalSentTo ?? '',
   });
   push(RequestActivityType.OUTCOME_RECORDED, request.outcomeAt, {
     outcome: request.outcome ?? '',
@@ -69,6 +70,7 @@ export function toRequestResponse(request: Request): RequestResponseDto {
     proposalDownloadedAt: request.proposalDownloadedAt?.toISOString() ?? null,
     proposalSentAt: request.proposalSentAt?.toISOString() ?? null,
     proposalSentVia: request.proposalSentVia,
+    proposalSentTo: request.proposalSentTo,
     followUpAt: request.followUpAt?.toISOString() ?? null,
     outcome: request.outcome,
     outcomeReason: request.outcomeReason,

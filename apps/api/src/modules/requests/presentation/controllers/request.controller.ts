@@ -229,7 +229,9 @@ export class RequestController {
   ): Promise<RequestResponseDto> {
     const organizationId = requireOrganizationId(user);
     try {
-      await this.commandBus.execute(new MarkProposalSentCommand(id, organizationId, dto.sentVia));
+      await this.commandBus.execute(
+        new MarkProposalSentCommand(id, organizationId, dto.sentVia, dto.sentTo),
+      );
     } catch (e) {
       if (e instanceof Error) {
         if (e.message === 'Request not found') throw new NotFoundException(e.message);

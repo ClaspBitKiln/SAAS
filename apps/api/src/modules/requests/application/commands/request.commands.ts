@@ -49,6 +49,7 @@ export class MarkProposalSentCommand {
     readonly id: string,
     readonly organizationId: string,
     readonly sentVia: ProposalSentViaEnum,
+    readonly sentTo?: string | null,
   ) {}
 }
 

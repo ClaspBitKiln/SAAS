@@ -303,6 +303,7 @@ export const ru = {
     sentViaWhatsapp: 'WhatsApp',
     sentViaMax: 'MAX',
     sentViaManual: 'Другой канал',
+    sentTo: 'Адресат: e-mail, телефон или аккаунт',
     markSent: 'Отметить отправленным',
     markingSent: 'Сохраняем…',
     markSentFailed: 'Не удалось отметить КП отправленным.',
@@ -314,7 +315,8 @@ export const ru = {
         MAX: 'MAX',
         MANUAL: 'Другой канал',
       })[channel] ?? channel,
-    sentAt: (date: string, channel: string) => `Отправлено ${date} · ${channel}`,
+    sentAt: (date: string, channel: string, recipient?: string | null) =>
+      `Отправлено ${date} · ${channel}${recipient ? ` · ${recipient}` : ''}`,
     followUpFilters: 'Фильтр следующих контактов',
     followUpAll: 'Все',
     followUpOverdue: 'Просрочено',
@@ -354,7 +356,7 @@ export const ru = {
             MAX: 'MAX',
             MANUAL: 'Другой',
           })[details.sentVia] ?? details.sentVia
-        }`;
+        }${details.sentTo ? ` · Адресат: ${details.sentTo}` : ''}`;
       }
       if (type === 'OUTCOME_RECORDED' && details.outcome) {
         return (
