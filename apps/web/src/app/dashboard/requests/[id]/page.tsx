@@ -103,6 +103,12 @@ function numberValue(value: string): number {
   return parseAmount(value) ?? 0;
 }
 
+function lineTotal(unitPrice: number, quantity: string | null | undefined): number | null {
+  const parsedQuantity = parseAmount(quantity ?? '');
+  if (parsedQuantity === null || parsedQuantity <= 0) return null;
+  return Math.round(unitPrice * parsedQuantity * 100) / 100;
+}
+
 function money(value: number, currency: string): string {
   return new Intl.NumberFormat('ru-RU', {
     style: 'currency',
@@ -211,8 +217,9 @@ export default function RequestDetailPage() {
       const available = imported.lines.map((line) => ({ ...line, matched: false }));
       const matchedPrices = new Map<
         string,
-        { description: string; purchaseAmount: number; saleAmount?: number }
+        { purchaseAmount: number; saleAmount?: number }
       >();
+      let missingQuantity = 0;
       request.lines.forEach((line) => {
         const key = normalizeDescription(line.rawLine);
         const price = available.find(
@@ -221,7 +228,17 @@ export default function RequestDetailPage() {
         );
         if (!price) return;
         price.matched = true;
-        matchedPrices.set(line.id, price);
+        const purchaseAmount = lineTotal(price.purchaseAmount, line.quantity);
+        const saleAmount =
+          price.saleAmount == null ? undefined : lineTotal(price.saleAmount, line.quantity);
+        if (purchaseAmount == null || (price.saleAmount != null && saleAmount == null)) {
+          missingQuantity += 1;
+          return;
+        }
+        matchedPrices.set(line.id, {
+          purchaseAmount,
+          ...(saleAmount == null ? {} : { saleAmount }),
+        });
       });
       setCommercials((current) => {
         const next = { ...current };
@@ -243,7 +260,7 @@ export default function RequestDetailPage() {
       setPriceImportNotice(
         applied === request.lines.length && applied === imported.lines.length
           ? ru.requests.priceImportApplied(imported.sourceFileName, applied)
-          : `${ru.requests.priceImportApplied(imported.sourceFileName, applied)} ${ru.requests.priceImportMismatch(applied, imported.lines.length, request.lines.length)}`,
+          : `${ru.requests.priceImportApplied(imported.sourceFileName, applied)} ${ru.requests.priceImportMismatch(applied, imported.lines.length, request.lines.length)}${missingQuantity > 0 ? ` ${ru.requests.priceImportMissingQuantity(missingQuantity)}` : ''}`,
       );
     } catch {
       setError(ru.requests.priceImportFailed);
