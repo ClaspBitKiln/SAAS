@@ -21,6 +21,8 @@ interface RequestItem {
   proposalSentAt: string | null;
   proposalSentVia: string | null;
   followUpAt: string | null;
+  outcome: 'WON' | 'LOST' | 'NO_RESPONSE' | null;
+  outcomeReason: string | null;
   createdAt: string;
 }
 
@@ -29,8 +31,11 @@ interface RequestList {
   total: number;
 }
 
-function followUpBucket(followUpAt: string | null): Exclude<FollowUpFilter, 'ALL'> | null {
-  if (!followUpAt) return null;
+function followUpBucket(
+  followUpAt: string | null,
+  outcome: RequestItem['outcome'],
+): Exclude<FollowUpFilter, 'ALL'> | null {
+  if (!followUpAt || outcome) return null;
 
   const followUp = new Date(followUpAt);
   const now = new Date();
@@ -58,7 +63,7 @@ export default function RequestsPage() {
 
   const followUpCounts = items.reduce(
     (counts, item) => {
-      const bucket = followUpBucket(item.followUpAt);
+      const bucket = followUpBucket(item.followUpAt, item.outcome);
       if (bucket) counts[bucket] += 1;
       return counts;
     },
@@ -66,7 +71,7 @@ export default function RequestsPage() {
   );
 
   const visibleItems = items
-    .filter((item) => filter === 'ALL' || followUpBucket(item.followUpAt) === filter)
+    .filter((item) => filter === 'ALL' || followUpBucket(item.followUpAt, item.outcome) === filter)
     .sort((left, right) => {
       if (!left.followUpAt) return 1;
       if (!right.followUpAt) return -1;
@@ -120,7 +125,7 @@ export default function RequestsPage() {
             </li>
           )}
           {visibleItems.map((r) => {
-            const bucket = followUpBucket(r.followUpAt);
+            const bucket = followUpBucket(r.followUpAt, r.outcome);
             const followUpClass =
               bucket === 'OVERDUE'
                 ? 'text-red-400'
@@ -156,7 +161,11 @@ export default function RequestsPage() {
                         : ''}
                     </div>
                   )}
-                  {r.followUpAt && (
+                  {r.outcome ? (
+                    <div className="mt-1 text-xs font-medium text-emerald-300">
+                      {ru.requests.outcomeLabel(r.outcome)} · {r.outcomeReason}
+                    </div>
+                  ) : r.followUpAt ? (
                     <div className={`mt-1 text-xs font-medium ${followUpClass}`}>
                       {bucket === 'OVERDUE'
                         ? ru.requests.followUpOverdueAt(
@@ -179,7 +188,7 @@ export default function RequestsPage() {
                               }).format(new Date(r.followUpAt)),
                             )}
                     </div>
-                  )}
+                  ) : null}
                 </div>
                 <Link
                   href={`/dashboard/requests/${r.id}`}

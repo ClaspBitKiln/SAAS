@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import {
   Prisma,
+  RequestOutcome as PrismaRequestOutcome,
   RequestSource as PrismaRequestSource,
   RequestStatus as PrismaRequestStatus,
 } from '@prisma/client';
@@ -8,6 +9,7 @@ import { PrismaService } from '../../../database/prisma/prisma.service';
 import { Request } from '../domain/entities/request.entity';
 import { RequestRepository } from '../domain/repositories/request.repository';
 import { ProposalSentViaEnum } from '../domain/value-objects/proposal-sent-via.vo';
+import { RequestOutcomeEnum } from '../domain/value-objects/request-outcome.vo';
 import { RequestSourceEnum } from '../domain/value-objects/request-source.vo';
 import { RequestStatusEnum } from '../domain/value-objects/request-status.vo';
 
@@ -65,6 +67,9 @@ export class PrismaRequestRepository implements RequestRepository {
       proposalSentAt: request.proposalSentAt,
       proposalSentVia: request.proposalSentVia,
       followUpAt: request.followUpAt,
+      outcome: request.outcome as PrismaRequestOutcome | null,
+      outcomeReason: request.outcomeReason,
+      outcomeAt: request.outcomeAt,
       deletedAt: request.deletedAt,
     };
 
@@ -149,6 +154,9 @@ export class PrismaRequestRepository implements RequestRepository {
     proposalSentAt: Date | null;
     proposalSentVia: string | null;
     followUpAt: Date | null;
+    outcome: PrismaRequestOutcome | null;
+    outcomeReason: string | null;
+    outcomeAt: Date | null;
     version: number;
     createdAt: Date;
     updatedAt: Date;
@@ -191,6 +199,9 @@ export class PrismaRequestRepository implements RequestRepository {
       proposalSentAt: row.proposalSentAt,
       proposalSentVia: row.proposalSentVia as ProposalSentViaEnum | null,
       followUpAt: row.followUpAt,
+      outcome: row.outcome as RequestOutcomeEnum | null,
+      outcomeReason: row.outcomeReason,
+      outcomeAt: row.outcomeAt,
       lines: row.lines.map((line) => ({
         ...line,
         purchaseAmount: line.purchaseAmount == null ? null : Number(line.purchaseAmount),

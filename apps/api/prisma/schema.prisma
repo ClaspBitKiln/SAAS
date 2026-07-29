@@ -293,6 +293,12 @@ enum RequestStatus {
   SENT
 }
 
+enum RequestOutcome {
+  WON
+  LOST
+  NO_RESPONSE
+}
+
 model Request {
   id             String        @id @db.Uuid
   tenantId       String        @db.Uuid
@@ -315,6 +321,9 @@ model Request {
   proposalSentAt         DateTime?
   proposalSentVia        String?       @db.VarChar(32)
   followUpAt             DateTime?
+  outcome                RequestOutcome?
+  outcomeReason          String?       @db.VarChar(500)
+  outcomeAt              DateTime?
   version                Int           @default(0)
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
@@ -325,6 +334,7 @@ model Request {
   @@index([organizationId])
   @@index([contactId])
   @@index([organizationId, status, followUpAt])
+  @@index([organizationId, outcome, outcomeAt])
   @@map("requests")
 }
 

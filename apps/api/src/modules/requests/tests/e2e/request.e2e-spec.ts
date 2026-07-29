@@ -143,6 +143,15 @@ describe('Request E2E', () => {
     expect(sent.body.proposalSentVia).toBe('EMAIL');
     expect(new Date(sent.body.proposalSentAt).getTime()).toBeGreaterThan(0);
 
+    const outcome = await request(app.getHttpServer())
+      .post(`/requests/${created.body.id}/outcome`)
+      .set(authHeader(token))
+      .send({ outcome: 'WON', reason: 'Клиент подтвердил заказ' })
+      .expect(201);
+    expect(outcome.body.outcome).toBe('WON');
+    expect(outcome.body.outcomeReason).toBe('Клиент подтвердил заказ');
+    expect(new Date(outcome.body.outcomeAt).getTime()).toBeGreaterThan(0);
+
     await request(app.getHttpServer())
       .post(`/requests/${created.body.id}/sent`)
       .set(authHeader(token))

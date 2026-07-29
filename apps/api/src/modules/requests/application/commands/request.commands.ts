@@ -1,5 +1,6 @@
 import { QuoteLineInput } from '../../domain/entities/request.entity';
 import { ProposalSentViaEnum } from '../../domain/value-objects/proposal-sent-via.vo';
+import { RequestOutcomeEnum } from '../../domain/value-objects/request-outcome.vo';
 import { RequestLineProps } from '../../domain/value-objects/request-line.vo';
 import { RequestSourceEnum } from '../../domain/value-objects/request-source.vo';
 
@@ -47,6 +48,15 @@ export class MarkProposalSentCommand {
     readonly id: string,
     readonly organizationId: string,
     readonly sentVia: ProposalSentViaEnum,
+  ) {}
+}
+
+export class RecordRequestOutcomeCommand {
+  constructor(
+    readonly id: string,
+    readonly organizationId: string,
+    readonly outcome: RequestOutcomeEnum,
+    readonly reason: string,
   ) {}
 }
 

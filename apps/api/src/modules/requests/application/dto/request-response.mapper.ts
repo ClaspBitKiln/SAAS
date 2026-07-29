@@ -31,6 +31,9 @@ export function toRequestResponse(request: Request): RequestResponseDto {
     proposalSentAt: request.proposalSentAt?.toISOString() ?? null,
     proposalSentVia: request.proposalSentVia,
     followUpAt: request.followUpAt?.toISOString() ?? null,
+    outcome: request.outcome,
+    outcomeReason: request.outcomeReason,
+    outcomeAt: request.outcomeAt?.toISOString() ?? null,
     lines: request.lines.map((l) => ({
       id: l.id,
       sortOrder: l.sortOrder,
