@@ -246,6 +246,7 @@ export const ru = {
     downloadProposal: 'Скачать PDF',
     downloadingProposal: 'Готовим PDF…',
     downloadProposalFailed: 'Не удалось скачать PDF. Используйте печать как запасной вариант.',
+    downloadTrackFailed: 'PDF скачан, но не удалось записать это действие в хронологию.',
     sentVia: 'Канал отправки',
     sentViaEmail: 'Email',
     sentViaTelegram: 'Telegram',
@@ -274,6 +275,45 @@ export const ru = {
     followUpTodayAt: (time: string) => `Связаться сегодня · ${time}`,
     followUpUpcomingAt: (date: string) => `Следующий контакт · ${date}`,
     followUpAction: 'Связаться',
+    activityTitle: 'Хронология заявки',
+    activityLabel: (type: string) =>
+      ({
+        REQUEST_CREATED: 'Заявка создана',
+        QUOTE_PREPARED: 'КП подготовлено',
+        FOLLOW_UP_SCHEDULED: 'Следующий контакт назначен',
+        PROPOSAL_DOWNLOADED: 'PDF скачан',
+        PROPOSAL_SENT: 'КП отправлено',
+        OUTCOME_RECORDED: 'Результат зафиксирован',
+      })[type] ?? type,
+    activityDetails: (type: string, details: Record<string, string>) => {
+      if (type === 'FOLLOW_UP_SCHEDULED' && details.followUpAt) {
+        return `Контакт: ${new Intl.DateTimeFormat('ru-RU', {
+          dateStyle: 'short',
+          timeStyle: 'short',
+        }).format(new Date(details.followUpAt))}`;
+      }
+      if (type === 'PROPOSAL_SENT' && details.sentVia) {
+        return `Канал: ${
+          ({
+            EMAIL: 'Email',
+            TELEGRAM: 'Telegram',
+            WHATSAPP: 'WhatsApp',
+            MAX: 'MAX',
+            MANUAL: 'Другой',
+          })[details.sentVia] ?? details.sentVia
+        }`;
+      }
+      if (type === 'OUTCOME_RECORDED' && details.outcome) {
+        return (
+          {
+            WON: 'Заказ получен',
+            LOST: 'Проиграно',
+            NO_RESPONSE: 'Нет ответа',
+          }[details.outcome] ?? details.outcome
+        );
+      }
+      return '';
+    },
     outcomeTitle: 'Результат по КП',
     outcomeWon: 'Заказ получен',
     outcomeLost: 'Проиграно',
