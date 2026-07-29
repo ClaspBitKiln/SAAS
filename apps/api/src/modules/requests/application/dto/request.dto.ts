@@ -108,6 +108,12 @@ export class PrepareQuoteDto {
   @ApiProperty({ description: 'ISO datetime for the mandatory next contact' })
   @IsDateString()
   followUpAt!: string;
+
+  @ApiPropertyOptional({ description: 'Original supplier price file used for this quote' })
+  @IsOptional()
+  @IsString()
+  @Length(1, 255)
+  priceSourceFileName?: string;
 }
 
 export class MarkProposalSentDto {
@@ -177,6 +183,7 @@ export class RequestResponseDto {
   @ApiProperty() currency!: string;
   @ApiPropertyOptional() sellerName!: string | null;
   @ApiPropertyOptional() deliveryTerms!: string | null;
+  @ApiPropertyOptional() priceSourceFileName!: string | null;
   @ApiProperty() logisticsCost!: number;
   @ApiProperty() otherCosts!: number;
   @ApiProperty() purchaseTotal!: number;
@@ -203,6 +210,17 @@ export class ParseRequestResponseDto {
   @ApiProperty() parser!: 'e-metall' | 'built-in';
   @ApiPropertyOptional() sourceText?: string;
   @ApiPropertyOptional() sourceFileName?: string;
+}
+
+export class PriceImportLineDto {
+  @ApiProperty() description!: string;
+  @ApiProperty({ minimum: 0 }) purchaseAmount!: number;
+  @ApiPropertyOptional({ minimum: 0 }) saleAmount?: number;
+}
+
+export class PriceImportResponseDto {
+  @ApiProperty({ type: [PriceImportLineDto] }) lines!: PriceImportLineDto[];
+  @ApiProperty() sourceFileName!: string;
 }
 
 export class RequestListResponseDto {

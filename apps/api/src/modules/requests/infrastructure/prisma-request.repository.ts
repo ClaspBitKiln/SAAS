@@ -59,6 +59,7 @@ export class PrismaRequestRepository implements RequestRepository {
       currency: request.currency,
       sellerName: request.sellerName,
       deliveryTerms: request.deliveryTerms,
+      priceSourceFileName: request.priceSourceFileName,
       logisticsCost: request.logisticsCost,
       otherCosts: request.otherCosts,
       proposalNumber: request.proposalNumber,
@@ -147,6 +148,7 @@ export class PrismaRequestRepository implements RequestRepository {
     currency: string;
     sellerName: string | null;
     deliveryTerms: string | null;
+    priceSourceFileName: string | null;
     logisticsCost: Prisma.Decimal;
     otherCosts: Prisma.Decimal;
     proposalNumber: string | null;
@@ -193,6 +195,7 @@ export class PrismaRequestRepository implements RequestRepository {
       currency: row.currency,
       sellerName: row.sellerName,
       deliveryTerms: row.deliveryTerms,
+      priceSourceFileName: row.priceSourceFileName,
       logisticsCost: Number(row.logisticsCost),
       otherCosts: Number(row.otherCosts),
       proposalNumber: row.proposalNumber,

@@ -22,6 +22,7 @@ import {
   MarkProposalSentDto,
   ParseRequestDto,
   ParseRequestResponseDto,
+  PriceImportResponseDto,
   PrepareQuoteDto,
   RequestListResponseDto,
   RequestResponseDto,
@@ -76,6 +77,38 @@ export class RequestController {
         ['Unsupported request file type', 'Invalid request file', 'PDF has no text layer'].includes(
           error.message,
         )
+      ) {
+        throw new BadRequestException(error.message);
+      }
+      throw error;
+    }
+  }
+
+  @Post('prices/file')
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: { type: 'object', properties: { file: { type: 'string', format: 'binary' } } },
+  })
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiOkResponse({ type: PriceImportResponseDto })
+  async parsePriceFile(
+    @UploadedFile() file: { buffer: Buffer; mimetype: string; originalname: string } | undefined,
+  ): Promise<PriceImportResponseDto> {
+    if (!file) throw new BadRequestException('file required');
+    try {
+      return await this.parseService.parsePriceFileBuffer(
+        file.buffer,
+        file.mimetype,
+        file.originalname,
+      );
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        [
+          'Unsupported price file type',
+          'Invalid price file',
+          'Price file has no valid rows',
+        ].includes(error.message)
       ) {
         throw new BadRequestException(error.message);
       }
@@ -174,6 +207,7 @@ export class RequestController {
           dto.otherCosts,
           dto.proposalValidityDays ?? 5,
           new Date(dto.followUpAt),
+          dto.priceSourceFileName,
         ),
       );
     } catch (e) {

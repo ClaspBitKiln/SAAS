@@ -43,6 +43,10 @@ Progress toward A9: deterministic pasted-message intake with retained source
 and mandatory manager review merged in PR #19. TXT/CSV, XLSX, and text-layer
 PDF extraction plus deterministic field-completeness warnings are merged.
 
+Progress toward A8: XLSX/CSV price imports are matched by normalized product
+description, unmatched rows are left untouched, and the source filename is
+retained with the prepared quote.
+
 ## Deferred until evidence
 
 - Full messenger inbox and telephony platform

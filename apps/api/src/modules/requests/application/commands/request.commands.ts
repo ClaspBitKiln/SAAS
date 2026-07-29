@@ -40,6 +40,7 @@ export class PrepareQuoteCommand {
     readonly otherCosts: number,
     readonly proposalValidityDays: number,
     readonly followUpAt: Date,
+    readonly priceSourceFileName?: string | null,
   ) {}
 }
 

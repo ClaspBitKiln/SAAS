@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { RequireAuth } from '@/components/RequireAuth';
-import { apiAuthGet, apiAuthPost } from '@/lib/api';
+import { apiAuthGet, apiAuthPost, apiAuthUpload } from '@/lib/api';
 import { ru } from '@/lib/ru';
 
 interface Offer {
@@ -49,6 +49,7 @@ interface RequestDetail {
   currency: string;
   sellerName: string | null;
   deliveryTerms: string | null;
+  priceSourceFileName: string | null;
   logisticsCost: number;
   otherCosts: number;
   purchaseTotal: number;
@@ -69,6 +70,11 @@ interface RequestDetail {
 interface CommercialLine {
   purchaseAmount: string;
   saleAmount: string;
+}
+
+interface PriceImportResponse {
+  lines: Array<{ description: string; purchaseAmount: number; saleAmount?: number }>;
+  sourceFileName: string;
 }
 
 function defaultFollowUp(): string {
@@ -123,6 +129,9 @@ export default function RequestDetailPage() {
   const [searching, setSearching] = useState(false);
   const [savingQuote, setSavingQuote] = useState(false);
   const [savingOutcome, setSavingOutcome] = useState(false);
+  const [importingPrices, setImportingPrices] = useState(false);
+  const [priceImportNotice, setPriceImportNotice] = useState<string | null>(null);
+  const [priceSourceFileName, setPriceSourceFileName] = useState<string | null>(null);
 
   const applyRequest = useCallback((data: RequestDetail) => {
     setRequest(data);
@@ -131,6 +140,7 @@ export default function RequestDetailPage() {
     setDeliveryTerms(data.deliveryTerms || '');
     setLogisticsCost(String(data.logisticsCost ?? 0));
     setOtherCosts(String(data.otherCosts ?? 0));
+    setPriceSourceFileName(data.priceSourceFileName);
     setValidityDays(String(data.proposalValidityDays ?? 5));
     setFollowUpAt(toLocalDateTime(data.followUpAt));
     setCommercials(
@@ -186,6 +196,62 @@ export default function RequestDetailPage() {
     }
   }
 
+  async function onImportPrices(file: File) {
+    if (!request) return;
+    setImportingPrices(true);
+    setError(null);
+    setPriceImportNotice(null);
+    try {
+      const imported = await apiAuthUpload<PriceImportResponse>('/requests/prices/file', file);
+      const normalizeDescription = (value: string | null | undefined) =>
+        (value ?? '')
+          .toLocaleLowerCase('ru-RU')
+          .replace(/ё/g, 'е')
+          .replace(/[^a-zа-я0-9]+/giu, '');
+      const available = imported.lines.map((line) => ({ ...line, matched: false }));
+      const matchedPrices = new Map<
+        string,
+        { description: string; purchaseAmount: number; saleAmount?: number }
+      >();
+      request.lines.forEach((line) => {
+        const key = normalizeDescription(line.rawLine);
+        const price = available.find(
+          (candidate) =>
+            !candidate.matched && key.length > 0 && normalizeDescription(candidate.description) === key,
+        );
+        if (!price) return;
+        price.matched = true;
+        matchedPrices.set(line.id, price);
+      });
+      setCommercials((current) => {
+        const next = { ...current };
+        request.lines.forEach((line) => {
+          const price = matchedPrices.get(line.id);
+          if (!price) return;
+          next[line.id] = {
+            purchaseAmount: String(price.purchaseAmount),
+            saleAmount:
+              price.saleAmount == null
+                ? current[line.id]?.saleAmount ?? ''
+                : String(price.saleAmount),
+          };
+        });
+        return next;
+      });
+      setPriceSourceFileName(imported.sourceFileName);
+      const applied = matchedPrices.size;
+      setPriceImportNotice(
+        applied === request.lines.length && applied === imported.lines.length
+          ? ru.requests.priceImportApplied(imported.sourceFileName, applied)
+          : `${ru.requests.priceImportApplied(imported.sourceFileName, applied)} ${ru.requests.priceImportMismatch(applied, imported.lines.length, request.lines.length)}`,
+      );
+    } catch {
+      setError(ru.requests.priceImportFailed);
+    } finally {
+      setImportingPrices(false);
+    }
+  }
+
   async function onPrepareQuote() {
     if (!request) return;
     if (request.lines.some((line) => !commercials[line.id]?.purchaseAmount || !commercials[line.id]?.saleAmount)) {
@@ -230,6 +296,7 @@ export default function RequestDetailPage() {
         otherCosts: numberValue(otherCosts),
         proposalValidityDays: validity,
         followUpAt: followUpDate.toISOString(),
+        priceSourceFileName: priceSourceFileName || undefined,
       });
       applyRequest(data);
     } catch (caught) {
@@ -398,7 +465,31 @@ export default function RequestDetailPage() {
         )}
 
         <section className="mt-8">
-          <h2 className="text-sm font-medium text-slate-300">{ru.requests.positionsAndPrices}</h2>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-medium text-slate-300">{ru.requests.positionsAndPrices}</h2>
+              <p className="mt-1 max-w-2xl text-xs text-slate-500">{ru.requests.priceImportHint}</p>
+            </div>
+            <label className="cursor-pointer rounded-md border border-slate-700 px-3 py-2 text-sm text-slate-300 hover:border-slate-500">
+              {importingPrices ? ru.requests.priceImporting : ru.requests.priceImport}
+              <input
+                type="file"
+                accept=".xlsx,.csv,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                disabled={importingPrices}
+                className="sr-only"
+                onChange={(event) => {
+                  const file = event.target.files?.[0];
+                  if (file) void onImportPrices(file);
+                  event.target.value = '';
+                }}
+              />
+            </label>
+          </div>
+          {priceImportNotice && (
+            <p className="mt-3 rounded border border-amber-800 bg-amber-950/40 px-3 py-2 text-xs text-amber-200">
+              {priceImportNotice}
+            </p>
+          )}
           <div className="mt-2 overflow-hidden rounded-lg border border-slate-800">
             {request?.lines.map((line) => (
               <div key={line.id} className="grid gap-3 border-b border-slate-800 p-4 last:border-b-0 md:grid-cols-[1fr_180px_180px]">

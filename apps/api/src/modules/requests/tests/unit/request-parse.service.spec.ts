@@ -164,4 +164,37 @@ describe('RequestParseService built-in parser', () => {
       ),
     ).rejects.toThrow('Invalid request file');
   });
+
+  it('imports deterministic purchase and sale amounts from a price workbook', async () => {
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet('Прайс');
+    sheet.addRow(['Наименование', 'Закупочная цена', 'Цена продажи']);
+    sheet.addRow(['Лист 09Г2С 5х1500х6000', 62000, 69000]);
+    sheet.addRow(['Труба Ст20 57х3,5', '75 500,50', '82 000']);
+    const buffer = Buffer.from(await workbook.xlsx.writeBuffer());
+
+    const result = await service.parsePriceFileBuffer(
+      buffer,
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'прайс поставщика.xlsx',
+    );
+
+    expect(result).toEqual({
+      sourceFileName: 'прайс поставщика.xlsx',
+      lines: [
+        { description: 'Лист 09Г2С 5х1500х6000', purchaseAmount: 62000, saleAmount: 69000 },
+        { description: 'Труба Ст20 57х3,5', purchaseAmount: 75500.5, saleAmount: 82000 },
+      ],
+    });
+  });
+
+  it('rejects a price file without explicit purchase headers', async () => {
+    await expect(
+      service.parsePriceFileBuffer(
+        Buffer.from('Наименование;Количество\nЛист 09Г2С;10'),
+        'text/csv',
+        'прайс.csv',
+      ),
+    ).rejects.toThrow('Price file has no valid rows');
+  });
 });
