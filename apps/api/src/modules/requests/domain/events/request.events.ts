@@ -6,6 +6,7 @@ type RequestEventName =
   | 'request.updated'
   | 'request.searched'
   | 'request.quoted'
+  | 'request.proposal_downloaded'
   | 'request.proposal_sent'
   | 'request.outcome_recorded';
 
