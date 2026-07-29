@@ -40,11 +40,14 @@ describe('Request E2E', () => {
       .set(authHeader(token))
       .send({
         title: 'E2E Request',
-        source: 'MANUAL',
+        source: 'PASTED',
+        sourceText: 'Лист 10мм 09Г2С\nТруба 57х3.5',
         lines: parsed.body.lines,
       })
       .expect(201);
     expect(created.body.lines.length).toBeGreaterThanOrEqual(1);
+    expect(created.body.source).toBe('PASTED');
+    expect(created.body.sourceText).toContain('Лист 10мм');
 
     const searched = await request(app.getHttpServer())
       .post(`/requests/${created.body.id}/search`)
