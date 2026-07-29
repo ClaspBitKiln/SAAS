@@ -4,6 +4,31 @@ import { RequestParseService } from '../../application/services/request-parse.se
 import { EMetallIntegrationService } from '../../../e-metall/application/services/e-metall-integration.service';
 import { HttpEMetallApiClient } from '../../../e-metall/infrastructure/e-metall-api.client';
 
+function createTextPdf(text: string): Buffer {
+  const stream = `BT /F1 12 Tf 72 720 Td (${text}) Tj ET`;
+  const objects = [
+    '<< /Type /Catalog /Pages 2 0 R >>',
+    '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+    '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>',
+    '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
+    `<< /Length ${Buffer.byteLength(stream)} >>\nstream\n${stream}\nendstream`,
+  ];
+  let pdf = '%PDF-1.4\n';
+  const offsets = [0];
+  for (const [index, object] of objects.entries()) {
+    offsets.push(Buffer.byteLength(pdf));
+    pdf += `${index + 1} 0 obj\n${object}\nendobj\n`;
+  }
+  const xrefOffset = Buffer.byteLength(pdf);
+  pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+  pdf += offsets
+    .slice(1)
+    .map((offset) => `${String(offset).padStart(10, '0')} 00000 n \n`)
+    .join('');
+  pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`;
+  return Buffer.from(pdf);
+}
+
 describe('RequestParseService built-in parser', () => {
   const service = new RequestParseService(
     new EMetallIntegrationService(new HttpEMetallApiClient()),
@@ -59,10 +84,22 @@ describe('RequestParseService built-in parser', () => {
     });
   });
 
-  it('rejects binary formats until a reliable extractor is configured', async () => {
+  it('extracts text from a PDF text layer for manager review', async () => {
+    const result = await service.parseFileBuffer(
+      createTextPdf('AISI 304 10 kg'),
+      'application/pdf',
+      'request.pdf',
+    );
+
+    expect(result.sourceFileName).toBe('request.pdf');
+    expect(result.sourceText).toContain('AISI 304 10 kg');
+    expect(result.lines[0]).toMatchObject({ steelGrade: 'AISI 304', rawLine: 'AISI 304 10 kg' });
+  });
+
+  it('rejects a corrupt PDF file', async () => {
     await expect(
       service.parseFileBuffer(Buffer.from('%PDF binary'), 'application/pdf', 'request.pdf'),
-    ).rejects.toThrow('Unsupported request file type');
+    ).rejects.toThrow('Invalid request file');
   });
 
   it('retains extracted text and file name for manager review', async () => {
