@@ -27,6 +27,18 @@ interface RequestLine {
   saleAmount?: number | null;
 }
 
+interface RequestActivity {
+  type:
+    | 'REQUEST_CREATED'
+    | 'QUOTE_PREPARED'
+    | 'FOLLOW_UP_SCHEDULED'
+    | 'PROPOSAL_DOWNLOADED'
+    | 'PROPOSAL_SENT'
+    | 'OUTCOME_RECORDED';
+  occurredAt: string;
+  details: Record<string, string>;
+}
+
 interface RequestDetail {
   id: string;
   contactId: string | null;
@@ -49,6 +61,7 @@ interface RequestDetail {
   outcome: 'WON' | 'LOST' | 'NO_RESPONSE' | null;
   outcomeReason: string | null;
   outcomeAt: string | null;
+  activity: RequestActivity[];
   lines: RequestLine[];
   searchResult?: { offers?: Offer[]; status?: string } | null;
 }
@@ -301,6 +314,36 @@ export default function RequestDetailPage() {
               {request.sourceText}
             </pre>
           </details>
+        )}
+
+        {request && (
+          <section className="mt-6 rounded-lg border border-slate-800 bg-slate-900 p-5">
+            <h2 className="font-medium">{ru.requests.activityTitle}</h2>
+            <ol className="mt-4 space-y-4">
+              {request.activity.map((item, index) => {
+                const details = ru.requests.activityDetails(item.type, item.details);
+                return (
+                  <li key={`${item.type}-${item.occurredAt}`} className="flex gap-3">
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-800 text-xs text-slate-300">
+                      {index + 1}
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium text-slate-200">
+                        {ru.requests.activityLabel(item.type)}
+                      </div>
+                      <div className="mt-0.5 text-xs text-slate-500">
+                        {new Intl.DateTimeFormat('ru-RU', {
+                          dateStyle: 'short',
+                          timeStyle: 'short',
+                        }).format(new Date(item.occurredAt))}
+                      </div>
+                      {details && <div className="mt-1 text-sm text-slate-400">{details}</div>}
+                    </div>
+                  </li>
+                );
+              })}
+            </ol>
+          </section>
         )}
 
         {request?.status === 'SENT' && (

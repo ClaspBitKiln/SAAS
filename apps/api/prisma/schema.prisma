@@ -318,6 +318,7 @@ model Request {
   proposalNumber         String?       @db.VarChar(64)
   proposalIssuedAt       DateTime?
   proposalValidityDays   Int           @default(5)
+  proposalDownloadedAt   DateTime?
   proposalSentAt         DateTime?
   proposalSentVia        String?       @db.VarChar(32)
   followUpAt             DateTime?

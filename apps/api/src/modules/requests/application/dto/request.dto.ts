@@ -141,6 +141,21 @@ export class RequestLineResponseDto {
   @ApiPropertyOptional() saleAmount?: number | null;
 }
 
+export enum RequestActivityType {
+  REQUEST_CREATED = 'REQUEST_CREATED',
+  QUOTE_PREPARED = 'QUOTE_PREPARED',
+  FOLLOW_UP_SCHEDULED = 'FOLLOW_UP_SCHEDULED',
+  PROPOSAL_DOWNLOADED = 'PROPOSAL_DOWNLOADED',
+  PROPOSAL_SENT = 'PROPOSAL_SENT',
+  OUTCOME_RECORDED = 'OUTCOME_RECORDED',
+}
+
+export class RequestActivityResponseDto {
+  @ApiProperty({ enum: RequestActivityType }) type!: RequestActivityType;
+  @ApiProperty() occurredAt!: string;
+  @ApiProperty() details!: Record<string, string>;
+}
+
 export class RequestResponseDto {
   @ApiProperty() id!: string;
   @ApiProperty() tenantId!: string;
@@ -164,12 +179,14 @@ export class RequestResponseDto {
   @ApiPropertyOptional() proposalNumber!: string | null;
   @ApiPropertyOptional() proposalIssuedAt!: string | null;
   @ApiProperty() proposalValidityDays!: number;
+  @ApiPropertyOptional() proposalDownloadedAt!: string | null;
   @ApiPropertyOptional() proposalSentAt!: string | null;
   @ApiPropertyOptional({ enum: ProposalSentViaEnum }) proposalSentVia!: ProposalSentViaEnum | null;
   @ApiPropertyOptional() followUpAt!: string | null;
   @ApiPropertyOptional({ enum: RequestOutcomeEnum }) outcome!: RequestOutcomeEnum | null;
   @ApiPropertyOptional() outcomeReason!: string | null;
   @ApiPropertyOptional() outcomeAt!: string | null;
+  @ApiProperty({ type: [RequestActivityResponseDto] }) activity!: RequestActivityResponseDto[];
   @ApiProperty({ type: [RequestLineResponseDto] }) lines!: RequestLineResponseDto[];
   @ApiProperty() createdAt!: string;
 }

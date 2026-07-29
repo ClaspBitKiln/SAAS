@@ -30,6 +30,7 @@ import {
 } from '../../application/dto/request.dto';
 import {
   CreateRequestCommand,
+  MarkProposalDownloadedCommand,
   MarkProposalSentCommand,
   PrepareQuoteCommand,
   RecordRequestOutcomeCommand,
@@ -196,6 +197,27 @@ export class RequestController {
         if (e.message.startsWith('Request proposal:')) throw new BadRequestException(e.message);
       }
       throw e;
+    }
+    return this.getOrFail(id, organizationId);
+  }
+
+  @Post(':id/downloaded')
+  @ApiOkResponse({ type: RequestResponseDto })
+  async markProposalDownloaded(
+    @CurrentUser() user: AccessTokenPayload,
+    @Param('id') id: string,
+  ): Promise<RequestResponseDto> {
+    const organizationId = requireOrganizationId(user);
+    try {
+      await this.commandBus.execute(new MarkProposalDownloadedCommand(id, organizationId));
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message === 'Request not found') throw new NotFoundException(error.message);
+        if (error.message.startsWith('Request proposal:')) {
+          throw new BadRequestException(error.message);
+        }
+      }
+      throw error;
     }
     return this.getOrFail(id, organizationId);
   }
