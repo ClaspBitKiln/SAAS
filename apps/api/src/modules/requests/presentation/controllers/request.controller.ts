@@ -25,12 +25,14 @@ import {
   PrepareQuoteDto,
   RequestListResponseDto,
   RequestResponseDto,
+  RecordRequestOutcomeDto,
   UpdateRequestDto,
 } from '../../application/dto/request.dto';
 import {
   CreateRequestCommand,
   MarkProposalSentCommand,
   PrepareQuoteCommand,
+  RecordRequestOutcomeCommand,
   SearchRequestCommand,
   UpdateRequestCommand,
 } from '../../application/commands/request.commands';
@@ -194,6 +196,30 @@ export class RequestController {
         if (e.message.startsWith('Request proposal:')) throw new BadRequestException(e.message);
       }
       throw e;
+    }
+    return this.getOrFail(id, organizationId);
+  }
+
+  @Post(':id/outcome')
+  @ApiOkResponse({ type: RequestResponseDto })
+  async recordOutcome(
+    @CurrentUser() user: AccessTokenPayload,
+    @Param('id') id: string,
+    @Body() dto: RecordRequestOutcomeDto,
+  ): Promise<RequestResponseDto> {
+    const organizationId = requireOrganizationId(user);
+    try {
+      await this.commandBus.execute(
+        new RecordRequestOutcomeCommand(id, organizationId, dto.outcome, dto.reason),
+      );
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message === 'Request not found') throw new NotFoundException(error.message);
+        if (error.message.startsWith('Request outcome:')) {
+          throw new BadRequestException(error.message);
+        }
+      }
+      throw error;
     }
     return this.getOrFail(id, organizationId);
   }
