@@ -12,6 +12,7 @@ export function toRequestResponse(request: Request): RequestResponseDto {
     contactId: request.contactId,
     title: request.title,
     notes: request.notes,
+    sourceText: request.sourceText,
     source: request.source,
     status: request.status,
     searchResult: request.searchResult,
