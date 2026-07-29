@@ -64,6 +64,7 @@ export class PrismaRequestRepository implements RequestRepository {
       proposalNumber: request.proposalNumber,
       proposalIssuedAt: request.proposalIssuedAt,
       proposalValidityDays: request.proposalValidityDays,
+      proposalDownloadedAt: request.proposalDownloadedAt,
       proposalSentAt: request.proposalSentAt,
       proposalSentVia: request.proposalSentVia,
       followUpAt: request.followUpAt,
@@ -151,6 +152,7 @@ export class PrismaRequestRepository implements RequestRepository {
     proposalNumber: string | null;
     proposalIssuedAt: Date | null;
     proposalValidityDays: number;
+    proposalDownloadedAt: Date | null;
     proposalSentAt: Date | null;
     proposalSentVia: string | null;
     followUpAt: Date | null;
@@ -196,6 +198,7 @@ export class PrismaRequestRepository implements RequestRepository {
       proposalNumber: row.proposalNumber,
       proposalIssuedAt: row.proposalIssuedAt,
       proposalValidityDays: row.proposalValidityDays,
+      proposalDownloadedAt: row.proposalDownloadedAt,
       proposalSentAt: row.proposalSentAt,
       proposalSentVia: row.proposalSentVia as ProposalSentViaEnum | null,
       followUpAt: row.followUpAt,
