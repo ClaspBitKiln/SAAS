@@ -35,6 +35,10 @@ traceable commercial proposal and the next manager action.
 | A8 | Deterministic pricing import | Supplier prices feed quote calculation | Validated import, provenance, no LLM arithmetic |
 | A9 | AI-assisted intake | Raw request becomes reviewed structured lines | Source retained, confidence shown, human confirms |
 
+Progress toward A6: a self-guided pilot checklist based on real organization
+state merged in PR #24. Production smoke and feedback from a real manager remain
+required before A6 is complete.
+
 Progress toward A9: deterministic pasted-message intake with retained source
 and mandatory manager review merged in PR #19. AI confidence and attachment
 extraction remain incomplete.
