@@ -113,7 +113,8 @@ export class RequestParseService {
         if (!worksheet) throw new Error();
         rows = [];
         worksheet.eachRow((row) => {
-          rows.push(row.values.slice(1).map((value) => String(value ?? '').trim()));
+          const values = Array.isArray(row.values) ? row.values.slice(1) : [];
+          rows.push(values.map((value) => String(value ?? '').trim()));
         });
       } catch {
         throw new Error('Invalid price file');
