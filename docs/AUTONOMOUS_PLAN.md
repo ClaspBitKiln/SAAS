@@ -8,6 +8,7 @@ This is the execution plan for autonomous development of AI Sales OS.
 - Ship one small end-to-end slice at a time.
 - Prefer the simplest working implementation.
 - Change the approach after two failed attempts with the same method.
+- Run in LOOP: after one slice is merged and recorded, immediately start the next safe priority without waiting for a person.
 - Never fake external delivery, customer activity, payments, or AI confidence.
 - Money and risk calculations stay deterministic.
 - A slice is done only after lint, build, tests, CI, merge, and evidence.
@@ -49,3 +50,11 @@ Choose the first incomplete slice whose dependencies exist and that can be
 shipped safely in one pull request. If a real external credential or customer
 action is required, implement the safe internal prerequisite and move to the
 next unblocked slice.
+
+## LOOP
+
+`sync main → inspect open PRs and CI → choose the first safe incomplete slice → implement → validate locally → open PR → pass CI → merge → record evidence → repeat`
+
+The LOOP pauses only for a payment, secret, irreversible external action,
+customer communication without an approved channel, or an access blocker that
+cannot be resolved safely.
