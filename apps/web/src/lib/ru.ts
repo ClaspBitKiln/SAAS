@@ -264,12 +264,14 @@ export const ru = {
     saleAmount: 'Продажа, сумма',
     priceImport: 'Загрузить расчёт из XLSX/CSV',
     priceImportHint:
-      'Колонки: «Наименование», «Закупочная цена» и необязательно «Цена продажи». Строки применяются по порядку и остаются на проверке менеджера.',
+      'Колонки: «Наименование», «Закупочная цена за единицу» и необязательно «Цена продажи за единицу». Система сопоставляет наименования и умножает цену на количество из заявки.',
     priceImporting: 'Загружаем…',
     priceImportApplied: (fileName: string, count: number) =>
       `Загружено из «${fileName}»: ${count} строк. Проверьте соответствие позиций и суммы.`,
     priceImportMismatch: (applied: number, imported: number, requested: number) =>
       `Совпало по наименованию ${applied} из ${requested} позиций заявки; в файле ${imported} строк. Несовпавшие цены не применены.`,
+    priceImportMissingQuantity: (count: number) =>
+      `Для ${count} позиций не распознано положительное количество — цены не применены.`,
     priceImportFailed: 'Не удалось загрузить прайс. Проверьте заголовки и формат XLSX/CSV.',
     calculation: 'Расчёт прибыли',
     sellerName: 'Поставщик в КП',
