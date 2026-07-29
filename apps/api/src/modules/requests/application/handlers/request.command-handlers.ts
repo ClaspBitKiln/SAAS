@@ -15,6 +15,7 @@ import { Request } from '../../domain/entities/request.entity';
 import { REQUEST_REPOSITORY, RequestRepository } from '../../domain/repositories/request.repository';
 import {
   CreateRequestCommand,
+  MarkProposalDownloadedCommand,
   MarkProposalSentCommand,
   PrepareQuoteCommand,
   RecordRequestOutcomeCommand,
@@ -137,6 +138,25 @@ export class MarkProposalSentHandler implements ICommandHandler<MarkProposalSent
     if (!request) throw new Error('Request not found');
 
     request.markProposalSent(cmd.sentVia, new Date());
+    await this.requestRepo.save(request);
+    request.pullEvents().forEach((event) => this.eventBus.publish(event));
+  }
+}
+
+@CommandHandler(MarkProposalDownloadedCommand)
+export class MarkProposalDownloadedHandler
+  implements ICommandHandler<MarkProposalDownloadedCommand>
+{
+  constructor(
+    @Inject(REQUEST_REPOSITORY) private readonly requestRepo: RequestRepository,
+    private readonly eventBus: EventBus,
+  ) {}
+
+  async execute(cmd: MarkProposalDownloadedCommand): Promise<void> {
+    const request = await this.requestRepo.findById(cmd.id, cmd.organizationId);
+    if (!request) throw new Error('Request not found');
+
+    request.markProposalDownloaded(new Date());
     await this.requestRepo.save(request);
     request.pullEvents().forEach((event) => this.eventBus.publish(event));
   }
