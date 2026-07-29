@@ -4,25 +4,27 @@ Track from first beta customer. Evidence in Obsidian or weekly founder note.
 
 ## North Star metric
 
-**Time from call end → CRM updated with summary** (target: < 2 min, manager effort: 1 click)
+**Time from a raw metal request → reviewed commercial proposal** (target: < 15 min).
 
 ## Primary (MVP)
 
 | Metric | Definition | Target (MVP) |
 |--------|------------|--------------|
-| Activation | Company registered + 1 user logged in + 1 contact created | 60% of signups |
-| First call | Account with ≥1 recorded call | 40% of activated |
-| AI summary used | Summary viewed or task accepted | 80% of calls |
-| Retention W4 | Active in week 4 | 50% |
+| Pilot sample | Real requests completed through the workflow | 20–30 requests |
+| Intake accuracy | Lines accepted without correction | ≥80% |
+| Quote speed | Median request → proposal time | ≤15 min |
+| Workflow completion | Sent proposals with a recorded outcome | ≥80% |
+| Repeat use | Pilot manager voluntarily processes another request | Yes |
 
 ## Product usage
 
 | Metric | Definition |
 |--------|------------|
-| Calls / account / week | Recorded calls |
-| AI summaries / week | Generated summaries |
-| Tasks from AI / week | Tasks created from AI |
-| CRM fields auto-filled | Accepted autofill suggestions |
+| Requests | Real customer requests created |
+| Quotes prepared | Requests with a generated proposal |
+| Proposals sent | Proposals marked as sent |
+| Outcomes recorded | Won, lost, or no-response outcomes |
+| Request → quote time | Hours from request creation to proposal preparation |
 
 ## Business
 

@@ -40,8 +40,8 @@ state merged in PR #24. Production smoke and feedback from a real manager remain
 required before A6 is complete.
 
 Progress toward A9: deterministic pasted-message intake with retained source
-and mandatory manager review merged in PR #19. AI confidence and attachment
-extraction remain incomplete.
+and mandatory manager review merged in PR #19. TXT/CSV, XLSX, and text-layer
+PDF extraction plus deterministic field-completeness warnings are merged.
 
 ## Deferred until evidence
 

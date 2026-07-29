@@ -105,6 +105,17 @@ export const ru = {
     pilotNext: 'Следующий шаг',
     pilotContinue: 'Продолжить пилот',
     pilotReady: 'Сценарий пройден. Система готова к сессии обратной связи с менеджером.',
+    pilotMetricsTitle: 'Показатели пилота',
+    pilotMetricsSubtitle: 'Считаются автоматически по реальным заявкам.',
+    pilotSample: (current: number, target: number) =>
+      `${current} из ${target} заявок для проверки MVP`,
+    pilotRequests: 'Заявки',
+    pilotQuotes: 'КП подготовлено',
+    pilotSent: 'КП отправлено',
+    pilotOutcomes: 'Результат записан',
+    pilotQuoteTime: 'Медиана до КП',
+    pilotHours: (hours: number) =>
+      hours < 1 ? `${Math.max(1, Math.round(hours * 60))} мин` : `${hours.toFixed(1)} ч`,
   },
 
   contacts: {
