@@ -14,7 +14,10 @@ interface ListResponse {
 interface RequestItem {
   id: string;
   status: string;
+  createdAt: string;
+  proposalIssuedAt: string | null;
   proposalDownloadedAt: string | null;
+  proposalSentAt: string | null;
   outcome: string | null;
 }
 
@@ -29,6 +32,17 @@ interface PilotStep {
   href: string;
 }
 
+const PILOT_REQUEST_TARGET = 20;
+
+function median(values: number[]): number | null {
+  if (values.length === 0) return null;
+  const sorted = [...values].sort((left, right) => left - right);
+  const middle = Math.floor(sorted.length / 2);
+  return sorted.length % 2 === 0
+    ? (sorted[middle - 1] + sorted[middle]) / 2
+    : sorted[middle];
+}
+
 export default function DashboardPage() {
   const user = getAuthUser();
   const orgId = user?.organizationId;
@@ -36,6 +50,7 @@ export default function DashboardPage() {
   const [callsTotal, setCallsTotal] = useState<number | null>(null);
   const [completedCalls, setCompletedCalls] = useState<number | null>(null);
   const [pilotSteps, setPilotSteps] = useState<PilotStep[] | null>(null);
+  const [pilotRequests, setPilotRequests] = useState<RequestItem[] | null>(null);
   const [pilotLoadFailed, setPilotLoadFailed] = useState(false);
 
   useEffect(() => {
@@ -52,6 +67,7 @@ export default function DashboardPage() {
         setContactsTotal(contacts.total);
         setCallsTotal(calls.total);
         setCompletedCalls(allCalls.items.filter((c) => c.status === 'COMPLETED').length);
+        setPilotRequests(requests.items);
         const quoteRequest = requests.items.find((request) =>
           ['QUOTED', 'SENT'].includes(request.status),
         );
@@ -102,6 +118,7 @@ export default function DashboardPage() {
         setCallsTotal(null);
         setCompletedCalls(null);
         setPilotSteps(null);
+        setPilotRequests(null);
         setPilotLoadFailed(true);
       });
   }, [orgId]);
@@ -110,6 +127,26 @@ export default function DashboardPage() {
   const nextPilotStep = pilotSteps?.find((step) => !step.complete) ?? null;
   const pilotProgress = pilotSteps
     ? Math.round((completedPilotSteps / pilotSteps.length) * 100)
+    : 0;
+  const quotedRequests =
+    pilotRequests?.filter((request) => Boolean(request.proposalIssuedAt)).length ?? 0;
+  const sentRequests =
+    pilotRequests?.filter((request) => Boolean(request.proposalSentAt)).length ?? 0;
+  const outcomeRequests =
+    pilotRequests?.filter((request) => Boolean(request.outcome)).length ?? 0;
+  const quoteLeadTimeHours = median(
+    (pilotRequests ?? [])
+      .filter((request) => request.proposalIssuedAt)
+      .map(
+        (request) =>
+          (new Date(request.proposalIssuedAt as string).getTime() -
+            new Date(request.createdAt).getTime()) /
+          3_600_000,
+      )
+      .filter((hours) => Number.isFinite(hours) && hours >= 0),
+  );
+  const pilotSampleProgress = pilotRequests
+    ? Math.min(100, Math.round((pilotRequests.length / PILOT_REQUEST_TARGET) * 100))
     : 0;
 
   return (
@@ -219,6 +256,48 @@ export default function DashboardPage() {
                     {ru.dashboard.pilotReady}
                   </p>
                 )}
+
+                <div className="mt-6 border-t border-slate-800 pt-5">
+                  <div className="flex flex-wrap items-end justify-between gap-2">
+                    <div>
+                      <h3 className="font-medium">{ru.dashboard.pilotMetricsTitle}</h3>
+                      <p className="mt-1 text-sm text-slate-400">
+                        {ru.dashboard.pilotMetricsSubtitle}
+                      </p>
+                    </div>
+                    <div className="text-xs text-slate-500">
+                      {ru.dashboard.pilotSample(
+                        pilotRequests?.length ?? 0,
+                        PILOT_REQUEST_TARGET,
+                      )}
+                    </div>
+                  </div>
+                  <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-slate-800">
+                    <div
+                      className="h-full rounded-full bg-blue-500"
+                      style={{ width: `${pilotSampleProgress}%` }}
+                    />
+                  </div>
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                    {[
+                      [ru.dashboard.pilotRequests, pilotRequests?.length ?? 0],
+                      [ru.dashboard.pilotQuotes, quotedRequests],
+                      [ru.dashboard.pilotSent, sentRequests],
+                      [ru.dashboard.pilotOutcomes, outcomeRequests],
+                      [
+                        ru.dashboard.pilotQuoteTime,
+                        quoteLeadTimeHours === null
+                          ? '—'
+                          : ru.dashboard.pilotHours(quoteLeadTimeHours),
+                      ],
+                    ].map(([label, value]) => (
+                      <div key={label} className="rounded-md bg-slate-950/50 px-3 py-3">
+                        <div className="text-xs text-slate-500">{label}</div>
+                        <div className="mt-1 text-xl font-semibold">{value}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </>
             )}
           </section>
