@@ -136,6 +136,29 @@ describe('Request entity', () => {
     expect(request.proposalSentAt?.toISOString()).toBe('2026-07-28T13:00:00.000Z');
   });
 
+  it('records a PDF download only after a quote is prepared', () => {
+    const request = makeRequest();
+    expect(() =>
+      request.markProposalDownloaded(new Date('2026-07-28T12:30:00.000Z')),
+    ).toThrow('quote must be prepared');
+
+    request.prepareQuote({
+      lines: [{ lineId: request.lines[0].id, purchaseAmount: 50000, saleAmount: 70000 }],
+      currency: 'RUB',
+      sellerName: 'ООО Мэджик Металл',
+      logisticsCost: 0,
+      otherCosts: 0,
+      proposalNumber: 'КП-1',
+      proposalIssuedAt: new Date('2026-07-28T12:00:00.000Z'),
+      proposalValidityDays: 5,
+      followUpAt: new Date('2026-07-29T12:00:00.000Z'),
+    });
+    request.markProposalDownloaded(new Date('2026-07-28T12:30:00.000Z'));
+
+    expect(request.proposalDownloadedAt?.toISOString()).toBe('2026-07-28T12:30:00.000Z');
+    expect(request.pullEvents().some((event) => event.eventName === 'request.proposal_downloaded')).toBe(true);
+  });
+
   it('records a reasoned outcome only after proposal delivery', () => {
     const request = makeRequest();
     expect(() =>
