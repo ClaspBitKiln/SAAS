@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   Query,
+  ServiceUnavailableException,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -26,6 +27,7 @@ import {
   PrepareQuoteDto,
   RequestListResponseDto,
   RequestResponseDto,
+  SendProposalEmailDto,
   RecordRequestOutcomeDto,
   UpdateRequestDto,
 } from '../../application/dto/request.dto';
@@ -40,7 +42,9 @@ import {
 } from '../../application/commands/request.commands';
 import { GetRequestQuery, ListRequestsQuery } from '../../application/queries/request.queries';
 import { RequestParseService } from '../../application/services/request-parse.service';
+import { ProposalEmailService } from '../../application/services/proposal-email.service';
 import { RequestSourceEnum } from '../../domain/value-objects/request-source.vo';
+import { ProposalSentViaEnum } from '../../domain/value-objects/proposal-sent-via.vo';
 
 @ApiTags('requests')
 @ApiBearerAuth()
@@ -50,6 +54,7 @@ export class RequestController {
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
     private readonly parseService: RequestParseService,
+    private readonly proposalEmailService: ProposalEmailService,
   ) {}
 
   @Post('parse')
@@ -238,6 +243,34 @@ export class RequestController {
         if (e.message.startsWith('Request proposal:')) throw new BadRequestException(e.message);
       }
       throw e;
+    }
+    return this.getOrFail(id, organizationId);
+  }
+
+  @Post(':id/send-email')
+  @ApiOkResponse({ type: RequestResponseDto })
+  async sendProposalEmail(
+    @CurrentUser() user: AccessTokenPayload,
+    @Param('id') id: string,
+    @Body() dto: SendProposalEmailDto,
+  ): Promise<RequestResponseDto> {
+    const organizationId = requireOrganizationId(user);
+    try {
+      await this.proposalEmailService.send(id, organizationId, dto.to);
+      await this.commandBus.execute(
+        new MarkProposalSentCommand(id, organizationId, ProposalSentViaEnum.EMAIL, dto.to),
+      );
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message === 'Request not found') throw new NotFoundException(error.message);
+        if (error.message === 'Email delivery not configured') {
+          throw new ServiceUnavailableException(error.message);
+        }
+        if (error.message.startsWith('Request proposal:')) {
+          throw new BadRequestException(error.message);
+        }
+      }
+      throw error;
     }
     return this.getOrFail(id, organizationId);
   }
