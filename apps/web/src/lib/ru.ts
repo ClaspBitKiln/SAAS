@@ -304,6 +304,7 @@ export const ru = {
     sentViaMax: 'MAX',
     sentViaManual: 'Другой канал',
     sentTo: 'Адресат: e-mail, телефон или аккаунт',
+    sentToRequired: 'Укажите адресата для выбранного канала отправки.',
     markSent: 'Отметить отправленным',
     markingSent: 'Сохраняем…',
     markSentFailed: 'Не удалось отметить КП отправленным.',
