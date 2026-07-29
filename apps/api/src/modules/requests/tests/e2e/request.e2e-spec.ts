@@ -141,6 +141,12 @@ describe('Request E2E', () => {
       .expect(200);
     expect(tasks.body.items.some((task: { title: string }) => task.title.includes(quoted.body.proposalNumber))).toBe(true);
 
+    await request(app.getHttpServer())
+      .post(`/requests/${created.body.id}/sent`)
+      .set(authHeader(token))
+      .send({ sentVia: 'EMAIL' })
+      .expect(400);
+
     const sent = await request(app.getHttpServer())
       .post(`/requests/${created.body.id}/sent`)
       .set(authHeader(token))

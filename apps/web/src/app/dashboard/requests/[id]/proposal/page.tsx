@@ -120,6 +120,10 @@ export default function ProposalPage() {
 
   async function onMarkSent() {
     if (!request) return;
+    if (sentVia !== 'MANUAL' && !sentTo.trim()) {
+      setSentError(ru.requests.sentToRequired);
+      return;
+    }
     setMarkingSent(true);
     setSentError(null);
     try {

@@ -336,6 +336,9 @@ export class Request extends AggregateRoot {
       throw new Error('Request proposal: sent channel is invalid');
     }
     const normalizedSentTo = sentTo?.trim() || null;
+    if (sentVia !== ProposalSentViaEnum.MANUAL && !normalizedSentTo) {
+      throw new Error('Request proposal: recipient is required for the selected channel');
+    }
     if (normalizedSentTo && normalizedSentTo.length > 255) {
       throw new Error('Request proposal: recipient must be at most 255 chars');
     }
