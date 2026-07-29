@@ -14,6 +14,16 @@ export interface LoginResponse {
   organizationId: string | null;
 }
 
+export class ApiError extends Error {
+  constructor(
+    readonly status: number,
+    message: string,
+  ) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
 function loginResponseToUser(data: LoginResponse): AuthUser {
   return {
     userId: data.userId,
@@ -48,7 +58,7 @@ async function refreshTokens(): Promise<string | null> {
 async function parseResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(text || `Request failed: ${res.status}`);
+    throw new ApiError(res.status, text || `Request failed: ${res.status}`);
   }
   if (res.status === 204) return undefined as T;
   return (await res.json()) as T;

@@ -3,7 +3,7 @@
 import { useParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { RequireAuth } from '@/components/RequireAuth';
-import { apiAuthGet, apiAuthPost } from '@/lib/api';
+import { ApiError, apiAuthGet, apiAuthPost } from '@/lib/api';
 import { downloadProposalPdf } from '@/lib/proposal-pdf';
 import { ru } from '@/lib/ru';
 
@@ -137,8 +137,12 @@ export default function ProposalPage() {
               sentTo: sentTo.trim() || undefined,
             }),
       );
-    } catch {
-      setSentError(ru.requests.markSentFailed);
+    } catch (error) {
+      setSentError(
+        error instanceof ApiError && error.status === 503
+          ? ru.requests.emailNotConfigured
+          : ru.requests.markSentFailed,
+      );
     } finally {
       setMarkingSent(false);
     }

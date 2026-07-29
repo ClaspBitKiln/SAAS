@@ -308,6 +308,8 @@ export const ru = {
     markSent: 'Отправить / отметить',
     markingSent: 'Отправляем…',
     markSentFailed: 'Не удалось отправить или отметить КП.',
+    emailNotConfigured:
+      'Корпоративная почта пока не настроена. Скачайте PDF и выберите другой канал отправки.',
     sentViaLabel: (channel: string) =>
       ({
         EMAIL: 'Email',
