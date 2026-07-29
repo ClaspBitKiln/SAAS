@@ -43,6 +43,7 @@ export class CreateRequestHandler implements ICommandHandler<CreateRequestComman
       contactId: cmd.contactId,
       title: cmd.title,
       notes: cmd.notes,
+      sourceText: cmd.sourceText,
       source: cmd.source,
       lines: cmd.lines,
     });
