@@ -33,6 +33,7 @@ interface RequestDetail {
   title: string | null;
   status: string;
   notes: string | null;
+  sourceText: string | null;
   currency: string;
   sellerName: string | null;
   deliveryTerms: string | null;
@@ -264,6 +265,16 @@ export default function RequestDetailPage() {
           )}
         </div>
         {request?.notes && <p className="mt-4 text-sm text-slate-400">{request.notes}</p>}
+        {request?.sourceText && (
+          <details className="mt-4 rounded-md border border-slate-800 bg-slate-900/50 p-4">
+            <summary className="cursor-pointer text-sm font-medium text-slate-300">
+              {ru.requests.originalMessage}
+            </summary>
+            <pre className="mt-3 whitespace-pre-wrap break-words font-sans text-sm text-slate-400">
+              {request.sourceText}
+            </pre>
+          </details>
+        )}
 
         <section className="mt-8">
           <h2 className="text-sm font-medium text-slate-300">{ru.requests.positionsAndPrices}</h2>
