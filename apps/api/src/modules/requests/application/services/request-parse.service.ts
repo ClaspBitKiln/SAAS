@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import ExcelJS from 'exceljs';
 import { EMetallIntegrationService } from '../../../e-metall/application/services/e-metall-integration.service';
 import { EMetallParsedLineDto } from '../../../e-metall/application/dto/e-metall.dto';
 import { RequestLineDto } from '../dto/request.dto';
@@ -48,12 +49,49 @@ export class RequestParseService {
     sourceFileName: string;
   }> {
     const textTypes = ['text/plain', 'text/csv', 'application/csv'];
-    if (textTypes.includes(mimeType) || fileName.endsWith('.txt') || fileName.endsWith('.csv')) {
+    const normalizedFileName = fileName.toLowerCase();
+    if (
+      textTypes.includes(mimeType) ||
+      normalizedFileName.endsWith('.txt') ||
+      normalizedFileName.endsWith('.csv')
+    ) {
       const sourceText = buffer.toString('utf-8');
       const parsed = await this.parseRawText(sourceText);
       return { ...parsed, sourceText, sourceFileName: fileName };
     }
+    if (
+      mimeType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+      normalizedFileName.endsWith('.xlsx')
+    ) {
+      let sourceText: string;
+      try {
+        sourceText = await this.extractWorkbookText(buffer);
+      } catch {
+        throw new Error('Invalid request file');
+      }
+      const parsed = await this.parseRawText(sourceText);
+      return { ...parsed, sourceText, sourceFileName: fileName };
+    }
     throw new Error('Unsupported request file type');
+  }
+
+  private async extractWorkbookText(buffer: Buffer): Promise<string> {
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(buffer as unknown as Parameters<typeof workbook.xlsx.load>[0]);
+    const rows: string[] = [];
+
+    workbook.eachSheet((worksheet) => {
+      worksheet.eachRow((row) => {
+        const cells: string[] = [];
+        row.eachCell((cell) => {
+          const text = cell.text.trim();
+          if (text) cells.push(text);
+        });
+        if (cells.length > 0) rows.push(cells.join(' '));
+      });
+    });
+
+    return rows.join('\n');
   }
 
   private builtInParse(rawText: string): RequestLineDto[] {

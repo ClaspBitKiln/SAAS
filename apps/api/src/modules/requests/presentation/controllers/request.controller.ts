@@ -71,7 +71,10 @@ export class RequestController {
     try {
       return await this.parseService.parseFileBuffer(file.buffer, file.mimetype, file.originalname);
     } catch (error) {
-      if (error instanceof Error && error.message === 'Unsupported request file type') {
+      if (
+        error instanceof Error &&
+        ['Unsupported request file type', 'Invalid request file'].includes(error.message)
+      ) {
         throw new BadRequestException(error.message);
       }
       throw error;
