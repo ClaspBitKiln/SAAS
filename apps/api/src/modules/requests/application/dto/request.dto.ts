@@ -18,6 +18,7 @@ import {
 import { RequestSourceEnum } from '../../domain/value-objects/request-source.vo';
 import { RequestStatusEnum } from '../../domain/value-objects/request-status.vo';
 import { ProposalSentViaEnum } from '../../domain/value-objects/proposal-sent-via.vo';
+import { RequestOutcomeEnum } from '../../domain/value-objects/request-outcome.vo';
 
 export class RequestLineDto {
   @ApiPropertyOptional() @IsOptional() @IsString() gost?: string;
@@ -108,6 +109,17 @@ export class MarkProposalSentDto {
   sentVia!: ProposalSentViaEnum;
 }
 
+export class RecordRequestOutcomeDto {
+  @ApiProperty({ enum: RequestOutcomeEnum })
+  @IsEnum(RequestOutcomeEnum)
+  outcome!: RequestOutcomeEnum;
+
+  @ApiProperty({ minLength: 2, maxLength: 500 })
+  @IsString()
+  @Length(2, 500)
+  reason!: string;
+}
+
 export class ParseRequestDto {
   @ApiProperty() @IsString() @Length(1, 100000) rawText!: string;
 }
@@ -155,6 +167,9 @@ export class RequestResponseDto {
   @ApiPropertyOptional() proposalSentAt!: string | null;
   @ApiPropertyOptional({ enum: ProposalSentViaEnum }) proposalSentVia!: ProposalSentViaEnum | null;
   @ApiPropertyOptional() followUpAt!: string | null;
+  @ApiPropertyOptional({ enum: RequestOutcomeEnum }) outcome!: RequestOutcomeEnum | null;
+  @ApiPropertyOptional() outcomeReason!: string | null;
+  @ApiPropertyOptional() outcomeAt!: string | null;
   @ApiProperty({ type: [RequestLineResponseDto] }) lines!: RequestLineResponseDto[];
   @ApiProperty() createdAt!: string;
 }
