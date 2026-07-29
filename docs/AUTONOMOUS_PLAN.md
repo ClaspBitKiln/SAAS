@@ -35,9 +35,9 @@ traceable commercial proposal and the next manager action.
 | A4 | Request outcome | Manager records won/lost/no-response with reason | Merged in PR #20 |
 | A5 | Request activity timeline | Quote, PDF, send, task, and outcome are traceable | Merged in PR #22 |
 | A6 | Pilot hardening | One manager completes the workflow without assistance | Production smoke and feedback evidence |
-| A7 | Real delivery channel | Send by email from a configured organization account | Explicit confirmation, delivery result, audit |
-| A8 | Deterministic pricing import | Supplier prices feed quote calculation | Validated import, provenance, no LLM arithmetic |
-| A9 | AI-assisted intake | Raw request becomes reviewed structured lines | Source retained, confidence shown, human confirms |
+| A7 | Real delivery channel | Send by email from a configured organization account | Code and audit merged in PR #35–#38; Railway SMTP configuration remains external |
+| A8 | Deterministic pricing import | Supplier prices feed quote calculation | Merged: validated XLSX/CSV import, provenance, no LLM arithmetic |
+| A9 | AI-assisted intake | Raw request becomes reviewed structured lines | Merged: source retained, confidence shown, human confirms |
 
 Progress toward A6: a self-guided pilot checklist based on real organization
 state merged in PR #24. Production smoke and feedback from a real manager remain
