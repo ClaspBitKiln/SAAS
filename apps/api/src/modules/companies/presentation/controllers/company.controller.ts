@@ -188,7 +188,7 @@ export class CompanyController {
           dto.managerComment,
           dto.sourceUrl,
           dto.sourceName,
-          dto.verifiedAt ? new Date(dto.verifiedAt) : dto.verifiedAt,
+          dto.verifiedAt === null ? null : dto.verifiedAt ? new Date(dto.verifiedAt) : undefined,
         ),
       );
     } catch (e) {
