@@ -63,4 +63,17 @@ describe('RequestParseService built-in parser', () => {
       service.parseFileBuffer(Buffer.from('%PDF binary'), 'application/pdf', 'request.pdf'),
     ).rejects.toThrow('Unsupported request file type');
   });
+
+  it('retains extracted text and file name for manager review', async () => {
+    const sourceText = 'Лист 5х1500х6000 09Г2С — 10 т';
+    const result = await service.parseFileBuffer(
+      Buffer.from(sourceText),
+      'text/plain',
+      'заявка клиента.txt',
+    );
+
+    expect(result.sourceText).toBe(sourceText);
+    expect(result.sourceFileName).toBe('заявка клиента.txt');
+    expect(result.lines[0]).toMatchObject({ steelGrade: '09Г2С', quantity: '10', unit: 'т' });
+  });
 });

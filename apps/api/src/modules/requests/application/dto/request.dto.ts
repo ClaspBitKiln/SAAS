@@ -194,6 +194,8 @@ export class RequestResponseDto {
 export class ParseRequestResponseDto {
   @ApiProperty({ type: [RequestLineDto] }) lines!: RequestLineDto[];
   @ApiProperty() parser!: 'e-metall' | 'built-in';
+  @ApiPropertyOptional() sourceText?: string;
+  @ApiPropertyOptional() sourceFileName?: string;
 }
 
 export class RequestListResponseDto {

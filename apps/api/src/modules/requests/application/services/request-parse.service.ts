@@ -41,10 +41,17 @@ export class RequestParseService {
     buffer: Buffer,
     mimeType: string,
     fileName: string,
-  ): Promise<{ lines: RequestLineDto[]; parser: 'e-metall' | 'built-in' }> {
+  ): Promise<{
+    lines: RequestLineDto[];
+    parser: 'e-metall' | 'built-in';
+    sourceText: string;
+    sourceFileName: string;
+  }> {
     const textTypes = ['text/plain', 'text/csv', 'application/csv'];
     if (textTypes.includes(mimeType) || fileName.endsWith('.txt') || fileName.endsWith('.csv')) {
-      return this.parseRawText(buffer.toString('utf-8'));
+      const sourceText = buffer.toString('utf-8');
+      const parsed = await this.parseRawText(sourceText);
+      return { ...parsed, sourceText, sourceFileName: fileName };
     }
     throw new Error('Unsupported request file type');
   }
