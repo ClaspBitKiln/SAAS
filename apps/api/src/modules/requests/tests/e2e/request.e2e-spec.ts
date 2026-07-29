@@ -144,10 +144,15 @@ describe('Request E2E', () => {
     const sent = await request(app.getHttpServer())
       .post(`/requests/${created.body.id}/sent`)
       .set(authHeader(token))
-      .send({ sentVia: 'EMAIL' })
+      .send({ sentVia: 'EMAIL', sentTo: 'buyer@example.com' })
       .expect(201);
     expect(sent.body.status).toBe('SENT');
     expect(sent.body.proposalSentVia).toBe('EMAIL');
+    expect(sent.body.proposalSentTo).toBe('buyer@example.com');
+    expect(
+      sent.body.activity.find((item: { type: string }) => item.type === 'PROPOSAL_SENT')
+        .details.sentTo,
+    ).toBe('buyer@example.com');
     expect(new Date(sent.body.proposalSentAt).getTime()).toBeGreaterThan(0);
 
     const outcome = await request(app.getHttpServer())

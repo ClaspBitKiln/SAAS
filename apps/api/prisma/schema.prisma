@@ -330,6 +330,7 @@ model Request {
   proposalDownloadedAt   DateTime?
   proposalSentAt         DateTime?
   proposalSentVia        String?       @db.VarChar(32)
+  proposalSentTo         String?       @db.VarChar(255)
   followUpAt             DateTime?
   outcome                RequestOutcome?
   outcomeReason          String?       @db.VarChar(500)

@@ -32,6 +32,7 @@ interface RequestDetail {
   proposalDownloadedAt: string | null;
   proposalSentAt: string | null;
   proposalSentVia: string | null;
+  proposalSentTo: string | null;
   lines: RequestLine[];
 }
 
@@ -74,6 +75,7 @@ export default function ProposalPage() {
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState<string | null>(null);
   const [sentVia, setSentVia] = useState('EMAIL');
+  const [sentTo, setSentTo] = useState('');
   const [markingSent, setMarkingSent] = useState(false);
   const [sentError, setSentError] = useState<string | null>(null);
 
@@ -84,6 +86,7 @@ export default function ProposalPage() {
       if (requestData.contactId) {
         const contactData = await apiAuthGet<Contact>(`/contacts/${requestData.contactId}`);
         setContact(contactData);
+        setSentTo(contactData.email ?? contactData.phone ?? '');
         if (contactData.companyId) {
           setCompany(await apiAuthGet<Company>(`/companies/${contactData.companyId}`));
         }
@@ -120,7 +123,12 @@ export default function ProposalPage() {
     setMarkingSent(true);
     setSentError(null);
     try {
-      setRequest(await apiAuthPost<RequestDetail>(`/requests/${id}/sent`, { sentVia }));
+      setRequest(
+        await apiAuthPost<RequestDetail>(`/requests/${id}/sent`, {
+          sentVia,
+          sentTo: sentTo.trim() || undefined,
+        }),
+      );
     } catch {
       setSentError(ru.requests.markSentFailed);
     } finally {
@@ -172,13 +180,21 @@ export default function ProposalPage() {
               {ru.requests.sentAt(
                 date(request.proposalSentAt),
                 ru.requests.sentViaLabel(request.proposalSentVia ?? '—'),
+                request.proposalSentTo,
               )}
             </span>
           ) : (
             <>
               <select
                 value={sentVia}
-                onChange={(event) => setSentVia(event.target.value)}
+                onChange={(event) => {
+                  const channel = event.target.value;
+                  setSentVia(channel);
+                  if (channel === 'EMAIL' && contact?.email) setSentTo(contact.email);
+                  if (['TELEGRAM', 'WHATSAPP', 'MAX'].includes(channel) && contact?.phone) {
+                    setSentTo(contact.phone);
+                  }
+                }}
                 aria-label={ru.requests.sentVia}
                 className="rounded border border-slate-300 bg-white px-3 py-2 text-sm"
               >
@@ -188,6 +204,14 @@ export default function ProposalPage() {
                 <option value="MAX">{ru.requests.sentViaMax}</option>
                 <option value="MANUAL">{ru.requests.sentViaManual}</option>
               </select>
+              <input
+                value={sentTo}
+                onChange={(event) => setSentTo(event.target.value)}
+                maxLength={255}
+                placeholder={ru.requests.sentTo}
+                aria-label={ru.requests.sentTo}
+                className="min-w-52 rounded border border-slate-300 bg-white px-3 py-2 text-sm"
+              />
               <button
                 type="button"
                 onClick={() => void onMarkSent()}

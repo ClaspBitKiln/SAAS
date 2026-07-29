@@ -131,10 +131,12 @@ describe('Request entity', () => {
     request.markProposalSent(
       ProposalSentViaEnum.EMAIL,
       new Date('2026-07-28T13:00:00.000Z'),
+      ' buyer@example.com ',
     );
 
     expect(request.status).toBe(RequestStatusEnum.SENT);
     expect(request.proposalSentVia).toBe(ProposalSentViaEnum.EMAIL);
+    expect(request.proposalSentTo).toBe('buyer@example.com');
     expect(request.proposalSentAt?.toISOString()).toBe('2026-07-28T13:00:00.000Z');
   });
 

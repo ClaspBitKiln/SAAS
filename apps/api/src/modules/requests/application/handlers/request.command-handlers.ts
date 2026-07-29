@@ -138,7 +138,7 @@ export class MarkProposalSentHandler implements ICommandHandler<MarkProposalSent
     const request = await this.requestRepo.findById(cmd.id, cmd.organizationId);
     if (!request) throw new Error('Request not found');
 
-    request.markProposalSent(cmd.sentVia, new Date());
+    request.markProposalSent(cmd.sentVia, new Date(), cmd.sentTo);
     await this.requestRepo.save(request);
     request.pullEvents().forEach((event) => this.eventBus.publish(event));
   }
