@@ -44,6 +44,7 @@ export default function NewRequestPage() {
   const [lines, setLines] = useState<RequestLine[]>([emptyLine()]);
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [rawText, setRawText] = useState('');
+  const [sourceFileName, setSourceFileName] = useState<string | null>(null);
   const [parser, setParser] = useState<string | null>(null);
   const [intakeSource, setIntakeSource] = useState<'MANUAL' | 'PASTED' | 'FILE'>('MANUAL');
   const [error, setError] = useState<string | null>(null);
@@ -87,10 +88,17 @@ export default function NewRequestPage() {
     setLoading(true);
     setError(null);
     try {
-      const result = await apiAuthUpload<{ lines: RequestLine[]; parser: string }>(
+      const result = await apiAuthUpload<{
+        lines: RequestLine[];
+        parser: string;
+        sourceText: string;
+        sourceFileName: string;
+      }>(
         '/requests/parse/file',
         file,
       );
+      setRawText(result.sourceText);
+      setSourceFileName(result.sourceFileName);
       applyParsedLines(result.lines, result.parser, 'FILE');
     } catch {
       setError(ru.requests.fileParseFailed);
@@ -116,7 +124,14 @@ export default function NewRequestPage() {
         contactId: contactId || undefined,
         title: title || undefined,
         notes: notes || undefined,
-        sourceText: intakeSource === 'PASTED' ? rawText.trim() || undefined : undefined,
+        sourceText:
+          intakeSource === 'PASTED'
+            ? rawText.trim() || undefined
+            : intakeSource === 'FILE'
+              ? [sourceFileName ? `${ru.requests.sourceFile}: ${sourceFileName}` : null, rawText.trim()]
+                  .filter(Boolean)
+                  .join('\n\n') || undefined
+              : undefined,
         source: intakeSource,
         lines: filtered,
       });
@@ -197,6 +212,11 @@ export default function NewRequestPage() {
           {parser && (
             <div className="rounded-md border border-amber-700/60 bg-amber-950/30 p-3 text-sm text-amber-200">
               {ru.requests.parsedWith(parser)} {ru.requests.reviewRequired}
+              {sourceFileName && (
+                <span className="mt-1 block text-amber-100">
+                  {ru.requests.sourceFile}: {sourceFileName}
+                </span>
+              )}
             </div>
           )}
           <input
