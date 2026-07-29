@@ -28,12 +28,16 @@ traceable commercial proposal and the next manager action.
 | A1 | Proposal PDF | Manager downloads a ready A4 proposal | Merged in PR #14 |
 | A2 | Proposal sent tracking | Manager records when and where a proposal was sent | Status, timestamp, channel, UI, unit/E2E tests |
 | A3 | Follow-up control | Overdue and upcoming proposal follow-ups are visible | Merged in PR #16 |
-| A4 | Request outcome | Manager records won/lost/no-response with reason | Outcome is tenant-scoped and reportable |
+| A4 | Request outcome | Manager records won/lost/no-response with reason | Merged in PR #20 |
 | A5 | Request activity timeline | Quote, PDF, send, task, and outcome are traceable | Timeline is ordered and source-backed |
 | A6 | Pilot hardening | One manager completes the workflow without assistance | Production smoke and feedback evidence |
 | A7 | Real delivery channel | Send by email from a configured organization account | Explicit confirmation, delivery result, audit |
 | A8 | Deterministic pricing import | Supplier prices feed quote calculation | Validated import, provenance, no LLM arithmetic |
 | A9 | AI-assisted intake | Raw request becomes reviewed structured lines | Source retained, confidence shown, human confirms |
+
+Progress toward A9: deterministic pasted-message intake with retained source
+and mandatory manager review merged in PR #19. AI confidence and attachment
+extraction remain incomplete.
 
 ## Deferred until evidence
 
