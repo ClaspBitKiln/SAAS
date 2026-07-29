@@ -36,6 +36,7 @@ export class CreateRequestDto {
   @ApiPropertyOptional({ format: 'uuid' }) @IsOptional() @IsUUID() contactId?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() @Length(0, 255) title?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() @Length(0, 2000) notes?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() @Length(0, 100000) sourceText?: string;
   @ApiPropertyOptional({ enum: RequestSourceEnum }) @IsOptional() @IsEnum(RequestSourceEnum) source?: RequestSourceEnum;
   @ApiProperty({ type: [RequestLineDto] })
   @IsArray()
@@ -135,6 +136,7 @@ export class RequestResponseDto {
   @ApiPropertyOptional() contactId?: string | null;
   @ApiPropertyOptional() title?: string | null;
   @ApiPropertyOptional() notes?: string | null;
+  @ApiPropertyOptional() sourceText?: string | null;
   @ApiProperty({ enum: RequestSourceEnum }) source!: RequestSourceEnum;
   @ApiProperty({ enum: RequestStatusEnum }) status!: RequestStatusEnum;
   @ApiPropertyOptional() searchResult?: Record<string, unknown> | null;
@@ -159,7 +161,7 @@ export class RequestResponseDto {
 
 export class ParseRequestResponseDto {
   @ApiProperty({ type: [RequestLineDto] }) lines!: RequestLineDto[];
-  @ApiProperty() parser!: 'e-metall' | 'fallback';
+  @ApiProperty() parser!: 'e-metall' | 'built-in';
 }
 
 export class RequestListResponseDto {
