@@ -29,7 +29,7 @@ traceable commercial proposal and the next manager action.
 | A2 | Proposal sent tracking | Manager records when and where a proposal was sent | Status, timestamp, channel, UI, unit/E2E tests |
 | A3 | Follow-up control | Overdue and upcoming proposal follow-ups are visible | Merged in PR #16 |
 | A4 | Request outcome | Manager records won/lost/no-response with reason | Merged in PR #20 |
-| A5 | Request activity timeline | Quote, PDF, send, task, and outcome are traceable | Timeline is ordered and source-backed |
+| A5 | Request activity timeline | Quote, PDF, send, task, and outcome are traceable | Merged in PR #22 |
 | A6 | Pilot hardening | One manager completes the workflow without assistance | Production smoke and feedback evidence |
 | A7 | Real delivery channel | Send by email from a configured organization account | Explicit confirmation, delivery result, audit |
 | A8 | Deterministic pricing import | Supplier prices feed quote calculation | Validated import, provenance, no LLM arithmetic |
