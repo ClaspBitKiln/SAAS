@@ -262,6 +262,15 @@ export const ru = {
     positionsAndPrices: 'Позиции и коммерческий расчёт',
     purchaseAmount: 'Закупка, сумма',
     saleAmount: 'Продажа, сумма',
+    priceImport: 'Загрузить расчёт из XLSX/CSV',
+    priceImportHint:
+      'Колонки: «Наименование», «Закупочная цена» и необязательно «Цена продажи». Строки применяются по порядку и остаются на проверке менеджера.',
+    priceImporting: 'Загружаем…',
+    priceImportApplied: (fileName: string, count: number) =>
+      `Загружено из «${fileName}»: ${count} строк. Проверьте соответствие позиций и суммы.`,
+    priceImportMismatch: (applied: number, imported: number, requested: number) =>
+      `Совпало по наименованию ${applied} из ${requested} позиций заявки; в файле ${imported} строк. Несовпавшие цены не применены.`,
+    priceImportFailed: 'Не удалось загрузить прайс. Проверьте заголовки и формат XLSX/CSV.',
     calculation: 'Расчёт прибыли',
     sellerName: 'Поставщик в КП',
     deliveryTerms: 'Условия поставки',
@@ -330,6 +339,9 @@ export const ru = {
           dateStyle: 'short',
           timeStyle: 'short',
         }).format(new Date(details.followUpAt))}`;
+      }
+      if (type === 'QUOTE_PREPARED' && details.priceSourceFileName) {
+        return `Источник закупочных цен: ${details.priceSourceFileName}`;
       }
       if (type === 'PROPOSAL_SENT' && details.sentVia) {
         return `Канал: ${

@@ -313,6 +313,7 @@ model Request {
   currency              String        @default("RUB") @db.VarChar(3)
   sellerName            String?       @db.VarChar(255)
   deliveryTerms         String?       @db.VarChar(500)
+  priceSourceFileName    String?       @db.VarChar(255)
   logisticsCost         Decimal       @default(0) @db.Decimal(15, 2)
   otherCosts             Decimal       @default(0) @db.Decimal(15, 2)
   proposalNumber         String?       @db.VarChar(64)

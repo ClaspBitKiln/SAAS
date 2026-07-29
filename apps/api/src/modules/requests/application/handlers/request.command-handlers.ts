@@ -107,6 +107,7 @@ export class PrepareQuoteHandler implements ICommandHandler<PrepareQuoteCommand>
       proposalIssuedAt: issuedAt,
       proposalValidityDays: cmd.proposalValidityDays,
       followUpAt: cmd.followUpAt,
+      priceSourceFileName: cmd.priceSourceFileName,
     });
     await this.requestRepo.save(request);
     request.pullEvents().forEach((e) => this.eventBus.publish(e));

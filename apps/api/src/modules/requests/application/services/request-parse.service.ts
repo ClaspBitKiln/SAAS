@@ -3,7 +3,7 @@ import ExcelJS from 'exceljs';
 import { PDFParse } from 'pdf-parse';
 import { EMetallIntegrationService } from '../../../e-metall/application/services/e-metall-integration.service';
 import { EMetallParsedLineDto } from '../../../e-metall/application/dto/e-metall.dto';
-import { ParsedRequestLineDto, RequestLineDto } from '../dto/request.dto';
+import { ParsedRequestLineDto, PriceImportLineDto, RequestLineDto } from '../dto/request.dto';
 
 const PRODUCT_TYPES: Array<[RegExp, string]> = [
   [/(?<![А-Яа-яЁё])лист(?:ы|овой|овая)?(?![А-Яа-яЁё])/iu, 'Лист'],
@@ -93,6 +93,74 @@ export class RequestParseService {
       return { ...parsed, sourceText, sourceFileName: fileName };
     }
     throw new Error('Unsupported request file type');
+  }
+
+  async parsePriceFileBuffer(
+    buffer: Buffer,
+    mimeType: string,
+    fileName: string,
+  ): Promise<{ lines: PriceImportLineDto[]; sourceFileName: string }> {
+    const normalizedFileName = fileName.toLowerCase();
+    let rows: string[][];
+    if (
+      mimeType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+      normalizedFileName.endsWith('.xlsx')
+    ) {
+      try {
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.load(buffer as unknown as Parameters<typeof workbook.xlsx.load>[0]);
+        const worksheet = workbook.worksheets[0];
+        if (!worksheet) throw new Error();
+        rows = [];
+        worksheet.eachRow((row) => {
+          const values = Array.isArray(row.values) ? row.values.slice(1) : [];
+          rows.push(values.map((value) => String(value ?? '').trim()));
+        });
+      } catch {
+        throw new Error('Invalid price file');
+      }
+    } else if (
+      ['text/csv', 'application/csv', 'text/plain'].includes(mimeType) ||
+      normalizedFileName.endsWith('.csv')
+    ) {
+      rows = buffer
+        .toString('utf-8')
+        .split(/\r?\n/)
+        .filter(Boolean)
+        .map((row) => row.split(row.includes(';') ? ';' : ',').map((cell) => cell.trim()));
+    } else {
+      throw new Error('Unsupported price file type');
+    }
+
+    const lines = this.priceRows(rows);
+    if (lines.length === 0) throw new Error('Price file has no valid rows');
+    return { lines, sourceFileName: fileName };
+  }
+
+  private priceRows(rows: string[][]): PriceImportLineDto[] {
+    if (rows.length < 2) return [];
+    const headers = rows[0].map((value) => value.toLocaleLowerCase('ru-RU').replace(/ё/g, 'е'));
+    const findColumn = (patterns: RegExp[]) =>
+      headers.findIndex((header) => patterns.some((pattern) => pattern.test(header)));
+    const descriptionIndex = findColumn([/наимен/, /товар/, /позици/, /описан/]);
+    const purchaseIndex = findColumn([/закуп/, /себестоим/, /цена.*постав/]);
+    const saleIndex = findColumn([/продаж/, /цена.*клиент/]);
+    if (descriptionIndex < 0 || purchaseIndex < 0) return [];
+
+    const amount = (value: string): number | null => {
+      const normalized = value.replace(/\s/g, '').replace(',', '.').replace(/[^\d.]/g, '');
+      if (!/^\d+(?:\.\d+)?$/.test(normalized)) return null;
+      const parsed = Number(normalized);
+      return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+    };
+
+    return rows.slice(1).flatMap((row) => {
+      const description = row[descriptionIndex]?.trim();
+      const purchaseAmount = amount(row[purchaseIndex] ?? '');
+      const saleAmount = saleIndex >= 0 ? amount(row[saleIndex] ?? '') : null;
+      if (!description || purchaseAmount == null) return [];
+      return [{ description, purchaseAmount, ...(saleAmount == null ? {} : { saleAmount }) }];
+    });
   }
 
   private async extractWorkbookText(buffer: Buffer): Promise<string> {

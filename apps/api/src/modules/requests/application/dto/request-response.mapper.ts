@@ -21,6 +21,7 @@ function requestActivity(request: Request): RequestActivityResponseDto[] {
   push(RequestActivityType.REQUEST_CREATED, request.createdAt, { source: request.source });
   push(RequestActivityType.QUOTE_PREPARED, request.proposalIssuedAt, {
     proposalNumber: request.proposalNumber ?? '',
+    priceSourceFileName: request.priceSourceFileName ?? '',
   });
   push(RequestActivityType.FOLLOW_UP_SCHEDULED, request.proposalIssuedAt, {
     followUpAt: request.followUpAt?.toISOString() ?? '',
@@ -55,6 +56,7 @@ export function toRequestResponse(request: Request): RequestResponseDto {
     currency: request.currency,
     sellerName: request.sellerName,
     deliveryTerms: request.deliveryTerms,
+    priceSourceFileName: request.priceSourceFileName,
     logisticsCost: request.logisticsCost,
     otherCosts: request.otherCosts,
     purchaseTotal: request.purchaseTotal,

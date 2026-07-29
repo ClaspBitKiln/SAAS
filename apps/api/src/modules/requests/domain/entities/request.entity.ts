@@ -36,6 +36,7 @@ export class Request extends AggregateRoot {
   private _currency: string;
   private _sellerName: string | null;
   private _deliveryTerms: string | null;
+  private _priceSourceFileName: string | null;
   private _logisticsCost: number;
   private _otherCosts: number;
   private _proposalNumber: string | null;
@@ -64,6 +65,7 @@ export class Request extends AggregateRoot {
     currency: string;
     sellerName: string | null;
     deliveryTerms: string | null;
+    priceSourceFileName: string | null;
     logisticsCost: number;
     otherCosts: number;
     proposalNumber: string | null;
@@ -99,6 +101,7 @@ export class Request extends AggregateRoot {
     this._currency = props.currency;
     this._sellerName = props.sellerName;
     this._deliveryTerms = props.deliveryTerms;
+    this._priceSourceFileName = props.priceSourceFileName;
     this._logisticsCost = props.logisticsCost;
     this._otherCosts = props.otherCosts;
     this._proposalNumber = props.proposalNumber;
@@ -146,6 +149,7 @@ export class Request extends AggregateRoot {
       currency: 'RUB',
       sellerName: null,
       deliveryTerms: null,
+      priceSourceFileName: null,
       logisticsCost: 0,
       otherCosts: 0,
       proposalNumber: null,
@@ -178,6 +182,7 @@ export class Request extends AggregateRoot {
     currency: string;
     sellerName: string | null;
     deliveryTerms: string | null;
+    priceSourceFileName: string | null;
     logisticsCost: number;
     otherCosts: number;
     proposalNumber: string | null;
@@ -241,6 +246,7 @@ export class Request extends AggregateRoot {
     proposalIssuedAt: Date;
     proposalValidityDays: number;
     followUpAt: Date;
+    priceSourceFileName?: string | null;
   }): void {
     const currency = input.currency.trim().toUpperCase();
     if (!/^[A-Z]{3}$/.test(currency)) throw new Error('Request quote: currency must be a 3-letter code');
@@ -268,6 +274,7 @@ export class Request extends AggregateRoot {
     this._currency = currency;
     this._sellerName = sellerName;
     this._deliveryTerms = input.deliveryTerms?.trim() || null;
+    this._priceSourceFileName = input.priceSourceFileName?.trim() || null;
     this._logisticsCost = amount(input.logisticsCost, 'logistics cost');
     this._otherCosts = amount(input.otherCosts, 'other costs');
     this._proposalNumber = input.proposalNumber.trim();
@@ -283,6 +290,7 @@ export class Request extends AggregateRoot {
       proposalNumber: this._proposalNumber,
       profitAmount: this.profitAmount,
       followUpAt: this._followUpAt.toISOString(),
+      priceSourceFileName: this._priceSourceFileName ?? '',
     }));
   }
 
@@ -362,6 +370,7 @@ export class Request extends AggregateRoot {
   private clearQuote(): void {
     this._sellerName = null;
     this._deliveryTerms = null;
+    this._priceSourceFileName = null;
     this._logisticsCost = 0;
     this._otherCosts = 0;
     this._proposalNumber = null;
@@ -387,6 +396,7 @@ export class Request extends AggregateRoot {
   get currency(): string { return this._currency; }
   get sellerName(): string | null { return this._sellerName; }
   get deliveryTerms(): string | null { return this._deliveryTerms; }
+  get priceSourceFileName(): string | null { return this._priceSourceFileName; }
   get logisticsCost(): number { return this._logisticsCost; }
   get otherCosts(): number { return this._otherCosts; }
   get proposalNumber(): string | null { return this._proposalNumber; }

@@ -64,6 +64,7 @@ describe('Request entity', () => {
       proposalIssuedAt: new Date('2026-07-28T12:00:00.000Z'),
       proposalValidityDays: 5,
       followUpAt: new Date('2026-07-29T09:00:00.000Z'),
+      priceSourceFileName: 'прайс поставщика.xlsx',
     });
 
     expect(request.status).toBe(RequestStatusEnum.QUOTED);
@@ -73,6 +74,7 @@ describe('Request entity', () => {
     expect(request.profitAmount).toBe(17000);
     expect(request.marginPercent).toBe(24.29);
     expect(request.followUpAt?.toISOString()).toBe('2026-07-29T09:00:00.000Z');
+    expect(request.priceSourceFileName).toBe('прайс поставщика.xlsx');
   });
 
   it('rejects a follow-up date that is not after the proposal date', () => {
