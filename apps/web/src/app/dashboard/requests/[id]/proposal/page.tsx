@@ -29,6 +29,7 @@ interface RequestDetail {
   proposalNumber: string | null;
   proposalIssuedAt: string | null;
   proposalValidityDays: number;
+  proposalDownloadedAt: string | null;
   proposalSentAt: string | null;
   proposalSentVia: string | null;
   lines: RequestLine[];
@@ -102,6 +103,11 @@ export default function ProposalPage() {
     setDownloadError(null);
     try {
       await downloadProposalPdf({ request, contact, company });
+      try {
+        setRequest(await apiAuthPost<RequestDetail>(`/requests/${id}/downloaded`, {}));
+      } catch {
+        setDownloadError(ru.requests.downloadTrackFailed);
+      }
     } catch {
       setDownloadError(ru.requests.downloadProposalFailed);
     } finally {
