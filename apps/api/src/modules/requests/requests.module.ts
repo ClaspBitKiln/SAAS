@@ -12,6 +12,7 @@ import {
   CreateRequestHandler,
   MarkProposalSentHandler,
   PrepareQuoteHandler,
+  RecordRequestOutcomeHandler,
   SearchRequestHandler,
   UpdateRequestHandler,
 } from './application/handlers/request.command-handlers';
@@ -29,6 +30,7 @@ import { RequestParseService } from './application/services/request-parse.servic
     UpdateRequestHandler,
     PrepareQuoteHandler,
     MarkProposalSentHandler,
+    RecordRequestOutcomeHandler,
     SearchRequestHandler,
     GetRequestHandler,
     ListRequestsHandler,
