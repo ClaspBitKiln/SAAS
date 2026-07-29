@@ -10,6 +10,7 @@ import { PrismaRequestRepository } from './infrastructure/prisma-request.reposit
 import { RequestController } from './presentation/controllers/request.controller';
 import {
   CreateRequestHandler,
+  MarkProposalDownloadedHandler,
   MarkProposalSentHandler,
   PrepareQuoteHandler,
   RecordRequestOutcomeHandler,
@@ -29,6 +30,7 @@ import { RequestParseService } from './application/services/request-parse.servic
     CreateRequestHandler,
     UpdateRequestHandler,
     PrepareQuoteHandler,
+    MarkProposalDownloadedHandler,
     MarkProposalSentHandler,
     RecordRequestOutcomeHandler,
     SearchRequestHandler,
