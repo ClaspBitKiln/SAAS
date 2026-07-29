@@ -128,6 +128,13 @@ describe('Request E2E', () => {
     expect(quoted.body.proposalNumber).toMatch(/^КП-\d{8}-/);
     expect(quoted.body.followUpAt).toBe(followUpAt);
 
+    const downloaded = await request(app.getHttpServer())
+      .post(`/requests/${created.body.id}/downloaded`)
+      .set(authHeader(token))
+      .send({})
+      .expect(201);
+    expect(new Date(downloaded.body.proposalDownloadedAt).getTime()).toBeGreaterThan(0);
+
     const tasks = await request(app.getHttpServer())
       .get('/tasks?status=OPEN&size=100')
       .set(authHeader(token))
@@ -151,6 +158,14 @@ describe('Request E2E', () => {
     expect(outcome.body.outcome).toBe('WON');
     expect(outcome.body.outcomeReason).toBe('Клиент подтвердил заказ');
     expect(new Date(outcome.body.outcomeAt).getTime()).toBeGreaterThan(0);
+    expect(outcome.body.activity.map((item: { type: string }) => item.type)).toEqual([
+      'REQUEST_CREATED',
+      'QUOTE_PREPARED',
+      'FOLLOW_UP_SCHEDULED',
+      'PROPOSAL_DOWNLOADED',
+      'PROPOSAL_SENT',
+      'OUTCOME_RECORDED',
+    ]);
 
     await request(app.getHttpServer())
       .post(`/requests/${created.body.id}/sent`)
