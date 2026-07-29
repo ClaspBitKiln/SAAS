@@ -27,6 +27,27 @@ describe('Company entity', () => {
     expect(c.phone).toBe('+79990001122');
   });
 
+  it('normalizes automatically enriched lead fields', () => {
+    const c = Company.create({
+      tenantId,
+      organizationId: orgId,
+      name: '  Industrial Co  ',
+      city: '  Челябинск ',
+      industry: ' Машиностроение ',
+      leadPriority: 'a',
+      potentialNeed: ' Лист и трубы ',
+      sourceUrl: ' https://example.com/company ',
+      sourceName: ' Официальный сайт ',
+      verifiedAt: new Date('2026-07-29'),
+    });
+    expect(c.city).toBe('Челябинск');
+    expect(c.industry).toBe('Машиностроение');
+    expect(c.leadPriority).toBe('A');
+    expect(c.potentialNeed).toBe('Лист и трубы');
+    expect(c.sourceUrl).toBe('https://example.com/company');
+    expect(c.verifiedAt?.toISOString()).toBe('2026-07-29T00:00:00.000Z');
+  });
+
   it('rejects invalid INN', () => {
     expect(() =>
       Company.create({ tenantId, organizationId: orgId, name: 'Bad INN Co', inn: '123' }),

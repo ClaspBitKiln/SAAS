@@ -57,6 +57,14 @@ export class CreateCompanyHandler implements ICommandHandler<CreateCompanyComman
       website: cmd.website,
       phone: cmd.phone,
       email: cmd.email,
+      city: cmd.city,
+      industry: cmd.industry,
+      leadPriority: cmd.leadPriority,
+      potentialNeed: cmd.potentialNeed,
+      managerComment: cmd.managerComment,
+      sourceUrl: cmd.sourceUrl,
+      sourceName: cmd.sourceName,
+      verifiedAt: cmd.verifiedAt,
     });
     await this.companyRepo.save(company);
     company.pullEvents().forEach((e) => this.eventBus.publish(e));
@@ -87,6 +95,14 @@ export class UpdateCompanyHandler implements ICommandHandler<UpdateCompanyComman
       website: cmd.website,
       phone: cmd.phone,
       email: cmd.email,
+      city: cmd.city,
+      industry: cmd.industry,
+      leadPriority: cmd.leadPriority,
+      potentialNeed: cmd.potentialNeed,
+      managerComment: cmd.managerComment,
+      sourceUrl: cmd.sourceUrl,
+      sourceName: cmd.sourceName,
+      verifiedAt: cmd.verifiedAt,
       ...(ownerUserId !== undefined ? { ownerUserId } : {}),
     });
     await this.companyRepo.save(company);

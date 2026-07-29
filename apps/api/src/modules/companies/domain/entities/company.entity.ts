@@ -14,6 +14,14 @@ export class Company extends AggregateRoot {
   private _website: string | null;
   private _phone: string | null;
   private _email: string | null;
+  private _city: string | null;
+  private _industry: string | null;
+  private _leadPriority: string | null;
+  private _potentialNeed: string | null;
+  private _managerComment: string | null;
+  private _sourceUrl: string | null;
+  private _sourceName: string | null;
+  private _verifiedAt: Date | null;
   private _status: CompanyStatus;
 
   private constructor(props: {
@@ -27,6 +35,14 @@ export class Company extends AggregateRoot {
     website: string | null;
     phone: string | null;
     email: string | null;
+    city?: string | null;
+    industry?: string | null;
+    leadPriority?: string | null;
+    potentialNeed?: string | null;
+    managerComment?: string | null;
+    sourceUrl?: string | null;
+    sourceName?: string | null;
+    verifiedAt?: Date | null;
     status: CompanyStatus;
     version?: number;
     createdAt?: Date;
@@ -47,6 +63,14 @@ export class Company extends AggregateRoot {
     this._website = props.website;
     this._phone = props.phone;
     this._email = props.email;
+    this._city = props.city ?? null;
+    this._industry = props.industry ?? null;
+    this._leadPriority = props.leadPriority ?? null;
+    this._potentialNeed = props.potentialNeed ?? null;
+    this._managerComment = props.managerComment ?? null;
+    this._sourceUrl = props.sourceUrl ?? null;
+    this._sourceName = props.sourceName ?? null;
+    this._verifiedAt = props.verifiedAt ?? null;
     this._status = props.status;
   }
 
@@ -60,6 +84,14 @@ export class Company extends AggregateRoot {
     website?: string | null;
     phone?: string | null;
     email?: string | null;
+    city?: string | null;
+    industry?: string | null;
+    leadPriority?: string | null;
+    potentialNeed?: string | null;
+    managerComment?: string | null;
+    sourceUrl?: string | null;
+    sourceName?: string | null;
+    verifiedAt?: Date | null;
   }): Company {
     const id = newId();
     const country = input.country ?? CompanyCountryEnum.RU;
@@ -74,6 +106,14 @@ export class Company extends AggregateRoot {
       website: input.website?.trim() || null,
       phone: input.phone?.trim() || null,
       email: input.email?.trim().toLowerCase() || null,
+      city: input.city?.trim() || null,
+      industry: input.industry?.trim() || null,
+      leadPriority: input.leadPriority?.trim().toUpperCase() || null,
+      potentialNeed: input.potentialNeed?.trim() || null,
+      managerComment: input.managerComment?.trim() || null,
+      sourceUrl: input.sourceUrl?.trim() || null,
+      sourceName: input.sourceName?.trim() || null,
+      verifiedAt: input.verifiedAt ?? null,
       status: CompanyStatus.active(),
     });
     company.addEvent(makeCompanyEvent('company.created', company, { name: input.name }));
@@ -91,6 +131,14 @@ export class Company extends AggregateRoot {
     website: string | null;
     phone: string | null;
     email: string | null;
+    city?: string | null;
+    industry?: string | null;
+    leadPriority?: string | null;
+    potentialNeed?: string | null;
+    managerComment?: string | null;
+    sourceUrl?: string | null;
+    sourceName?: string | null;
+    verifiedAt?: Date | null;
     status: CompanyStatusEnum;
     version: number;
     createdAt: Date;
@@ -107,6 +155,14 @@ export class Company extends AggregateRoot {
       website: props.website,
       phone: props.phone,
       email: props.email,
+      city: props.city ?? null,
+      industry: props.industry ?? null,
+      leadPriority: props.leadPriority ?? null,
+      potentialNeed: props.potentialNeed ?? null,
+      managerComment: props.managerComment ?? null,
+      sourceUrl: props.sourceUrl ?? null,
+      sourceName: props.sourceName ?? null,
+      verifiedAt: props.verifiedAt ?? null,
       status: new CompanyStatus(props.status),
       version: props.version,
       createdAt: props.createdAt,
@@ -122,6 +178,14 @@ export class Company extends AggregateRoot {
     phone?: string | null;
     email?: string | null;
     ownerUserId?: string | null;
+    city?: string | null;
+    industry?: string | null;
+    leadPriority?: string | null;
+    potentialNeed?: string | null;
+    managerComment?: string | null;
+    sourceUrl?: string | null;
+    sourceName?: string | null;
+    verifiedAt?: Date | null;
   }): void {
     if (input.country !== undefined) this._country = input.country;
     if (input.name !== undefined) this._name = new CompanyName(input.name);
@@ -130,6 +194,14 @@ export class Company extends AggregateRoot {
     if (input.phone !== undefined) this._phone = input.phone?.trim() || null;
     if (input.email !== undefined) this._email = input.email?.trim().toLowerCase() || null;
     if (input.ownerUserId !== undefined) this._ownerUserId = input.ownerUserId;
+    if (input.city !== undefined) this._city = input.city?.trim() || null;
+    if (input.industry !== undefined) this._industry = input.industry?.trim() || null;
+    if (input.leadPriority !== undefined) this._leadPriority = input.leadPriority?.trim().toUpperCase() || null;
+    if (input.potentialNeed !== undefined) this._potentialNeed = input.potentialNeed?.trim() || null;
+    if (input.managerComment !== undefined) this._managerComment = input.managerComment?.trim() || null;
+    if (input.sourceUrl !== undefined) this._sourceUrl = input.sourceUrl?.trim() || null;
+    if (input.sourceName !== undefined) this._sourceName = input.sourceName?.trim() || null;
+    if (input.verifiedAt !== undefined) this._verifiedAt = input.verifiedAt;
     this.touch();
     this.addEvent(makeCompanyEvent('company.updated', this, { ...input }));
   }
@@ -171,6 +243,15 @@ export class Company extends AggregateRoot {
   get email(): string | null {
     return this._email;
   }
+
+  get city(): string | null { return this._city; }
+  get industry(): string | null { return this._industry; }
+  get leadPriority(): string | null { return this._leadPriority; }
+  get potentialNeed(): string | null { return this._potentialNeed; }
+  get managerComment(): string | null { return this._managerComment; }
+  get sourceUrl(): string | null { return this._sourceUrl; }
+  get sourceName(): string | null { return this._sourceName; }
+  get verifiedAt(): Date | null { return this._verifiedAt; }
 
   get status(): CompanyStatusEnum {
     return this._status.value;

@@ -16,6 +16,14 @@ interface Company {
   phone: string | null;
   website: string | null;
   ownerUserId: string | null;
+  city: string | null;
+  industry: string | null;
+  leadPriority: string | null;
+  potentialNeed: string | null;
+  managerComment: string | null;
+  sourceUrl: string | null;
+  sourceName: string | null;
+  verifiedAt: string | null;
 }
 
 const countryLabels: Record<string, string> = {
@@ -37,7 +45,11 @@ interface CompanyList {
   total: number;
 }
 
-const emptyForm = { name: '', country: 'RU', inn: '', email: '', phone: '', website: '', ownerUserId: '' };
+const emptyForm = {
+  name: '', country: 'RU', inn: '', email: '', phone: '', website: '', ownerUserId: '',
+  city: '', industry: '', leadPriority: '', potentialNeed: '', managerComment: '',
+  sourceUrl: '', sourceName: '', verifiedAt: '',
+};
 
 export default function CompaniesPage() {
   const user = getAuthUser();
@@ -90,6 +102,14 @@ export default function CompaniesPage() {
       phone: c.phone ?? '',
       website: c.website ?? '',
       ownerUserId: c.ownerUserId ?? '',
+      city: c.city ?? '',
+      industry: c.industry ?? '',
+      leadPriority: c.leadPriority ?? '',
+      potentialNeed: c.potentialNeed ?? '',
+      managerComment: c.managerComment ?? '',
+      sourceUrl: c.sourceUrl ?? '',
+      sourceName: c.sourceName ?? '',
+      verifiedAt: c.verifiedAt?.slice(0, 10) ?? '',
     });
     setShowForm(true);
   }
@@ -150,6 +170,14 @@ export default function CompaniesPage() {
         phone: form.phone || undefined,
         website: form.website || undefined,
         ownerUserId: form.ownerUserId || undefined,
+        city: form.city || undefined,
+        industry: form.industry || undefined,
+        leadPriority: form.leadPriority || undefined,
+        potentialNeed: form.potentialNeed || undefined,
+        managerComment: form.managerComment || undefined,
+        sourceUrl: form.sourceUrl || undefined,
+        sourceName: form.sourceName || undefined,
+        verifiedAt: form.verifiedAt || undefined,
       };
       if (editingId) {
         await apiAuthPatch(`/companies/${editingId}`, {
@@ -265,6 +293,62 @@ export default function CompaniesPage() {
                 onChange={(e) => setForm({ ...form, website: e.target.value })}
                 className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-blue-500"
               />
+              <div className="grid grid-cols-2 gap-3">
+                <input
+                  placeholder="Город / регион"
+                  value={form.city}
+                  onChange={(e) => setForm({ ...form, city: e.target.value })}
+                  className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-blue-500"
+                />
+                <input
+                  placeholder="Отрасль"
+                  value={form.industry}
+                  onChange={(e) => setForm({ ...form, industry: e.target.value })}
+                  className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-blue-500"
+                />
+              </div>
+              <select
+                value={form.leadPriority}
+                onChange={(e) => setForm({ ...form, leadPriority: e.target.value })}
+                className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-blue-500"
+              >
+                <option value="">Приоритет не определён</option>
+                <option value="A">A — связаться в первую очередь</option>
+                <option value="B">B — перспективный</option>
+                <option value="C">C — резерв</option>
+              </select>
+              <textarea
+                placeholder="Потенциальная потребность и основание"
+                value={form.potentialNeed}
+                onChange={(e) => setForm({ ...form, potentialNeed: e.target.value })}
+                className="min-h-20 rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-blue-500"
+              />
+              <textarea
+                placeholder="Комментарий менеджера"
+                value={form.managerComment}
+                onChange={(e) => setForm({ ...form, managerComment: e.target.value })}
+                className="min-h-16 rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-blue-500"
+              />
+              <input
+                placeholder="Ссылка на источник"
+                value={form.sourceUrl}
+                onChange={(e) => setForm({ ...form, sourceUrl: e.target.value })}
+                className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-blue-500"
+              />
+              <div className="grid grid-cols-2 gap-3">
+                <input
+                  placeholder="Название источника"
+                  value={form.sourceName}
+                  onChange={(e) => setForm({ ...form, sourceName: e.target.value })}
+                  className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-blue-500"
+                />
+                <input
+                  type="date"
+                  value={form.verifiedAt}
+                  onChange={(e) => setForm({ ...form, verifiedAt: e.target.value })}
+                  className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:border-blue-500"
+                />
+              </div>
               <select
                 value={form.ownerUserId}
                 onChange={(e) => setForm({ ...form, ownerUserId: e.target.value })}
@@ -311,6 +395,18 @@ export default function CompaniesPage() {
                     .filter(Boolean)
                     .join(' · ') || ru.companies.noDetails}
                 </p>
+                {(c.industry || c.potentialNeed) && (
+                  <p className="mt-1 text-xs text-slate-300">
+                    {[c.leadPriority && `Приоритет ${c.leadPriority}`, c.city, c.industry, c.potentialNeed]
+                      .filter(Boolean)
+                      .join(' · ')}
+                  </p>
+                )}
+                {c.sourceUrl && (
+                  <a href={c.sourceUrl} target="_blank" rel="noreferrer" className="mt-1 block text-xs text-blue-400 hover:underline">
+                    Источник: {c.sourceName || c.sourceUrl}
+                  </a>
+                )}
               </div>
               <div className="flex gap-2">
                 <button type="button" onClick={() => openEdit(c)} className="text-sm text-blue-400 hover:underline">

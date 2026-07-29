@@ -27,6 +27,7 @@ import {
 import { GetCompanyQuery, ListCompaniesQuery } from '../../application/queries/company.queries';
 import { InnLookupService } from '../../infrastructure/inn-lookup.service';
 import { InnLookupResponseDto } from '../../application/dto/inn-lookup-response.dto';
+import { ImportCompaniesDto, ImportCompaniesResultDto } from '../../application/dto/import-companies.dto';
 
 @ApiTags('companies')
 @ApiBearerAuth()
@@ -52,6 +53,50 @@ export class CompanyController {
     }
   }
 
+  @Post('import')
+  @ApiOkResponse({ type: ImportCompaniesResultDto })
+  async import(
+    @CurrentUser() user: AccessTokenPayload,
+    @Body() dto: ImportCompaniesDto,
+  ): Promise<ImportCompaniesResultDto> {
+    const organizationId = requireOrganizationId(user);
+    const result: ImportCompaniesResultDto = { created: 0, skipped: 0, errors: [] };
+    for (const [index, row] of dto.rows.entries()) {
+      try {
+        await this.commandBus.execute(
+          new CreateCompanyCommand(
+            organizationId,
+            row.name,
+            row.inn,
+            row.website,
+            row.phone,
+            row.email,
+            row.ownerUserId,
+            user.sub,
+            row.country,
+            row.city,
+            row.industry,
+            row.leadPriority,
+            row.potentialNeed,
+            row.managerComment,
+            row.sourceUrl,
+            row.sourceName,
+            row.verifiedAt ? new Date(row.verifiedAt) : undefined,
+          ),
+        );
+        result.created += 1;
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        if (message.includes('already exists')) {
+          result.skipped += 1;
+        } else {
+          result.errors.push({ row: index + 2, name: row.name, reason: message });
+        }
+      }
+    }
+    return result;
+  }
+
   @Post()
   @ApiOkResponse({ type: CompanyResponseDto })
   async create(
@@ -71,6 +116,14 @@ export class CompanyController {
           dto.ownerUserId,
           user.sub,
           dto.country,
+          dto.city,
+          dto.industry,
+          dto.leadPriority,
+          dto.potentialNeed,
+          dto.managerComment,
+          dto.sourceUrl,
+          dto.sourceName,
+          dto.verifiedAt ? new Date(dto.verifiedAt) : undefined,
         ),
       );
       return this.getOrFail(id, organizationId);
@@ -128,6 +181,14 @@ export class CompanyController {
           dto.email,
           dto.ownerUserId,
           dto.country,
+          dto.city,
+          dto.industry,
+          dto.leadPriority,
+          dto.potentialNeed,
+          dto.managerComment,
+          dto.sourceUrl,
+          dto.sourceName,
+          dto.verifiedAt === null ? null : dto.verifiedAt ? new Date(dto.verifiedAt) : undefined,
         ),
       );
     } catch (e) {
