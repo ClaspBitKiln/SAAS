@@ -51,6 +51,13 @@ export class MarkProposalSentCommand {
   ) {}
 }
 
+export class MarkProposalDownloadedCommand {
+  constructor(
+    readonly id: string,
+    readonly organizationId: string,
+  ) {}
+}
+
 export class RecordRequestOutcomeCommand {
   constructor(
     readonly id: string,
