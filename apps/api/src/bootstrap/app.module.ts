@@ -9,6 +9,7 @@ import { TasksModule } from '../modules/tasks/tasks.module';
 import { AuthModule } from '../modules/auth/auth.module';
 import { EMetallModule } from '../modules/e-metall/e-metall.module';
 import { RequestsModule } from '../modules/requests/requests.module';
+import { PublicIntakeModule } from '../modules/public-intake/public-intake.module';
 import { HealthModule } from '../modules/health/health.module';
 import { SecurityModule } from '../infrastructure/security/security.module';
 import { PinoLoggerModule } from '../infrastructure/logging/pino-logger.module';
@@ -27,6 +28,7 @@ import { PinoLoggerModule } from '../infrastructure/logging/pino-logger.module';
     AuthModule,
     EMetallModule,
     RequestsModule,
+    PublicIntakeModule,
     HealthModule,
   ],
 })
