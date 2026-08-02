@@ -210,8 +210,8 @@ export class PublicLeadResponseDto {
   @ApiProperty({ nullable: true, example: null })
   companyId!: string | null;
 
-  @ApiProperty({ example: '018f7cd8-f7cc-7f49-a8f5-495c2b56ee3d' })
-  contactId!: string;
+  @ApiProperty({ nullable: true, example: '018f7cd8-f7cc-7f49-a8f5-495c2b56ee3d' })
+  contactId!: string | null;
 
   @ApiProperty({ example: 'DRAFT' })
   status!: 'DRAFT';
