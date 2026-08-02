@@ -46,13 +46,14 @@ function lead(overrides: Partial<PublicLeadDto> = {}): PublicLeadDto {
 }
 
 describe('PublicIntakeService', () => {
-  const prisma = {
-    organization: { findFirst: vi.fn() },
-    request: { findFirst: vi.fn() },
-    contact: { findFirst: vi.fn() },
+  const repository = {
+    findOrganizationIdById: vi.fn(),
+    findOrganizationIdByInn: vi.fn(),
+    findLeadByMarker: vi.fn(),
+    findContactIdByChannel: vi.fn(),
   };
   const commandBus = { execute: vi.fn() };
-  const service = new PublicIntakeService(prisma as never, commandBus as never);
+  const service = new PublicIntakeService(repository, commandBus as never);
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -61,9 +62,10 @@ describe('PublicIntakeService', () => {
     process.env.PUBLIC_INTAKE_ALLOWED_ORIGINS =
       'https://www.magicmet.ru,https://magicmet.ru';
 
-    prisma.organization.findFirst.mockResolvedValue({ id: organizationId });
-    prisma.request.findFirst.mockResolvedValue(null);
-    prisma.contact.findFirst.mockResolvedValue({ id: contactId });
+    repository.findOrganizationIdById.mockResolvedValue(organizationId);
+    repository.findOrganizationIdByInn.mockResolvedValue(null);
+    repository.findLeadByMarker.mockResolvedValue(null);
+    repository.findContactIdByChannel.mockResolvedValue(contactId);
   });
 
   it('rejects a request without the gateway bearer token', async () => {
@@ -77,7 +79,7 @@ describe('PublicIntakeService', () => {
       ),
     ).rejects.toBeInstanceOf(UnauthorizedException);
 
-    expect(prisma.organization.findFirst).not.toHaveBeenCalled();
+    expect(repository.findOrganizationIdById).not.toHaveBeenCalled();
   });
 
   it('rejects a request with a different gateway bearer token', async () => {
@@ -150,7 +152,7 @@ describe('PublicIntakeService', () => {
   });
 
   it('returns the existing request for a repeated externalLeadId', async () => {
-    prisma.request.findFirst.mockResolvedValue({ id: requestId, contactId });
+    repository.findLeadByMarker.mockResolvedValue({ requestId, contactId });
 
     const result = await service.createLead(
       lead(),
