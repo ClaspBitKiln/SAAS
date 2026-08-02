@@ -2,23 +2,26 @@ import { timingSafeEqual } from 'node:crypto';
 import {
   BadRequestException,
   ForbiddenException,
+  Inject,
   Injectable,
   Logger,
   ServiceUnavailableException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
-import { PrismaService } from '../../../../database/prisma/prisma.service';
 import { CreateContactCommand } from '../../../contacts/application/commands/contact.commands';
 import { CreateRequestCommand } from '../../../requests/application/commands/request.commands';
 import { RequestSourceEnum } from '../../../requests/domain/value-objects/request-source.vo';
+import {
+  PUBLIC_INTAKE_REPOSITORY,
+  PublicIntakeContactChannel,
+  PublicIntakeRepository,
+} from '../../domain/repositories/public-intake.repository';
 import {
   PublicFunnelEventDto,
   PublicLeadDto,
   PublicLeadResponseDto,
 } from '../dto/public-intake.dto';
-
-type ContactChannel = { phone?: string; email?: string };
 
 type CommandResult = { id: string };
 
@@ -27,7 +30,8 @@ export class PublicIntakeService {
   private readonly logger = new Logger(PublicIntakeService.name);
 
   constructor(
-    private readonly prisma: PrismaService,
+    @Inject(PUBLIC_INTAKE_REPOSITORY)
+    private readonly repository: PublicIntakeRepository,
     private readonly commandBus: CommandBus,
   ) {}
 
@@ -46,19 +50,15 @@ export class PublicIntakeService {
     this.assertTenant(tenantId, organizationId);
 
     const marker = this.idempotencyMarker(dto.externalLeadId);
-    const existing = await this.prisma.request.findFirst({
-      where: {
-        organizationId,
-        deletedAt: null,
-        notes: { contains: marker },
-      },
-      select: { id: true, contactId: true },
-    });
+    const existing = await this.repository.findLeadByMarker(
+      organizationId,
+      marker,
+    );
 
     if (existing) {
       return {
         ok: true,
-        requestId: existing.id,
+        requestId: existing.requestId,
         companyId: null,
         contactId: existing.contactId,
         status: 'DRAFT',
@@ -197,26 +197,20 @@ export class PublicIntakeService {
   private async resolveOrganizationId(): Promise<string> {
     const configuredId = process.env.PUBLIC_INTAKE_ORGANIZATION_ID?.trim();
     if (configuredId) {
-      const organization = await this.prisma.organization.findFirst({
-        where: { id: configuredId, deletedAt: null },
-        select: { id: true },
-      });
-      if (organization) return organization.id;
+      const organizationId = await this.repository.findOrganizationIdById(configuredId);
+      if (organizationId) return organizationId;
       throw new ServiceUnavailableException('Public intake organization not found');
     }
 
     const configuredInn = (process.env.PUBLIC_INTAKE_ORGANIZATION_INN ?? '7453362080').trim();
-    const organization = await this.prisma.organization.findFirst({
-      where: { inn: configuredInn, deletedAt: null },
-      select: { id: true },
-    });
-    if (!organization) {
+    const organizationId = await this.repository.findOrganizationIdByInn(configuredInn);
+    if (!organizationId) {
       throw new ServiceUnavailableException('Public intake organization is not configured');
     }
-    return organization.id;
+    return organizationId;
   }
 
-  private parseContactChannel(value: string): ContactChannel {
+  private parseContactChannel(value: string): PublicIntakeContactChannel {
     const normalized = value.trim();
     if (normalized.includes('@')) return { email: normalized.toLowerCase() };
     return { phone: normalized };
@@ -225,17 +219,13 @@ export class PublicIntakeService {
   private async resolveContactId(
     organizationId: string,
     name: string,
-    channel: ContactChannel,
+    channel: PublicIntakeContactChannel,
   ): Promise<string> {
-    const existing = await this.prisma.contact.findFirst({
-      where: {
-        organizationId,
-        deletedAt: null,
-        ...(channel.email ? { email: channel.email } : { phone: channel.phone }),
-      },
-      select: { id: true },
-    });
-    if (existing) return existing.id;
+    const existingId = await this.repository.findContactIdByChannel(
+      organizationId,
+      channel,
+    );
+    if (existingId) return existingId;
 
     const result = await this.commandBus.execute<CreateContactCommand, CommandResult>(
       new CreateContactCommand(
