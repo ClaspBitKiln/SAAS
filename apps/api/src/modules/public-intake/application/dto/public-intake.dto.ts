@@ -2,12 +2,14 @@ import { Type } from 'class-transformer';
 import {
   IsBoolean,
   IsDateString,
+  IsInt,
   IsNotEmpty,
   IsObject,
   IsOptional,
   IsString,
   Matches,
   MaxLength,
+  Min,
   ValidateNested,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
@@ -54,13 +56,32 @@ export class PublicLeadConsentDto {
   @ApiProperty({ example: '2026-07-30T14:00:00.000Z' })
   @IsDateString()
   capturedAt!: string;
+
+  @ApiPropertyOptional({ example: '2026-07-30' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(64)
+  privacyVersion?: string;
 }
 
 export class PublicLeadDto {
+  @ApiPropertyOptional({ example: 1 })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  schemaVersion?: number;
+
   @ApiProperty({ example: '3ef65221-47bc-4b03-a98f-84de03f378ba' })
   @IsString()
   @Matches(/^[A-Za-z0-9_-]{8,128}$/)
   externalLeadId!: string;
+
+  @ApiPropertyOptional({ example: 'magicmet-website' })
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(64)
+  source?: string;
 
   @ApiProperty({ example: 'magicmet-website' })
   @IsString()
@@ -184,7 +205,16 @@ export class PublicLeadResponseDto {
   ok!: true;
 
   @ApiProperty({ example: '018f7cd8-f7cc-7f49-a8f5-495c2b56ee3c' })
-  leadId!: string;
+  requestId!: string;
+
+  @ApiProperty({ nullable: true, example: null })
+  companyId!: string | null;
+
+  @ApiProperty({ example: '018f7cd8-f7cc-7f49-a8f5-495c2b56ee3d' })
+  contactId!: string;
+
+  @ApiProperty({ example: 'DRAFT' })
+  status!: 'DRAFT';
 
   @ApiProperty({ example: '3ef65221-47bc-4b03-a98f-84de03f378ba' })
   externalLeadId!: string;
