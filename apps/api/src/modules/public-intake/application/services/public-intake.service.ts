@@ -1,9 +1,11 @@
+import { timingSafeEqual } from 'node:crypto';
 import {
   BadRequestException,
   ForbiddenException,
   Injectable,
   Logger,
   ServiceUnavailableException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
@@ -31,13 +33,18 @@ export class PublicIntakeService {
 
   async createLead(
     dto: PublicLeadDto,
+    authorization: string | undefined,
     idempotencyKey: string | undefined,
+    tenantId: string | undefined,
     origin: string | undefined,
   ): Promise<PublicLeadResponseDto> {
     this.assertAllowedOrigin(origin);
+    this.assertAuthorized(authorization);
     this.assertLead(dto, idempotencyKey);
 
     const organizationId = await this.resolveOrganizationId();
+    this.assertTenant(tenantId, organizationId);
+
     const marker = this.idempotencyMarker(dto.externalLeadId);
     const existing = await this.prisma.request.findFirst({
       where: {
@@ -45,13 +52,16 @@ export class PublicIntakeService {
         deletedAt: null,
         notes: { contains: marker },
       },
-      select: { id: true },
+      select: { id: true, contactId: true },
     });
 
     if (existing) {
       return {
         ok: true,
-        leadId: existing.id,
+        requestId: existing.id,
+        companyId: null,
+        contactId: existing.contactId,
+        status: 'DRAFT',
         externalLeadId: dto.externalLeadId,
         duplicate: true,
       };
@@ -92,14 +102,26 @@ export class PublicIntakeService {
 
     return {
       ok: true,
-      leadId: result.id,
+      requestId: result.id,
+      companyId: null,
+      contactId,
+      status: 'DRAFT',
       externalLeadId: dto.externalLeadId,
       duplicate: false,
     };
   }
 
-  acceptEvent(dto: PublicFunnelEventDto, origin: string | undefined): void {
+  async acceptEvent(
+    dto: PublicFunnelEventDto,
+    authorization: string | undefined,
+    tenantId: string | undefined,
+    origin: string | undefined,
+  ): Promise<void> {
     this.assertAllowedOrigin(origin);
+    this.assertAuthorized(authorization);
+    const organizationId = await this.resolveOrganizationId();
+    this.assertTenant(tenantId, organizationId);
+
     this.logger.log(
       JSON.stringify({
         event: 'public_funnel_event',
@@ -107,6 +129,7 @@ export class PublicIntakeService {
         name: dto.name,
         sessionId: dto.sessionId,
         sourceSystem: dto.sourceSystem,
+        organizationId,
         occurredAt: dto.occurredAt,
         path: dto.path,
         data: dto.data ?? {},
@@ -114,12 +137,42 @@ export class PublicIntakeService {
     );
   }
 
+  private assertAuthorized(authorization: string | undefined): void {
+    const configuredToken = process.env.SITE_INGEST_TOKEN?.trim();
+    if (!configuredToken) {
+      throw new ServiceUnavailableException('Site intake token is not configured');
+    }
+
+    const suppliedToken = authorization?.match(/^Bearer\s+(.+)$/i)?.[1]?.trim();
+    if (!suppliedToken || !this.secretsMatch(suppliedToken, configuredToken)) {
+      throw new UnauthorizedException('Invalid site intake token');
+    }
+  }
+
+  private secretsMatch(supplied: string, expected: string): boolean {
+    const suppliedBuffer = Buffer.from(supplied);
+    const expectedBuffer = Buffer.from(expected);
+    return (
+      suppliedBuffer.length === expectedBuffer.length &&
+      timingSafeEqual(suppliedBuffer, expectedBuffer)
+    );
+  }
+
   private assertLead(dto: PublicLeadDto, idempotencyKey: string | undefined): void {
     if (!dto.consent.personalData) {
       throw new BadRequestException('Personal data consent is required');
     }
-    if (idempotencyKey && idempotencyKey !== dto.externalLeadId) {
-      throw new BadRequestException('X-Idempotency-Key must match externalLeadId');
+    if (!idempotencyKey) {
+      throw new BadRequestException('Idempotency-Key is required');
+    }
+    if (idempotencyKey !== dto.externalLeadId) {
+      throw new BadRequestException('Idempotency-Key must match externalLeadId');
+    }
+  }
+
+  private assertTenant(tenantId: string | undefined, organizationId: string): void {
+    if (!tenantId || tenantId !== organizationId) {
+      throw new ForbiddenException('Tenant is not allowed');
     }
   }
 
