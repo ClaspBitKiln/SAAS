@@ -1,0 +1,35 @@
+name: KomTender bridge check
+
+on:
+  push:
+    paths:
+      - "scripts/run-komtender.cmd"
+      - "scripts/run-komtender-bridge.ps1"
+      - ".github/workflows/komtender-bridge-check.yml"
+  workflow_dispatch:
+
+jobs:
+  syntax:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Parse PowerShell bridge
+        shell: powershell
+        run: |
+          $tokens = $null
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile(
+            "$PWD\scripts\run-komtender-bridge.ps1",
+            [ref]$tokens,
+            [ref]$errors
+          ) | Out-Null
+          if ($errors.Count -gt 0) {
+            $errors | Format-List | Out-String | Write-Host
+            exit 1
+          }
+          Write-Host "KomTender bridge syntax: PASS"
+      - name: Check launcher
+        shell: cmd
+        run: |
+          if not exist scripts\run-komtender.cmd exit /b 1
+          echo KomTender CMD launcher: PASS
