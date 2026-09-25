@@ -20,3 +20,8 @@ $state = (Get-ScheduledTask -TaskName $Task.TaskName).State
 Write-Host "AUTONOMOUS_KOMTENDER_TASK=INSTALLED"
 Write-Host "TASK_STATE=$state"
 Write-Host "REPO=$MagicMetal"
+$proof = @("AUTONOMOUS_INSTALL=PASS","TIME="+(Get-Date -Format o),"TASK_STATE="+$state) -join [Environment]::NewLine
+Set-Content -Path (Join-Path $Saas "komtender-autonomous-status.txt") -Value $proof -Encoding utf8
+git add komtender-autonomous-status.txt
+git commit -m "test: record autonomous KomTender install" 2>$null
+git push origin main 2>$null
