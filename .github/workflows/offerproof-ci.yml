@@ -38,3 +38,24 @@ jobs:
         run: npm run typecheck
       - name: Production build
         run: npm run build
+      - name: Runtime smoke test (payments disabled)
+        run: |
+          PORT=3210 npm start > /tmp/offerproof-server.log 2>&1 &
+          echo $! > /tmp/offerproof-server.pid
+          trap 'kill "$(cat /tmp/offerproof-server.pid)" 2>/dev/null || true' EXIT
+          ready=0
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:3210/api/health -o /tmp/offerproof-health.json; then
+              ready=1
+              break
+            fi
+            sleep 1
+          done
+          if [ "$ready" -ne 1 ]; then
+            cat /tmp/offerproof-server.log
+            exit 1
+          fi
+          node -e "const h=require('/tmp/offerproof-health.json'); if (h.paymentsEnabled !== false || h.status !== 'setup_required') { console.error(h); process.exit(1); } console.log('Health endpoint OK; payment gate remains disabled.');"
+          status=$(curl -sS -o /tmp/offerproof-post.json -w '%{http_code}' -X POST http://127.0.0.1:3210/api/offer-proof -H 'Content-Type: application/json' --data-binary '{"url":"https://example.com"}')
+          test "$status" = "503"
+          node -e "const r=require('/tmp/offerproof-post.json'); if (r?.error?.code !== 'PAYMENTS_NOT_CONFIGURED') { console.error(r); process.exit(1); } console.log('Unconfigured payment route correctly returns 503; no payment is simulated.');"
