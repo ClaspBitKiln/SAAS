@@ -57,7 +57,7 @@ describe("offer report", () => {
     expect(report.facts.productName.value).toBe("Blue Trail Shoe");
     expect(report.facts.price.value).toBe("89.00");
     expect(report.facts.price.currency).toBe("USD");
-    expect(report.facts.availability.value).toBe("InStock");
+    expect(report.facts.availability.value).toBe("In Stock");
     expect(report.facts.canonicalUrl).toBe("https://store.example/products/blue-shoe");
     expect(report.consistency.status).toBe("consistent");
     expect(report.score).toBeGreaterThan(70);
