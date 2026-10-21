@@ -64,7 +64,7 @@ async function handleOfferProof(request: NextRequest): Promise<NextResponse<any>
 }
 
 const payTo = process.env.X402_PAY_TO_ADDRESS || "";
-const network = process.env.X402_NETWORK || "eip155:84532"; // Base Sepolia testnet by default.
+const network = (process.env.X402_NETWORK || "eip155:84532") as "eip155:84532" | "eip155:8453"; // Base Sepolia testnet by default.
 const facilitatorUrl = process.env.X402_FACILITATOR_URL || "https://x402.org/facilitator";
 const x402Enabled = process.env.X402_ENABLED === "true" &&
   /^0x[a-fA-F0-9]{40}$/.test(payTo) &&
