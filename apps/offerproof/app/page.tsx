@@ -147,11 +147,11 @@ export default function Home() {
             <button className="secondary" onClick={() => setShowSample(v => !v)}>{showSample ? "Hide sample" : "See sample output"}</button>
           </div>
           <div className="factsStrip">
-            <div><strong>$0.02*</strong><span>per successful request</span></div>
+            <div><strong>$0.01*</strong><span>per successful request</span></div>
             <div><strong>No account</strong><span>protocol-native payment</span></div>
             <div><strong>Read only</strong><span>never places an order</span></div>
           </div>
-          <p className="priceNote">*Pricing hypothesis. Live requests remain disabled until the operator configures and verifies a receiving wallet and payment facilitator.</p>
+          <p className="priceNote">*Pricing hypothesis, deliberately below the observed $0.015 quick-audit competitor. Live requests remain disabled until the operator configures and verifies a receiving wallet and payment facilitator.</p>
         </div>
         <div className="heroVisual" aria-label="Conceptual diagram of a product page being checked">
           <div className="orbit orbitA" /><div className="orbit orbitB" />
