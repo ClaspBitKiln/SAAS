@@ -12,16 +12,35 @@ function jsonError(code: string, message: string, status: number) {
   return NextResponse.json({ service:"OfferProof", error:{ code, message } }, { status });
 }
 
-export async function handleOfferProof(request: NextRequest): Promise<NextResponse<any>> {
+async function handleOfferProof(request: NextRequest): Promise<NextResponse<any>> {
   const declaredLength = Number(request.headers.get("content-length") || 0);
   if (declaredLength > MAX_REQUEST_BYTES) {
     return jsonError("REQUEST_TOO_LARGE", "Request body is limited to 4 KB.", 413);
   }
   let bodyText: string;
-  try { bodyText = await request.text(); }
-  catch { return jsonError("INVALID_BODY", "Could not read request body.", 400); }
-  if (new TextEncoder().encode(bodyText).byteLength > MAX_REQUEST_BYTES) {
-    return jsonError("REQUEST_TOO_LARGE", "Request body is limited to 4 KB.", 413);
+  const reader = request.body?.getReader();
+  if (!reader) return jsonError("INVALID_BODY", "Request body is empty.", 400);
+  try {
+    const chunks: Uint8Array[] = [];
+    let bytes = 0;
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      bytes += value.byteLength;
+      if (bytes > MAX_REQUEST_BYTES) {
+        await reader.cancel();
+        return jsonError("REQUEST_TOO_LARGE", "Request body is limited to 4 KB.", 413);
+      }
+      chunks.push(value);
+    }
+    const merged = new Uint8Array(bytes);
+    let offset = 0;
+    for (const chunk of chunks) { merged.set(chunk, offset); offset += chunk.byteLength; }
+    bodyText = new TextDecoder("utf-8", { fatal: true }).decode(merged);
+  } catch {
+    return jsonError("INVALID_BODY", "Could not read or decode the request body.", 400);
+  } finally {
+    reader.releaseLock();
   }
   let body: unknown;
   try { body = JSON.parse(bodyText); }
@@ -47,7 +66,6 @@ export async function handleOfferProof(request: NextRequest): Promise<NextRespon
 const payTo = process.env.X402_PAY_TO_ADDRESS || "";
 const network = process.env.X402_NETWORK || "eip155:84532"; // Base Sepolia testnet by default.
 const facilitatorUrl = process.env.X402_FACILITATOR_URL || "https://x402.org/facilitator";
-export const PAYMENT_MODE = process.env.X402_ENABLED === "true" ? network : "disabled";
 const x402Enabled = process.env.X402_ENABLED === "true" &&
   /^0x[a-fA-F0-9]{40}$/.test(payTo) &&
   ["eip155:84532", "eip155:8453"].includes(network) &&
