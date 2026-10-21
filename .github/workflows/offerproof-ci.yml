@@ -1,0 +1,38 @@
+name: OfferProof CI
+
+on:
+  push:
+    branches: ["triz-agent-money-machine"]
+    paths:
+      - "apps/offerproof/**"
+      - ".github/workflows/offerproof-ci.yml"
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "apps/offerproof/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/offerproof
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: apps/offerproof/package-lock.json
+      - name: Install dependencies
+        run: npm install
+      - name: Unit tests
+        run: npm test
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Production build
+        run: npm run build
