@@ -101,7 +101,7 @@ export async function validatePublicTarget(raw: string): Promise<SafeTarget> {
   return { url, hostname, pinnedAddress: records[0].address, family: records[0].family };
 }
 
-async function boundedFetch(url: URL, checkedTarget: SafeTarget): Promise<{status:number; headers:Headers; text:string}> {
+async function boundedFetch(url: URL, checkedTarget: SafeTarget, expected: "html" | "text" = "html"): Promise<{status:number; headers:Headers; text:string}> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   const dispatcher = new Agent({
@@ -118,27 +118,39 @@ async function boundedFetch(url: URL, checkedTarget: SafeTarget): Promise<{statu
   });
   try {
     const response = await undiciFetch(url, {
-      method:"GET",
-      redirect:"manual",
+      method: "GET",
+      redirect: "manual",
       headers: {
         "User-Agent": USER_AGENT,
-        "Accept": "text/html,application/xhtml+xml;q=0.9",
+        "Accept": expected === "html" ? "text/html,application/xhtml+xml;q=0.9" : "text/plain,*/*;q=0.2",
         "Accept-Encoding": "identity"
       },
       signal: controller.signal,
-      // Node's fetch supports the undici dispatcher extension; TypeScript's DOM RequestInit does not include it.
       dispatcher
     });
     if (response.status >= 300 && response.status < 400) {
       throw new PublicFetchError("REDIRECT_BLOCKED", "Redirects are not followed automatically. Scan the final HTTPS URL directly.", 422);
     }
+    if (expected === "text" && response.status >= 400 && response.status < 500) {
+      await response.body?.cancel().catch(()=>undefined);
+      return { status: response.status, headers: response.headers as unknown as Headers, text: "" };
+    }
+    if (response.status >= 500) {
+      throw new PublicFetchError(expected === "text" ? "ROBOTS_UNAVAILABLE" : "REMOTE_SERVER_ERROR",
+        expected === "text" ? "The site's robots.txt could not be checked; refusing to fetch the product page." : "The target server failed.",
+        503);
+    }
     const contentType = response.headers.get("content-type") || "";
-    if (!contentType.toLowerCase().includes("text/html") && !contentType.toLowerCase().includes("application/xhtml+xml")) {
-      throw new PublicFetchError("NOT_HTML", "The target did not return an HTML page.", 415);
+    const contentTypeLower = contentType.toLowerCase();
+    const isHtml = contentTypeLower.includes("text/html") || contentTypeLower.includes("application/xhtml+xml");
+    const isText = contentTypeLower.startsWith("text/") || contentTypeLower.includes("application/octet-stream");
+    if (expected === "html" && !isHtml) throw new PublicFetchError("NOT_HTML", "The target did not return an HTML page.", 415);
+    if (expected === "text" && response.status >= 200 && response.status < 300 && !isText) {
+      throw new PublicFetchError("ROBOTS_UNREADABLE", "The site's robots.txt is not served as readable text; refusing to scan.", 422);
     }
     const length = Number(response.headers.get("content-length") || 0);
-    if (length > MAX_HTML_BYTES) throw new PublicFetchError("RESPONSE_TOO_LARGE", "The HTML response exceeds the 1.5 MB limit.", 413);
-    if (!response.body) throw new PublicFetchError("EMPTY_RESPONSE", "The target returned an empty body.", 422);
+    if (length > MAX_HTML_BYTES) throw new PublicFetchError("RESPONSE_TOO_LARGE", "The response exceeds the 1.5 MB limit.", 413);
+    if (!response.body) return { status:response.status, headers:response.headers as unknown as Headers, text:"" };
     const reader = response.body.getReader();
     const chunks: Uint8Array[] = [];
     let bytes = 0;
@@ -148,14 +160,14 @@ async function boundedFetch(url: URL, checkedTarget: SafeTarget): Promise<{statu
       bytes += value.byteLength;
       if (bytes > MAX_HTML_BYTES) {
         await reader.cancel();
-        throw new PublicFetchError("RESPONSE_TOO_LARGE", "The HTML response exceeds the 1.5 MB limit.", 413);
+        throw new PublicFetchError("RESPONSE_TOO_LARGE", "The response exceeds the 1.5 MB limit.", 413);
       }
       chunks.push(value);
     }
     const all = new Uint8Array(bytes);
     let offset = 0;
     for (const chunk of chunks) { all.set(chunk, offset); offset += chunk.byteLength; }
-    return { status:response.status, headers:response.headers, text:new TextDecoder("utf-8", {fatal:false}).decode(all) };
+    return { status:response.status, headers:response.headers as unknown as Headers, text:new TextDecoder("utf-8", {fatal:false}).decode(all) };
   } catch (error) {
     if (error instanceof PublicFetchError) throw error;
     if ((error as Error)?.name === "AbortError") throw new PublicFetchError("FETCH_TIMEOUT", "The page took too long to respond.", 504);
@@ -166,35 +178,49 @@ async function boundedFetch(url: URL, checkedTarget: SafeTarget): Promise<{statu
   }
 }
 
-function robotsAllowsAll(robots: string): boolean {
-  const lines = robots.split(/\r?\n/).map(line => line.replace(/#.*/, "").trim()).filter(Boolean);
-  let activeAgents: string[] = [];
-  let hasApplicableRule = false;
-  let best: {length:number; allow:boolean} | null = null;
-  for (const line of lines) {
-    const index = line.indexOf(":");
-    if (index < 0) continue;
-    const key = line.slice(0,index).trim().toLowerCase();
-    const value = line.slice(index+1).trim();
+export function robotsDisallowsPath(robots: string, pathname: string): boolean {
+  type Rule = { pattern: string; allow: boolean };
+  type Group = { agents: string[]; rules: Rule[] };
+  const groups: Group[] = [];
+  let group: Group = { agents: [], rules: [] };
+  for (const rawLine of robots.split(/\r?\n/)) {
+    const line = rawLine.replace(/#.*/, "").trim();
+    if (!line) continue;
+    const sep = line.indexOf(":");
+    if (sep < 0) continue;
+    const key = line.slice(0, sep).trim().toLowerCase();
+    const value = line.slice(sep + 1).trim();
     if (key === "user-agent") {
-      if (activeAgents.length && hasApplicableRule) { activeAgents=[]; hasApplicableRule=false; }
-      activeAgents.push(value.toLowerCase());
-      continue;
-    }
-    if (key !== "disallow" && key !== "allow") continue;
-    if (!activeAgents.some(a => a === "*" || USER_AGENT.toLowerCase().includes(a))) continue;
-    hasApplicableRule = true;
-    if (key === "disallow" && value === "") continue;
-    if (key === "disallow" && "/".startsWith(value) || key === "disallow" && value === "/") {
-      const rule = {length:value.length, allow:false};
-      if (!best || rule.length > best.length) best=rule;
-    }
-    if (key === "allow" && value === "/") {
-      const rule={length:value.length,allow:true};
-      if (!best || rule.length >= best.length) best=rule;
+      if (group.agents.length && group.rules.length) {
+        groups.push(group);
+        group = { agents: [], rules: [] };
+      }
+      group.agents.push(value.toLowerCase());
+    } else if ((key === "allow" || key === "disallow") && group.agents.length && value) {
+      group.rules.push({ pattern: value, allow: key === "allow" });
     }
   }
-  return best === null || best.allow;
+  if (group.agents.length) groups.push(group);
+  const agentToken = USER_AGENT.split(/[ /]/)[0].toLowerCase();
+  const candidates = groups.map(g => ({
+    group: g,
+    specificity: Math.max(-1, ...g.agents.map(a => a === "*" ? 0 : (agentToken.includes(a) || USER_AGENT.toLowerCase().includes(a) ? a.length : -1)))
+  })).filter(x => x.specificity >= 0);
+  if (!candidates.length) return false;
+  const bestSpecificity = Math.max(...candidates.map(x => x.specificity));
+  const rules = candidates.filter(x => x.specificity === bestSpecificity).flatMap(x => x.group.rules);
+  let best: { length: number; allow: boolean } | null = null;
+  for (const rule of rules) {
+    const endAnchor = rule.pattern.endsWith("$");
+    const rawPattern = endAnchor ? rule.pattern.slice(0, -1) : rule.pattern;
+    const escaped = rawPattern.split("*").map(part => part.replace(/[.*+?^{}()|[\]\\]/g, "\\$&")).join(".*");
+    let expression: RegExp;
+    try { expression = new RegExp("^" + escaped + (endAnchor ? "$" : "")); } catch { continue; }
+    if (!expression.test(pathname)) continue;
+    const length = rawPattern.replace(/\*/g, "").length;
+    if (!best || length > best.length || (length === best.length && rule.allow)) best = { length, allow: rule.allow };
+  }
+  return Boolean(best && !best.allow);
 }
 
 function typesOf(node: any): string[] {
@@ -325,7 +351,16 @@ export async function auditPublicOffer(rawUrl: string): Promise<OfferProofReport
   const started = Date.now();
   const checkedAt = new Date().toISOString();
   const target = await validatePublicTarget(rawUrl);
-  const fetched = await boundedFetch(target.url, target);
+  const robotsUrl = new URL("/robots.txt", target.url);
+  const robotsTarget: SafeTarget = { ...target, url: robotsUrl };
+  const robots = await boundedFetch(robotsUrl, robotsTarget, "text");
+  if (robots.status === 403) {
+    throw new PublicFetchError("ROBOTS_FORBIDDEN", "The site's robots.txt denies automated access; scan stopped.", 403);
+  }
+  if (robots.status >= 200 && robots.status < 300 && robotsDisallowsPath(robots.text, target.url.pathname + target.url.search)) {
+    throw new PublicFetchError("ROBOTS_DISALLOW", "The site's robots.txt disallows OfferProof from reading this path; scan stopped.", 403);
+  }
+  const fetched = await boundedFetch(target.url, target, "html");
   if (fetched.status < 200 || fetched.status >= 300) throw new PublicFetchError("HTTP_ERROR", `The target returned HTTP ${fetched.status}.`, 422);
   const elapsed = Date.now() - started;
   return buildOfferReport(rawUrl, target.url.toString(), fetched.status, fetched.text, elapsed, checkedAt);
