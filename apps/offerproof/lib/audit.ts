@@ -1,13 +1,12 @@
 import { lookup } from "node:dns/promises";
 import { isIP } from "node:net";
-import { Agent } from "undici";
+import { Agent, fetch as undiciFetch } from "undici";
 import * as ipaddr from "ipaddr.js";
 import { load } from "cheerio";
 
 const MAX_HTML_BYTES = 1_500_000;
 const FETCH_TIMEOUT_MS = 8_000;
 const USER_AGENT = "OfferProofBot/0.1 (+https://offerproof.dev/methodology)";
-const MAX_RECOMMENDATIONS = 12;
 
 export type CheckStatus = "pass" | "warn" | "fail" | "unknown";
 export interface AuditCheck {
@@ -49,35 +48,17 @@ export class PublicFetchError extends Error {
   }
 }
 
-function inCidr(address: ipaddr.IPv4 | ipaddr.IPv6, cidr: string): boolean {
-  try {
-    const [base, prefix] = ipaddr.parseCIDR(cidr);
-    return address.kind() === base.kind() && address.match(base, prefix);
-  } catch {
-    return true; // Fail closed if a denylist entry cannot be parsed.
-  }
-}
-
 export function isPublicAddress(input: string): boolean {
   try {
     const address = ipaddr.parse(input);
     if (address.kind() === "ipv6" && (address as ipaddr.IPv6).isIPv4MappedAddress()) {
       return isPublicAddress((address as ipaddr.IPv6).toIPv4Address().toString());
     }
-    if (address.kind() === "ipv4") {
-      const blocked = [
-        "0.0.0.0/8", "10.0.0.0/8", "100.64.0.0/10", "127.0.0.0/8",
-        "169.254.0.0/16", "172.16.0.0/12", "192.0.0.0/24",
-        "192.0.2.0/24", "192.88.99.0/24", "192.168.0.0/16",
-        "198.18.0.0/15", "198.51.100.0/24", "203.0.113.0/24",
-        "224.0.0.0/4", "240.0.0.0/4",
-      ];
-      return !blocked.some(cidr => inCidr(address, cidr));
-    }
-    const blocked = ["::/128", "::1/128", "fc00::/7", "fe80::/10", "ff00::/8", "2001:db8::/32"];
-    return !blocked.some(cidr => inCidr(address, cidr));
+    // ipaddr.js classifies private, loopback, link-local, multicast, documentation,
+    // reserved and other non-global ranges separately from globally routable unicast.
+    return address.range() === "unicast";
   } catch {
-    return false;
+    return false; // Fail closed on unparseable or unsupported address forms.
   }
 }
 
@@ -136,7 +117,7 @@ async function boundedFetch(url: URL, checkedTarget: SafeTarget): Promise<{statu
     }
   });
   try {
-    const response = await fetch(url, {
+    const response = await undiciFetch(url, {
       method:"GET",
       redirect:"manual",
       headers: {
@@ -145,10 +126,9 @@ async function boundedFetch(url: URL, checkedTarget: SafeTarget): Promise<{statu
         "Accept-Encoding": "identity"
       },
       signal: controller.signal,
-      cache:"no-store",
       // Node's fetch supports the undici dispatcher extension; TypeScript's DOM RequestInit does not include it.
-      ...({ dispatcher } as object)
-    } as RequestInit);
+      dispatcher
+    });
     if (response.status >= 300 && response.status < 400) {
       throw new PublicFetchError("REDIRECT_BLOCKED", "Redirects are not followed automatically. Scan the final HTTPS URL directly.", 422);
     }
