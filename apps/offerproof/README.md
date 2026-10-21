@@ -1,6 +1,6 @@
 # OfferProof — evidence-bearing product-offer API for AI agents
 
-**Status: MVP source in an isolated branch; not yet deployed and not yet earning revenue.** This is an experiment in agent-to-agent commerce, not a business with validated customers.
+**Status: MVP source in an isolated branch; not yet deployed and not yet earning revenue.** This is an experiment in agent-to-agent commerce, not a business with validated customers. The niche is deliberately narrowed to cross-source Product/Offer price, currency and availability mismatch detection; broad agent-readiness auditing is already served by established competitors.
 
 ## The invention
 
@@ -45,7 +45,7 @@ Environment variables:
 - `X402_NETWORK=eip155:84532` is Base Sepolia testnet.
 - `X402_FACILITATOR_URL=https://x402.org/facilitator` is the testnet facilitator.
 - For mainnet Base, use `X402_NETWORK=eip155:8453` and the authorized production facilitator URL in `X402_FACILITATOR_URL`. Do not use the testnet facilitator for mainnet.
-- `X402_PRICE_USD=$0.02` is a hypothesis, not a market-validated price.
+- `X402_PRICE_USD=$0.01` is a hypothesis, not a market-validated price.
 - `NEXT_PUBLIC_SITE_URL` must be set to the actual HTTPS deployment origin before sitemap output is enabled.
 
 Never commit `.env.local`, real tokens or secrets. The app does not need or accept a wallet private key. A wallet owner still has to choose and authorize the public receiving address; that step cannot be silently inferred.
@@ -56,12 +56,12 @@ Import the Git repository and set the project Root Directory to `apps/offerproof
 
 ## Revenue math (not a forecast)
 
-At a price hypothesis of $0.02 per successful request:
-- 25,000 successful paid requests = $500 gross.
+At a price hypothesis of $0.01 per successful request:
+- 50,000 successful paid requests = $500 gross.
 - 1,000 requests = $20 gross.
 - zero paid requests = $0.
 
-These figures exclude network costs, hosting, taxes, refunds/failed processing where applicable and any required accounting. The existence of x402 and the fact that competing APIs charge are not evidence that this new endpoint will get 25,000 paid calls. Measure successful unique payers, repeats, output usefulness, response cost and payment settlement. Do not claim revenue until a real settlement is verified.
+These figures exclude network costs, hosting, taxes, refunds/failed processing where applicable and any required accounting. The existence of x402 and paid competitors are not evidence that this endpoint will get 50,000 paid calls. Measure successful unique payers, repeats, output usefulness, response cost and payment settlement. Do not claim revenue until a real settlement is verified.
 
 ## Production gates still open
 
