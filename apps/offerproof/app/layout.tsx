@@ -5,10 +5,9 @@ export const metadata: Metadata = {
   title: "OfferProof — verifiable product facts for AI agents",
   description: "A pay-per-success API that checks public product-page facts and JSON-LD consistency, with source evidence for autonomous buyer agents.",
   robots: { index: true, follow: true },
-  alternates: { canonical: "/" },
   openGraph: {
     title: "OfferProof",
-    description: "Verify the offer before an AI agent acts.",
+    description: "Verify the offer before an agent acts.",
     type: "website"
   }
 };
