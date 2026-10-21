@@ -88,7 +88,7 @@ export const POST = x402Enabled && server
       {
         accepts: [{
           scheme: "exact",
-          price: process.env.X402_PRICE_USD || "$0.02",
+          price: process.env.X402_PRICE_USD || "$0.01",
           network,
           payTo
         }],
