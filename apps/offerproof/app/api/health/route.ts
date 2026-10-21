@@ -9,7 +9,7 @@ export async function GET() {
     status: enabled ? "ready" : "setup_required",
     paymentsEnabled: enabled,
     paymentMode: PAYMENT_MODE,
-    pricePerSuccessfulRequest: process.env.X402_PRICE_USD || "$0.02",
+    pricePerSuccessfulRequest: process.env.X402_PRICE_USD || "$0.01",
     note: enabled ? "The payment gate is configured; this response does not verify a live settlement." : "No paid requests are accepted until payment configuration is valid."
   }, { headers: { "Cache-Control": "no-store" } });
 }
