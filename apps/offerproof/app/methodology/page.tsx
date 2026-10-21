@@ -1,3 +1,5 @@
+import "./methodology.css";
+
 export const metadata = {
   title: "Methodology — OfferProof",
   description: "What OfferProof observes, scores and cannot verify."
