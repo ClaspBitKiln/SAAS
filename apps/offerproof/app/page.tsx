@@ -40,6 +40,18 @@ export default function Home() {
   const [status, setStatus] = useState<string>("not checked");
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [schemaInput, setSchemaInput] = useState<string>(JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "Example product",
+    "offers": {
+      "@type": "Offer",
+      "price": "29.00",
+      "priceCurrency": "USD",
+      "availability": "https://schema.org/InStock"
+    }
+  }, null, 2));
+  const [schemaResult, setSchemaResult] = useState<Record<string, unknown> | null>(null);
 
   const curlCommand = 'curl -X POST "$OFFERPROOF_URL/api/offer-proof" \\\n  -H "Content-Type: application/json" \\\n  -d \'{"url":"https://shop.example/products/example"}\'';
   async function copyCurl() {
@@ -64,11 +76,65 @@ export default function Home() {
     }
   }
 
+  function validateSchemaLocally() {
+    try {
+      const parsed: unknown = JSON.parse(schemaInput);
+      const nodes: Array<Record<string, unknown>> = [];
+      const walk = (value: unknown) => {
+        if (Array.isArray(value)) {
+          value.forEach(walk);
+        } else if (value && typeof value === "object") {
+          const object = value as Record<string, unknown>;
+          nodes.push(object);
+          Object.values(object).forEach(child => {
+            if (child && typeof child === "object") walk(child);
+          });
+        }
+      };
+      walk(parsed);
+      const types = (object: Record<string, unknown>) => {
+        const raw = object["@type"];
+        return (Array.isArray(raw) ? raw : [raw]).filter((item): item is string => typeof item === "string");
+      };
+      const product = nodes.find(object => types(object).some(type => type === "Product" || type === "ProductGroup"));
+      const embeddedOffers = product?.offers;
+      const offer = (Array.isArray(embeddedOffers) ? embeddedOffers[0] : embeddedOffers) as Record<string, unknown> | undefined
+        ?? nodes.find(object => types(object).includes("Offer"));
+      const priceValue = offer?.price ?? (offer?.priceSpecification as Record<string, unknown> | undefined)?.price ?? null;
+      const currency = typeof offer?.priceCurrency === "string" ? offer.priceCurrency : null;
+      const availability = typeof offer?.availability === "string" ? offer.availability.split(/[\\/#]/).pop() : null;
+      const flags: string[] = [];
+      if (!product) flags.push("No Product/ProductGroup object was found.");
+      if (!offer) flags.push("No Offer object was found.");
+      if (priceValue === null) flags.push("No explicit price was found.");
+      if (!currency) flags.push("No priceCurrency was found.");
+      if (!availability) flags.push("No availability was found.");
+      setSchemaResult({
+        validJson: true,
+        productFound: Boolean(product),
+        productName: typeof product?.name === "string" ? product.name : null,
+        offerFound: Boolean(offer),
+        price: priceValue === null ? null : String(priceValue),
+        currency,
+        availability: availability || null,
+        typesFound: [...new Set(nodes.flatMap(types))],
+        warnings: flags,
+        privacy: "Processed locally in this browser. No request was sent to a server."
+      });
+    } catch (error) {
+      setSchemaResult({
+        validJson: false,
+        error: error instanceof Error ? error.message : "Invalid JSON",
+        privacy: "Processed locally in this browser. No request was sent to a server."
+      });
+    }
+  }
+
   return (
     <main>
       <nav className="nav wrap">
         <a className="brand" href="/" aria-label="OfferProof home"><span className="brandMark">O</span> OfferProof</a>
-        <div className="navRight"><a href="#how">How it works</a><a href="#api">API</a><a href="#limits">Limits</a></div>
+        <div className="navRight"><a href="#free-check">Free check</a><a href="#how">How it works</a><a href="#api">API</a><a href="#limits">Limits</a></div>
       </nav>
 
       <section className="hero wrap">
@@ -102,6 +168,24 @@ export default function Home() {
         <div className="sampleHeading"><div><div className="eyebrow">DEMO FIXTURE</div><h2>What the agent receives</h2></div><span className="sampleBadge">SYNTHETIC SAMPLE — NOT A LIVE SCAN</span></div>
         <pre className="sampleJson">{JSON.stringify(sample, null, 2)}</pre>
       </section>}
+
+      <section className="localCheck wrap" id="free-check">
+        <div className="localIntro">
+          <div className="eyebrow">FREE · IN-BROWSER</div>
+          <h2>Check a Product/Offer snippet — without uploading it.</h2>
+          <p>Paste JSON-LD from a product page. OfferProof parses the fields locally, shows missing values, and never sends the snippet to a server. This checks syntax and presence only; it cannot establish that the seller's offer is truthful.</p>
+        </div>
+        <div className="localTool">
+          <label htmlFor="schemaInput">Product JSON-LD</label>
+          <textarea id="schemaInput" spellCheck={false} value={schemaInput} onChange={event => setSchemaInput(event.target.value)} />
+          <div className="localActions">
+            <button className="primary" onClick={validateSchemaLocally}>Validate locally</button>
+            <button className="secondary" onClick={() => setSchemaInput("")}>Clear</button>
+          </div>
+          {schemaResult && <pre className="localResult">{JSON.stringify(schemaResult, null, 2)}</pre>}
+          <p className="localPrivacy"><span>●</span> Local-only processing. No login, no file upload, no telemetry from this tool.</p>
+        </div>
+      </section>
 
       <section className="method" id="how">
         <div className="wrap">
