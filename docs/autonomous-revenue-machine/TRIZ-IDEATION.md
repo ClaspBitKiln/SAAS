@@ -80,7 +80,7 @@ Read-only public HTTPS pages only in production; block localhost, private/reserv
 - Do not charge failed/invalid requests; x402 route wrappers should settle only a successful response.
 - Later offer a bulk batch endpoint only if repeated use is observed.
 - Avoid subscriptions and mandatory account creation at first.
-- Gross revenue scenarios, before chain/hosting cost: 25,000 successful calls = $500 at $0.01; 1,000 = $20; 0 = $0. Do not assume any call volume.
+- Gross revenue scenarios, before chain/hosting cost: 50,000 successful calls = $500 at $0.01; 1,000 = $10; 0 = $0. Do not assume any call volume.
 
 ### Hard truth
 x402 may remove checkout friction for a machine, but it does not create demand. A public receive wallet and production configuration are required before accepting real payments. The wallet owner, account access and legal/tax obligations cannot safely be invented or silently assumed by an assistant. Until configured and verified, keep live payments disabled and report zero revenue.
