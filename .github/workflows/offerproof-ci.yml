@@ -28,6 +28,10 @@ jobs:
           node-version: "22"
       - name: Install dependencies
         run: npm install
+      - name: Dependency audit (report only)
+        run: |
+          npm audit --json > /tmp/offerproof-audit.json || true
+          node -e "const a=require('/tmp/offerproof-audit.json'); console.log('Audit summary:', JSON.stringify(a.metadata?.vulnerabilities || {})); for (const [n,v] of Object.entries(a.vulnerabilities || {})) console.log(n, v.severity, 'fix:', JSON.stringify(v.fixAvailable), 'via:', (v.via || []).map(x => typeof x === 'string' ? x : x.title).join('; '));"
       - name: Unit tests
         run: npm test
       - name: Typecheck
