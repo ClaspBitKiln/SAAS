@@ -76,14 +76,24 @@ Output JSON:
 Read-only public HTTPS pages only in production; block localhost, private/reserved IP literals and DNS resolutions; deny redirects to private addresses; use bounded time/body size; allow only HTML content; never submit forms, authenticate, execute page JavaScript, read arbitrary files, scan arbitrary ports or call internal APIs. This is not a malware or security scan. A production implementation needs a robust resolver/pinned-connection or trusted fetch sandbox to close DNS-rebinding edge cases before unrestricted public deployment.
 
 ### Monetization hypothesis
-- $0.02 per successful OfferProof request (x402, stablecoin on a supported network). This is a pricing hypothesis, not evidence of actual sales.
+- $0.01 per successful OfferProof request (x402, stablecoin on a supported network). This is a pricing hypothesis, not evidence of actual sales.
 - Do not charge failed/invalid requests; x402 route wrappers should settle only a successful response.
 - Later offer a bulk batch endpoint only if repeated use is observed.
 - Avoid subscriptions and mandatory account creation at first.
-- Gross revenue scenarios, before chain/hosting cost: 25,000 successful calls = $500 at $0.02; 1,000 = $20; 0 = $0. Do not assume any call volume.
+- Gross revenue scenarios, before chain/hosting cost: 25,000 successful calls = $500 at $0.01; 1,000 = $20; 0 = $0. Do not assume any call volume.
 
 ### Hard truth
 x402 may remove checkout friction for a machine, but it does not create demand. A public receive wallet and production configuration are required before accepting real payments. The wallet owner, account access and legal/tax obligations cannot safely be invented or silently assumed by an assistant. Until configured and verified, keep live payments disabled and report zero revenue.
+
+## 4A. Red-team update — 2026-10-21
+
+Current primary-source checks confirm the market is already active and the generic idea would be a weak clone:
+- Santos exposes a public API that costs **0.015 USDC per quick audit** and **0.075 USDC per full Agent Readiness audit**, paid per successful call with x402: https://api.santosautomation.com/docs and https://api.santosautomation.com/agent-readiness-audit
+- AgentReady offers free audits and paid Shopify plans at **$9/month, $29/month and $79/month**, including publishing, maintenance and drift detection: https://joinagentready.com/pricing
+
+Therefore OfferProof should not position itself as a broad readiness audit. The narrower hypothesis is **buyer-side cross-source offer consistency**: detect conflicts between Product/Offer structured values and other observable price/currency signals, and return field-level evidence for a downstream agent. The proposed **$0.01 per successful request** is a price test below Santos's $0.015 quick audit, not a proven advantage or demand signal.
+
+At $0.01, reaching $500 gross requires **50,000 successfully paid requests**, before fees and tax. That is a demanding target. The current implementation should be treated as a technical prototype until the narrower mismatch coverage is tested on public pages and an independent buyer-agent actually pays and repeats. If it cannot outperform a general audit for the specific job, stop or pivot instead of adding features.
 
 ## 5. Stop/go gates
 
