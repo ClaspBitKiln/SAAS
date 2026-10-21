@@ -76,3 +76,8 @@ These figures exclude network costs, hosting, taxes, refunds/failed processing w
 ## Non-goals
 
 No scraping behind logins, no private APIs, no form submissions, no automated buying, no broad crawler, no SEO services, no cold outreach and no paid ads. No LLM call is needed for the v1 extraction path.
+
+
+## Build verification note
+
+GitHub Actions CI installs from `package.json` with `npm install`; dependency caching is not enabled until a lockfile is committed. The CI job runs tests, typecheck and production build on each app change.
