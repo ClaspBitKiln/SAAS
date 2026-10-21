@@ -12,7 +12,7 @@ function jsonError(code: string, message: string, status: number) {
   return NextResponse.json({ service:"OfferProof", error:{ code, message } }, { status });
 }
 
-export async function handleOfferProof(request: NextRequest) {
+export async function handleOfferProof(request: NextRequest): Promise<NextResponse<any>> {
   const declaredLength = Number(request.headers.get("content-length") || 0);
   if (declaredLength > MAX_REQUEST_BYTES) {
     return jsonError("REQUEST_TOO_LARGE", "Request body is limited to 4 KB.", 413);
