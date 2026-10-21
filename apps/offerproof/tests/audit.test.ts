@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildOfferReport, isPublicAddress, validatePublicTarget } from "../lib/audit";
+import { buildOfferReport, isPublicAddress, robotsDisallowsPath, validatePublicTarget } from "../lib/audit";
 
 const html = `
 <!doctype html><html><head>
@@ -20,7 +20,7 @@ const html = `
 </head><body><h1>Blue Trail Shoe</h1><a href="/cart">Add to cart</a></body></html>`;
 
 describe("public address guard", () => {
-  it("allows globally routable address", () => expect(isPublicAddress("1.1.1.1")).toBe(true));
+  it("allows a globally routable address", () => expect(isPublicAddress("1.1.1.1")).toBe(true));
   it("blocks private IPv4 and loopback", () => {
     expect(isPublicAddress("10.0.0.5")).toBe(false);
     expect(isPublicAddress("127.0.0.1")).toBe(false);
@@ -31,7 +31,7 @@ describe("public address guard", () => {
     expect(isPublicAddress("::1")).toBe(false);
     expect(isPublicAddress("fd00::1")).toBe(false);
   });
-  it("rejects local hosts and non-HTTPS without doing a network lookup", async () => {
+  it("rejects local hosts and non-HTTPS without network lookup", async () => {
     await expect(validatePublicTarget("http://store.example/products/a")).rejects.toMatchObject({code:"HTTPS_REQUIRED"});
     await expect(validatePublicTarget("https://localhost/products/a")).rejects.toMatchObject({code:"PRIVATE_HOST_BLOCKED"});
     await expect(validatePublicTarget("https://127.0.0.1/")).rejects.toMatchObject({code:"PRIVATE_HOST_BLOCKED"});
@@ -39,13 +39,21 @@ describe("public address guard", () => {
   });
 });
 
+describe("robots policy", () => {
+  it("blocks path disallows and honors a longer Allow rule", () => {
+    expect(robotsDisallowsPath("User-agent: *\nDisallow: /products\nAllow: /products/public", "/products/private")).toBe(true);
+    expect(robotsDisallowsPath("User-agent: *\nDisallow: /products\nAllow: /products/public", "/products/public/1")).toBe(false);
+  });
+  it("prefers the more specific user-agent group", () => {
+    const robots = "User-agent: *\nDisallow: /\n\nUser-agent: OfferProofBot\nAllow: /products/";
+    expect(robotsDisallowsPath(robots, "/products/item")).toBe(false);
+    expect(robotsDisallowsPath(robots, "/about")).toBe(false);
+  });
+});
+
 describe("offer report", () => {
   it("extracts price/currency and source-linked facts", () => {
-    const report = buildOfferReport(
-      "https://store.example/products/blue-shoe",
-      "https://store.example/products/blue-shoe",
-      200, html, 125
-    );
+    const report = buildOfferReport("https://store.example/products/blue-shoe", "https://store.example/products/blue-shoe", 200, html, 125);
     expect(report.facts.productName.value).toBe("Blue Trail Shoe");
     expect(report.facts.price.value).toBe("89.00");
     expect(report.facts.price.currency).toBe("USD");
