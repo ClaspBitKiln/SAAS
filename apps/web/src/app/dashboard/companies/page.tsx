@@ -6,6 +6,7 @@ import { apiAuthDelete, apiAuthGet, apiAuthPatch, apiAuthPost } from '@/lib/api'
 import { getAuthUser } from '@/lib/auth';
 import { ru } from '@/lib/ru';
 import { useOrgMembers } from '@/lib/use-org-members';
+import { extractCompanyInformation, fillEmptyCompanyFields } from '@/lib/company-intake';
 
 interface Company {
   id: string;
@@ -64,6 +65,8 @@ export default function CompaniesPage() {
   const [saving, setSaving] = useState(false);
   const [innLoading, setInnLoading] = useState(false);
   const [innInfo, setInnInfo] = useState<string | null>(null);
+  const [intakeText, setIntakeText] = useState('');
+  const [intakeNotice, setIntakeNotice] = useState('');
 
   const loadCompanies = useCallback(async () => {
     if (!orgId) {
@@ -87,12 +90,16 @@ export default function CompaniesPage() {
   }, [loadCompanies]);
 
   function openCreate() {
+    setIntakeText('');
+    setIntakeNotice('');
     setEditingId(null);
     setForm(emptyForm);
     setShowForm(true);
   }
 
   function openEdit(c: Company) {
+    setIntakeText('');
+    setIntakeNotice('');
     setEditingId(c.id);
     setForm({
       name: c.name,
@@ -115,10 +122,29 @@ export default function CompaniesPage() {
   }
 
   function closeForm() {
+    setIntakeText('');
+    setIntakeNotice('');
     setShowForm(false);
     setEditingId(null);
     setForm(emptyForm);
     setInnInfo(null);
+  }
+
+  function fillFromText() {
+    const result = extractCompanyInformation(intakeText, form.country);
+    const next = fillEmptyCompanyFields(form, result.fields);
+    const changed = Object.keys(result.fields).some(
+      (key) => next[key as keyof typeof next] !== form[key as keyof typeof form],
+    );
+    setForm(changed ? {
+      ...next,
+      sourceName: form.sourceName || 'Текст менеджера — требует проверки',
+      managerComment: form.managerComment || `Источник автозаполнения:\n${intakeText}`,
+    } : next);
+    setIntakeNotice([
+      changed ? 'Пустые поля заполнены. Проверьте данные перед сохранением.' : 'Новых однозначных данных для пустых полей не найдено.',
+      result.ambiguous.length ? 'В тексте несколько значений одного поля — выберите нужное вручную.' : '',
+    ].filter(Boolean).join(' '));
   }
 
   async function fillByInn() {
@@ -236,6 +262,24 @@ export default function CompaniesPage() {
         {showForm && (
           <form onSubmit={onSubmit} className="mt-6 max-w-lg rounded-lg border border-slate-800 bg-slate-900 p-4">
             <h2 className="mb-4 text-sm font-medium">{editingId ? ru.companies.edit : ru.companies.new}</h2>
+            <details className="mb-4 rounded-md border border-slate-700 p-3">
+              <summary className="cursor-pointer text-sm text-blue-400">Заполнить из текста</summary>
+              <label className="mt-3 block text-xs text-slate-400">
+                Вставьте реквизиты или подпись из письма. Заполним только пустые поля; исходный текст останется в комментарии, если он пуст.
+                <textarea
+                  value={intakeText}
+                  onChange={(event) => setIntakeText(event.target.value)}
+                  maxLength={4000}
+                  placeholder={'Компания: ООО Пример\nИНН: 7707083893\nТелефон: +7 (999) 123-45-67\nsales@example.ru\nhttps://example.ru'}
+                  className="mt-2 min-h-28 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
+                />
+              </label>
+              <button type="button" onClick={fillFromText} disabled={!intakeText.trim()}
+                className="mt-2 rounded-md border border-blue-600 px-3 py-2 text-sm text-blue-400 disabled:opacity-50">
+                Заполнить пустые поля
+              </button>
+              {intakeNotice && <p role="status" className="mt-2 text-xs text-slate-400">{intakeNotice}</p>}
+            </details>
             <div className="grid gap-3">
               <input
                 required

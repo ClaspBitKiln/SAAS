@@ -1,0 +1,556 @@
+[
+  {
+    "ref": "origin/agent/accept-pdf-request-files",
+    "sha": "d9c7eb572855ac6fa4b47166a4842b7248780c85",
+    "patch_unique_commits": [],
+    "branch_files_since_fork": [
+      "apps/api/package.json",
+      "apps/api/src/modules/requests/application/services/request-parse.service.ts",
+      "apps/api/src/modules/requests/presentation/controllers/request.controller.ts",
+      "apps/api/src/modules/requests/tests/unit/request-parse.service.spec.ts",
+      "apps/web/src/app/dashboard/requests/new/page.tsx",
+      "apps/web/src/lib/ru.ts",
+      "pnpm-lock.yaml"
+    ]
+  },
+  {
+    "ref": "origin/agent/align-site-intake-contract",
+    "sha": "7422a45fa36d3852f6490802622825fdfa684259",
+    "patch_unique_commits": [
+      "7422a45 test(public-intake): mock repository boundary",
+      "ea76446 refactor(public-intake): register repository adapter",
+      "e13e48a refactor(public-intake): depend on repository port",
+      "895e333 refactor(public-intake): isolate Prisma access",
+      "a8f55f7 refactor(public-intake): define intake repository port",
+      "7d0dcef test(public-intake): cover gateway contract guards",
+      "58ae55c docs(public-intake): record exact gateway contract",
+      "8b5cdaa docs(public-intake): add shared ingest token",
+      "e6dffe4 fix(public-intake): allow duplicate contact fallback",
+      "a0fcf33 fix(public-intake): enforce gateway token and tenant",
+      "7ab2f49 fix(public-intake): match gateway payload and response",
+      "cbb3812 fix(public-intake): align website route and headers",
+      "3ca7d29 docs(public-intake): document website to SaaS funnel adapter",
+      "fd5e666 docs(public-intake): add website funnel environment settings",
+      "d271a53 feat(public-intake): allow configured website origins and idempotency header",
+      "c451ded feat(public-intake): wire website intake into API",
+      "d930639 feat(public-intake): register website intake module",
+      "847970c feat(public-intake): expose public website lead and event endpoints",
+      "cde91bb feat(public-intake): create idempotent website lead intake service",
+      "a4e6f6c feat(public-intake): define website lead and event contracts"
+    ],
+    "branch_files_since_fork": [
+      "apps/api/.env.example",
+      "apps/api/src/bootstrap/app.module.ts",
+      "apps/api/src/bootstrap/main.ts",
+      "apps/api/src/modules/public-intake/application/dto/public-intake.dto.ts",
+      "apps/api/src/modules/public-intake/application/services/public-intake.service.ts",
+      "apps/api/src/modules/public-intake/domain/repositories/public-intake.repository.ts",
+      "apps/api/src/modules/public-intake/infrastructure/prisma-public-intake.repository.ts",
+      "apps/api/src/modules/public-intake/presentation/controllers/public-intake.controller.ts",
+      "apps/api/src/modules/public-intake/public-intake.module.ts",
+      "apps/api/src/modules/public-intake/tests/unit/public-intake.service.spec.ts",
+      "docs/050-public-website-intake.md"
+    ]
+  },
+  {
+    "ref": "origin/agent/autonomous-loop-rule",
+    "sha": "d5e44e87dc7dc59da4d641690637beb66ce52a24",
+    "patch_unique_commits": [
+      "d5e44e8 docs: record autonomous LOOP rule"
+    ],
+    "branch_files_since_fork": [
+      "docs/AUTONOMOUS_PLAN.md"
+    ]
+  },
+  {
+    "ref": "origin/agent/client-base-import",
+    "sha": "b3d0ccb279b4d132229c3d714950645c926a5809",
+    "patch_unique_commits": [
+      "b3d0ccb fix(companies): normalize nullable verification date",
+      "4522a1c feat(companies): automate prospect base import"
+    ],
+    "branch_files_since_fork": [
+      "apps/api/prisma/migrations/20260729170000_company_lead_profile/migration.sql",
+      "apps/api/prisma/schema.prisma",
+      "apps/api/src/modules/companies/application/commands/company.commands.ts",
+      "apps/api/src/modules/companies/application/dto/company-response.dto.ts",
+      "apps/api/src/modules/companies/application/dto/create-company.dto.ts",
+      "apps/api/src/modules/companies/application/dto/import-companies.dto.ts",
+      "apps/api/src/modules/companies/application/dto/update-company.dto.ts",
+      "apps/api/src/modules/companies/application/handlers/company.command-handlers.ts",
+      "apps/api/src/modules/companies/domain/entities/company.entity.ts",
+      "apps/api/src/modules/companies/infrastructure/prisma-company.repository.ts",
+      "apps/api/src/modules/companies/presentation/controllers/company.controller.ts",
+      "apps/api/src/modules/companies/tests/unit/company.entity.spec.ts",
+      "apps/web/src/app/dashboard/companies/page.tsx",
+      "docs/CLIENT_BASE_FILLING_STANDARD.md"
+    ]
+  },
+  {
+    "ref": "origin/agent/complete-a3-plan",
+    "sha": "309070eb942f789c365b7e92a55f09463f5e4244",
+    "patch_unique_commits": [
+      "309070e docs: record autonomous LOOP rule"
+    ],
+    "branch_files_since_fork": [
+      "docs/AUTONOMOUS_PLAN.md"
+    ]
+  },
+  {
+    "ref": "origin/agent/deterministic-price-import",
+    "sha": "968050fd9c5348435f5ab88b34c2b9cbfa959d33",
+    "patch_unique_commits": [
+      "968050f fix(requests): narrow Excel row values",
+      "04651b1 feat(requests): import supplier prices safely"
+    ],
+    "branch_files_since_fork": [
+      "apps/api/prisma/migrations/20260729190000_request_price_source/migration.sql",
+      "apps/api/prisma/schema.prisma",
+      "apps/api/src/modules/requests/application/commands/request.commands.ts",
+      "apps/api/src/modules/requests/application/dto/request-response.mapper.ts",
+      "apps/api/src/modules/requests/application/dto/request.dto.ts",
+      "apps/api/src/modules/requests/application/handlers/request.command-handlers.ts",
+      "apps/api/src/modules/requests/application/services/request-parse.service.ts",
+      "apps/api/src/modules/requests/domain/entities/request.entity.ts",
+      "apps/api/src/modules/requests/infrastructure/prisma-request.repository.ts",
+      "apps/api/src/modules/requests/presentation/controllers/request.controller.ts",
+      "apps/api/src/modules/requests/tests/unit/request-parse.service.spec.ts",
+      "apps/api/src/modules/requests/tests/unit/request.entity.spec.ts",
+      "apps/web/src/app/dashboard/requests/[id]/page.tsx",
+      "apps/web/src/lib/ru.ts",
+      "docs/AUTONOMOUS_PLAN.md"
+    ]
+  },
+  {
+    "ref": "origin/agent/direct-proposal-pdf",
+    "sha": "db4e0f571e41cb106683d7e38890ad0f77432481",
+    "patch_unique_commits": [
+      "db4e0f5 feat(web): download proposals as PDF",
+      "4ea8a59 feat(web): download proposals as PDF",
+      "b7637b0 feat(web): download proposals as PDF",
+      "647f4b0 feat(web): download proposals as PDF",
+      "eb09ff1 feat(web): download proposals as PDF"
+    ],
+    "branch_files_since_fork": [
+      "apps/web/package.json",
+      "apps/web/src/app/dashboard/requests/[id]/proposal/page.tsx",
+      "apps/web/src/lib/proposal-pdf.ts",
+      "apps/web/src/lib/ru.ts",
+      "pnpm-lock.yaml"
+    ]
+  },
+  {
+    "ref": "origin/agent/email-config-feedback",
+    "sha": "8bc25587c59c727738be255afdcfca8c40c16945",
+    "patch_unique_commits": [
+      "8bc2558 fix(requests): explain unavailable email delivery",
+      "9d5633b fix(requests): explain unavailable email delivery",
+      "32289cf fix(requests): explain unavailable email delivery"
+    ],
+    "branch_files_since_fork": []
+  },
+  {
+    "ref": "origin/agent/file-request-intake",
+    "sha": "43b8c21b707447a1b28fb79acb37b3e376dbe81c",
+    "patch_unique_commits": [],
+    "branch_files_since_fork": [
+      "apps/api/src/modules/requests/application/dto/request.dto.ts",
+      "apps/api/src/modules/requests/application/services/request-parse.service.ts",
+      "apps/api/src/modules/requests/tests/unit/request-parse.service.spec.ts",
+      "apps/web/src/app/dashboard/requests/new/page.tsx",
+      "apps/web/src/lib/ru.ts"
+    ]
+  },
+  {
+    "ref": "origin/agent/follow-up-control",
+    "sha": "e29794192876a94f3a615dbfcbc8ab8b279c3224",
+    "patch_unique_commits": [],
+    "branch_files_since_fork": [
+      "apps/web/src/app/dashboard/requests/page.tsx",
+      "apps/web/src/lib/ru.ts"
+    ]
+  },
+  {
+    "ref": "origin/agent/manual-request-intake",
+    "sha": "3e6ad38ec1b2720aa00ce0f938dd1e086499715f",
+    "patch_unique_commits": [
+      "3e6ad38 feat(requests): add pasted request intake",
+      "a9a01a3 feat(requests): add pasted request intake",
+      "51e5122 feat(requests): add pasted request intake",
+      "fbd6a6c feat(requests): add pasted request intake",
+      "e20a583 feat(requests): add pasted request intake",
+      "4129261 feat(requests): add pasted request intake",
+      "80338cc feat(requests): add pasted request intake",
+      "c1efc79 feat(requests): add pasted request intake",
+      "a2c9507 feat(requests): add pasted request intake",
+      "ce2769f feat(requests): add pasted request intake",
+      "137d448 feat(requests): add pasted request intake",
+      "06f8f8a feat(requests): add pasted request intake",
+      "8d66e94 feat(requests): add pasted request intake",
+      "f53640d feat(requests): add pasted request intake",
+      "fe1563f feat(requests): add pasted request intake",
+      "03c3a1f feat(requests): add pasted request intake",
+      "8e73bb9 feat(requests): add pasted request intake",
+      "ad50676 feat(requests): add pasted request intake"
+    ],
+    "branch_files_since_fork": [
+      "apps/api/prisma/migrations/20260729070000_request_pasted_intake/migration.sql",
+      "apps/api/prisma/schema.prisma",
+      "apps/api/src/modules/requests/application/commands/request.commands.ts",
+      "apps/api/src/modules/requests/application/dto/request-response.mapper.ts",
+      "apps/api/src/modules/requests/application/dto/request.dto.ts",
+      "apps/api/src/modules/requests/application/handlers/request.command-handlers.ts",
+      "apps/api/src/modules/requests/application/services/request-parse.service.ts",
+      "apps/api/src/modules/requests/domain/entities/request.entity.ts",
+      "apps/api/src/modules/requests/domain/value-objects/request-source.vo.ts",
+      "apps/api/src/modules/requests/infrastructure/prisma-request.repository.ts",
+      "apps/api/src/modules/requests/presentation/controllers/request.controller.ts",
+      "apps/api/src/modules/requests/tests/e2e/request.e2e-spec.ts",
+      "apps/api/src/modules/requests/tests/unit/request-parse.service.spec.ts",
+      "apps/api/src/modules/requests/tests/unit/request.entity.spec.ts",
+      "apps/web/src/app/dashboard/requests/[id]/page.tsx",
+      "apps/web/src/app/dashboard/requests/new/page.tsx",
+      "apps/web/src/app/dashboard/requests/page.tsx",
+      "apps/web/src/lib/ru.ts"
+    ]
+  },
+  {
+    "ref": "origin/agent/pilot-checklist",
+    "sha": "acc62c30699eb02c9c16c6460e2469c83bc09ae6",
+    "patch_unique_commits": [
+      "acc62c3 feat(web): add pilot workflow checklist",
+      "4005425 feat(web): add pilot workflow checklist"
+    ],
+    "branch_files_since_fork": [
+      "apps/web/src/app/dashboard/page.tsx",
+      "apps/web/src/lib/ru.ts"
+    ]
+  },
+  {
+    "ref": "origin/agent/pilot-metrics",
+    "sha": "8806673e9d3c9c243adab4d0cb42c80a7d598b6a",
+    "patch_unique_commits": [],
+    "branch_files_since_fork": [
+      "apps/web/src/app/dashboard/page.tsx",
+      "apps/web/src/lib/ru.ts",
+      "docs/AUTONOMOUS_PLAN.md",
+      "docs/METRICS.md"
+    ]
+  },
+  {
+    "ref": "origin/agent/proposal-recipient-audit",
+    "sha": "c0ad80a5b58d35e057ed18f36355510000663df2",
+    "patch_unique_commits": [],
+    "branch_files_since_fork": [
+      "apps/api/prisma/migrations/20260729143000_request_proposal_sent_to/migration.sql",
+      "apps/api/prisma/schema.prisma",
+      "apps/api/src/modules/requests/application/commands/request.commands.ts",
+      "apps/api/src/modules/requests/application/dto/request-response.mapper.ts",
+      "apps/api/src/modules/requests/application/dto/request.dto.ts",
+      "apps/api/src/modules/requests/application/handlers/request.command-handlers.ts",
+      "apps/api/src/modules/requests/domain/entities/request.entity.ts",
+      "apps/api/src/modules/requests/infrastructure/prisma-request.repository.ts",
+      "apps/api/src/modules/requests/presentation/controllers/request.controller.ts",
+      "apps/api/src/modules/requests/tests/e2e/request.e2e-spec.ts",
+      "apps/api/src/modules/requests/tests/unit/request.entity.spec.ts",
+      "apps/web/src/app/dashboard/requests/[id]/proposal/page.tsx",
+      "apps/web/src/lib/ru.ts"
+    ]
+  },
+  {
+    "ref": "origin/agent/proposal-sent-tracking",
+    "sha": "dded10ffbff58ba4a2dceae2bc2acb5d7b8e6f8e",
+    "patch_unique_commits": [],
+    "branch_files_since_fork": [
+      "apps/api/prisma/migrations/20260728210000_request_proposal_sent/migration.sql",
+      "apps/api/prisma/schema.prisma",
+      "apps/api/src/modules/requests/application/commands/request.commands.ts",
+      "apps/api/src/modules/requests/application/dto/request-response.mapper.ts",
+      "apps/api/src/modules/requests/application/dto/request.dto.ts",
+      "apps/api/src/modules/requests/application/handlers/request.command-handlers.ts",
+      "apps/api/src/modules/requests/domain/entities/request.entity.ts",
+      "apps/api/src/modules/requests/domain/events/request.events.ts",
+      "apps/api/src/modules/requests/domain/value-objects/proposal-sent-via.vo.ts",
+      "apps/api/src/modules/requests/domain/value-objects/request-status.vo.ts",
+      "apps/api/src/modules/requests/infrastructure/prisma-request.repository.ts",
+      "apps/api/src/modules/requests/presentation/controllers/request.controller.ts",
+      "apps/api/src/modules/requests/requests.module.ts",
+      "apps/api/src/modules/requests/tests/e2e/request.e2e-spec.ts",
+      "apps/api/src/modules/requests/tests/unit/request.entity.spec.ts",
+      "apps/web/src/app/dashboard/requests/[id]/page.tsx",
+      "apps/web/src/app/dashboard/requests/[id]/proposal/page.tsx",
+      "apps/web/src/app/dashboard/requests/page.tsx",
+      "apps/web/src/lib/ru.ts",
+      "docs/AUTONOMOUS_PLAN.md"
+    ]
+  },
+  {
+    "ref": "origin/agent/record-a4-complete",
+    "sha": "70d243ca8b30bc4095297a3ee319baa382c1629c",
+    "patch_unique_commits": [],
+    "branch_files_since_fork": [
+      "docs/AUTONOMOUS_PLAN.md"
+    ]
+  },
+  {
+    "ref": "origin/agent/refresh-autonomous-plan",
+    "sha": "3a9dbd1b614499c838c8262a7829522d8f2f5862",
+    "patch_unique_commits": [
+      "3a9dbd1 docs: align plan with completed sales workflow",
+      "4d9175f docs: align plan with completed sales workflow"
+    ],
+    "branch_files_since_fork": [
+      "docs/AUTONOMOUS_PLAN.md",
+      "docs/NEXT.md"
+    ]
+  },
+  {
+    "ref": "origin/agent/request-activity-timeline",
+    "sha": "2aaa2c5e308dd07ed5f2b53a4de97d8fd6065020",
+    "patch_unique_commits": [
+      "2aaa2c5 feat: update apps/web/src/lib/ru.ts",
+      "d9791aa feat: update apps/web/src/app/dashboard/requests/[id]/proposal/page.tsx",
+      "a0d3de1 feat: update apps/web/src/app/dashboard/requests/[id]/page.tsx",
+      "b4625bf feat: update apps/api/src/modules/requests/tests/unit/request.entity.spec.ts",
+      "982b0c9 feat: update apps/api/src/modules/requests/tests/e2e/request.e2e-spec.ts",
+      "96e7656 feat: update apps/api/src/modules/requests/requests.module.ts",
+      "aa57ef1 feat: update apps/api/src/modules/requests/presentation/controllers/request.controller.ts",
+      "1e5de5a feat: update apps/api/src/modules/requests/infrastructure/prisma-request.repository.ts",
+      "696c4a8 feat: update apps/api/src/modules/requests/domain/events/request.events.ts",
+      "2cb6bea feat: update apps/api/src/modules/requests/domain/entities/request.entity.ts",
+      "f98129a feat: update apps/api/src/modules/requests/application/handlers/request.command-handlers.ts",
+      "294d490 feat: update apps/api/src/modules/requests/application/dto/request.dto.ts",
+      "6281e6e feat: update apps/api/src/modules/requests/application/dto/request-response.mapper.ts",
+      "0533eeb feat: update apps/api/src/modules/requests/application/commands/request.commands.ts",
+      "d77543d feat: update apps/api/prisma/schema.prisma",
+      "08d39bf feat: add apps/api/prisma/migrations/20260729093000_request_activity_timeline/migration.sql"
+    ],
+    "branch_files_since_fork": [
+      "apps/api/prisma/migrations/20260729093000_request_activity_timeline/migration.sql",
+      "apps/api/prisma/schema.prisma",
+      "apps/api/src/modules/requests/application/commands/request.commands.ts",
+      "apps/api/src/modules/requests/application/dto/request-response.mapper.ts",
+      "apps/api/src/modules/requests/application/dto/request.dto.ts",
+      "apps/api/src/modules/requests/application/handlers/request.command-handlers.ts",
+      "apps/api/src/modules/requests/domain/entities/request.entity.ts",
+      "apps/api/src/modules/requests/domain/events/request.events.ts",
+      "apps/api/src/modules/requests/infrastructure/prisma-request.repository.ts",
+      "apps/api/src/modules/requests/presentation/controllers/request.controller.ts",
+      "apps/api/src/modules/requests/requests.module.ts",
+      "apps/api/src/modules/requests/tests/e2e/request.e2e-spec.ts",
+      "apps/api/src/modules/requests/tests/unit/request.entity.spec.ts",
+      "apps/web/src/app/dashboard/requests/[id]/page.tsx",
+      "apps/web/src/app/dashboard/requests/[id]/proposal/page.tsx",
+      "apps/web/src/lib/ru.ts"
+    ]
+  },
+  {
+    "ref": "origin/agent/request-outcome",
+    "sha": "c2d3f9578f1b2b566e2624032af77e98191abbaf",
+    "patch_unique_commits": [
+      "c2d3f95 feat(requests): record proposal outcome",
+      "a49ebd2 feat(requests): record proposal outcome",
+      "0197280 feat(requests): record proposal outcome",
+      "86edbe4 feat(requests): record proposal outcome",
+      "5746453 feat(requests): record proposal outcome",
+      "a05ac3b feat(requests): record proposal outcome",
+      "4e2f88a feat(requests): record proposal outcome",
+      "97c63eb feat(requests): record proposal outcome",
+      "b3f204b feat(requests): record proposal outcome",
+      "b3a1f55 feat(requests): record proposal outcome",
+      "e4e7099 feat(requests): record proposal outcome",
+      "7e6e5da feat(requests): record proposal outcome",
+      "bf91196 feat(requests): record proposal outcome",
+      "2193af2 feat(requests): record proposal outcome",
+      "fa5ceff feat(requests): record proposal outcome",
+      "deb5e49 feat(requests): record proposal outcome",
+      "6a59016 feat(requests): record proposal outcome"
+    ],
+    "branch_files_since_fork": [
+      "apps/api/prisma/migrations/20260729090000_request_outcome/migration.sql",
+      "apps/api/prisma/schema.prisma",
+      "apps/api/src/modules/requests/application/commands/request.commands.ts",
+      "apps/api/src/modules/requests/application/dto/request-response.mapper.ts",
+      "apps/api/src/modules/requests/application/dto/request.dto.ts",
+      "apps/api/src/modules/requests/application/handlers/request.command-handlers.ts",
+      "apps/api/src/modules/requests/domain/entities/request.entity.ts",
+      "apps/api/src/modules/requests/domain/events/request.events.ts",
+      "apps/api/src/modules/requests/domain/value-objects/request-outcome.vo.ts",
+      "apps/api/src/modules/requests/infrastructure/prisma-request.repository.ts",
+      "apps/api/src/modules/requests/presentation/controllers/request.controller.ts",
+      "apps/api/src/modules/requests/requests.module.ts",
+      "apps/api/src/modules/requests/tests/e2e/request.e2e-spec.ts",
+      "apps/api/src/modules/requests/tests/unit/request.entity.spec.ts",
+      "apps/web/src/app/dashboard/requests/[id]/page.tsx",
+      "apps/web/src/app/dashboard/requests/page.tsx",
+      "apps/web/src/lib/ru.ts"
+    ]
+  },
+  {
+    "ref": "origin/agent/request-recognition-confidence",
+    "sha": "59e2d1a6abbc8a8cdd1e776ea5fbe0cc6b6e0b85",
+    "patch_unique_commits": [],
+    "branch_files_since_fork": [
+      "apps/api/src/modules/requests/application/dto/request.dto.ts",
+      "apps/api/src/modules/requests/application/services/request-parse.service.ts",
+      "apps/api/src/modules/requests/tests/unit/request-parse.service.spec.ts",
+      "apps/web/src/app/dashboard/requests/new/page.tsx",
+      "apps/web/src/lib/ru.ts"
+    ]
+  },
+  {
+    "ref": "origin/agent/request-to-quote-mvp",
+    "sha": "87bd405e81f2ab80b9b4383914e119aa405ae9e7",
+    "patch_unique_commits": [
+      "87bd405 test(e2e): avoid parallel auth collisions",
+      "4d5b610 test(requests): isolate missing-line validation",
+      "39e5dac fix(web): validate quote inputs before submit",
+      "e815b74 feat(web): add quote validation messages",
+      "fee9c93 test(api): reject past quote follow-up",
+      "d65d7fc test(requests): cover past follow-up",
+      "c9eea74 fix(requests): require future follow-up",
+      "6b196a5 fix(db): make request quote migration self-contained",
+      "1b59a3e feat(web): show quote outcome in request list",
+      "6d92be6 feat(web): add quote ui strings",
+      "7a8b69f feat(web): add printable commercial proposal",
+      "6dd4666 feat(web): add request quote calculation screen",
+      "d7ed66d test(requests): cover quote and follow-up workflow",
+      "cdbb744 test(requests): cover quote profit calculation",
+      "eeed811 feat(requests): wire quote workflow",
+      "5b73646 feat(requests): add prepare quote endpoint",
+      "6353b79 feat(requests): persist quote calculation",
+      "efdbde9 feat(requests): prepare quote and schedule follow-up",
+      "b3eb260 feat(requests): expose quote metrics",
+      "6faff01 feat(requests): add quote api dto",
+      "fb2f960 feat(requests): add prepare quote command",
+      "358858f feat(requests): implement request quote aggregate",
+      "a5757dc feat(requests): add quoted domain event",
+      "14e410d feat(requests): add commercial amounts to request lines",
+      "614ee7a feat(requests): add quoted status",
+      "943b9d5 feat(requests): add request quote migration",
+      "c81ba17 feat(requests): add quote calculation schema"
+    ],
+    "branch_files_since_fork": [
+      "apps/api/prisma/migrations/20260728190000_request_quote/migration.sql",
+      "apps/api/prisma/schema.prisma",
+      "apps/api/src/bootstrap/e2e-auth.helper.ts",
+      "apps/api/src/modules/requests/application/commands/request.commands.ts",
+      "apps/api/src/modules/requests/application/dto/request-response.mapper.ts",
+      "apps/api/src/modules/requests/application/dto/request.dto.ts",
+      "apps/api/src/modules/requests/application/handlers/request.command-handlers.ts",
+      "apps/api/src/modules/requests/domain/entities/request.entity.ts",
+      "apps/api/src/modules/requests/domain/events/request.events.ts",
+      "apps/api/src/modules/requests/domain/value-objects/request-line.vo.ts",
+      "apps/api/src/modules/requests/domain/value-objects/request-status.vo.ts",
+      "apps/api/src/modules/requests/infrastructure/prisma-request.repository.ts",
+      "apps/api/src/modules/requests/presentation/controllers/request.controller.ts",
+      "apps/api/src/modules/requests/requests.module.ts",
+      "apps/api/src/modules/requests/tests/e2e/request.e2e-spec.ts",
+      "apps/api/src/modules/requests/tests/unit/request.entity.spec.ts",
+      "apps/web/src/app/dashboard/requests/[id]/page.tsx",
+      "apps/web/src/app/dashboard/requests/[id]/proposal/page.tsx",
+      "apps/web/src/app/dashboard/requests/page.tsx",
+      "apps/web/src/lib/ru.ts"
+    ]
+  },
+  {
+    "ref": "origin/agent/require-proposal-recipient",
+    "sha": "818875b05210e2334f67a6058894e1e61d4c6a1d",
+    "patch_unique_commits": [
+      "818875b test(requests): include sent recipient in outcome flow",
+      "941428b fix(requests): require proposal recipient"
+    ],
+    "branch_files_since_fork": [
+      "apps/api/src/modules/requests/domain/entities/request.entity.ts",
+      "apps/api/src/modules/requests/tests/e2e/request.e2e-spec.ts",
+      "apps/api/src/modules/requests/tests/unit/request.entity.spec.ts",
+      "apps/web/src/app/dashboard/requests/[id]/proposal/page.tsx",
+      "apps/web/src/lib/ru.ts"
+    ]
+  },
+  {
+    "ref": "origin/agent/send-proposal-email",
+    "sha": "3de2a0bb3da0caa4b3040825168747b0b7c29518",
+    "patch_unique_commits": [],
+    "branch_files_since_fork": [
+      "apps/api/.env.example",
+      "apps/api/src/modules/requests/application/dto/request.dto.ts",
+      "apps/api/src/modules/requests/application/services/proposal-email.service.ts",
+      "apps/api/src/modules/requests/infrastructure/smtp-proposal-email.sender.ts",
+      "apps/api/src/modules/requests/presentation/controllers/request.controller.ts",
+      "apps/api/src/modules/requests/requests.module.ts",
+      "apps/api/src/modules/requests/tests/e2e/request.e2e-spec.ts",
+      "apps/api/src/modules/requests/tests/unit/proposal-email.service.spec.ts",
+      "apps/web/src/app/dashboard/requests/[id]/proposal/page.tsx",
+      "apps/web/src/lib/ru.ts",
+      "scripts/bin/pnpm",
+      "scripts/verify-local.sh"
+    ]
+  },
+  {
+    "ref": "origin/agent/stable-local-verification",
+    "sha": "6ddf97853870d794dda5cf23ee1faf95f605c064",
+    "patch_unique_commits": [],
+    "branch_files_since_fork": [
+      ".gitignore",
+      "CLAUDE.md",
+      "docs/AUTONOMOUS_PLAN.md",
+      "package.json",
+      "scripts/verify-local.sh"
+    ]
+  },
+  {
+    "ref": "origin/agent/unit-price-totals",
+    "sha": "cdf68b739ac9968df5008c13afe549dc2d1385f2",
+    "patch_unique_commits": [],
+    "branch_files_since_fork": [
+      "apps/web/src/app/dashboard/requests/[id]/page.tsx",
+      "apps/web/src/lib/ru.ts",
+      "docs/AUTONOMOUS_PLAN.md"
+    ]
+  },
+  {
+    "ref": "origin/agent/xlsx-request-intake",
+    "sha": "fdb16d68e085d474e905471332e15f970dc09c85",
+    "patch_unique_commits": [],
+    "branch_files_since_fork": [
+      "apps/api/package.json",
+      "apps/api/src/modules/requests/application/services/request-parse.service.ts",
+      "apps/api/src/modules/requests/presentation/controllers/request.controller.ts",
+      "apps/api/src/modules/requests/tests/unit/request-parse.service.spec.ts",
+      "apps/web/src/app/dashboard/requests/new/page.tsx",
+      "apps/web/src/lib/ru.ts",
+      "pnpm-lock.yaml"
+    ]
+  },
+  {
+    "ref": "origin/feat/public-website-intake",
+    "sha": "3ca7d2980f58c29284fe1ce81e0cd12779994d90",
+    "patch_unique_commits": [
+      "3ca7d29 docs(public-intake): document website to SaaS funnel adapter",
+      "fd5e666 docs(public-intake): add website funnel environment settings",
+      "d271a53 feat(public-intake): allow configured website origins and idempotency header",
+      "c451ded feat(public-intake): wire website intake into API",
+      "d930639 feat(public-intake): register website intake module",
+      "847970c feat(public-intake): expose public website lead and event endpoints",
+      "cde91bb feat(public-intake): create idempotent website lead intake service",
+      "a4e6f6c feat(public-intake): define website lead and event contracts"
+    ],
+    "branch_files_since_fork": [
+      "apps/api/.env.example",
+      "apps/api/src/bootstrap/app.module.ts",
+      "apps/api/src/bootstrap/main.ts",
+      "apps/api/src/modules/public-intake/application/dto/public-intake.dto.ts",
+      "apps/api/src/modules/public-intake/application/services/public-intake.service.ts",
+      "apps/api/src/modules/public-intake/presentation/controllers/public-intake.controller.ts",
+      "apps/api/src/modules/public-intake/public-intake.module.ts",
+      "docs/050-public-website-intake.md"
+    ]
+  },
+  {
+    "ref": "origin/main",
+    "sha": "d4309bcde2f21abdb4826d025a6cb1bfa692b19d",
+    "patch_unique_commits": [],
+    "branch_files_since_fork": []
+  }
+]

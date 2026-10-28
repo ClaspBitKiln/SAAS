@@ -1,0 +1,1 @@
+{"browser": {"mode": "launch", "executable_path": "/usr/bin/chromium"}, "start_url": {"url": "http://127.0.0.1:3001/dashboard/requests"}, "actions": [{"step_id": "login-redirect", "action": "wait_for", "locator": {"kind": "css", "selector": "input[type=password]"}, "state": "visible", "timeout_ms": 10000}], "capture": {"at_end": ["dom", "url"]}}

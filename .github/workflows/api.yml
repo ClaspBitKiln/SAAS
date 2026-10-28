@@ -127,3 +127,6 @@ jobs:
         run: pnpm build
         env:
           NEXT_PUBLIC_API_URL: http://localhost:3000
+
+      - name: Web unit tests
+        run: pnpm test
