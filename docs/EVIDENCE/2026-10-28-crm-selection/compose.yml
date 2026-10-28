@@ -1,0 +1,40 @@
+services:
+  db:
+    image: mariadb:10.11
+    environment:
+      MARIADB_ROOT_PASSWORD: ${ESPO_RESEARCH_DB_ROOT_PASSWORD:?set test DB root password}
+      MARIADB_DATABASE: espocrm
+      MARIADB_USER: espocrm
+      MARIADB_PASSWORD: ${ESPO_RESEARCH_DB_PASSWORD:?set test DB password}
+    healthcheck:
+      test: [CMD, healthcheck.sh, --connect, --innodb_initialized]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    volumes:
+      - db:/var/lib/mysql
+  crm:
+    image: espocrm/espocrm@sha256:8e1c7e97e0a1a08953a86af89c3808cb95410b6a5eb487d1e3475d2c7289357d
+    environment:
+      ESPOCRM_DATABASE_PLATFORM: Mysql
+      ESPOCRM_DATABASE_HOST: db
+      ESPOCRM_DATABASE_USER: espocrm
+      ESPOCRM_DATABASE_PASSWORD: ${ESPO_RESEARCH_DB_PASSWORD:?set test DB password}
+      ESPOCRM_ADMIN_USERNAME: researcher
+      ESPOCRM_ADMIN_PASSWORD: ${ESPO_RESEARCH_PASSWORD:?set local CRM password}
+      ESPOCRM_SITE_URL: http://127.0.0.1:8090
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - 127.0.0.1:8090:80
+    volumes:
+      - custom:/var/www/html/custom
+      - data:/var/www/html/data
+      - client-custom:/var/www/html/client/custom
+volumes:
+  db:
+  crm:
+  custom:
+  data:
+  client-custom:

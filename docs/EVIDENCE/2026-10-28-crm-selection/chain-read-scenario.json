@@ -1,0 +1,131 @@
+{
+  "browser": {
+    "mode": "launch",
+    "executable_path": "/usr/bin/chromium"
+  },
+  "start_url": {
+    "url": "http://127.0.0.1:8090"
+  },
+  "secrets": [
+    {
+      "secret_id": "local_password",
+      "environment_variable": "REA_LOCAL_ESPO_PASSWORD"
+    }
+  ],
+  "actions": [
+    {
+      "step_id": "username",
+      "action": "fill",
+      "locator": {
+        "kind": "css",
+        "selector": "input[name=username]"
+      },
+      "value": {
+        "source": "literal",
+        "value": "researcher"
+      }
+    },
+    {
+      "step_id": "password",
+      "action": "fill",
+      "locator": {
+        "kind": "css",
+        "selector": "input[name=password]"
+      },
+      "value": {
+        "source": "secret",
+        "secret_id": "local_password"
+      }
+    },
+    {
+      "step_id": "login",
+      "action": "click",
+      "locator": {
+        "kind": "css",
+        "selector": "#btn-login"
+      }
+    },
+    {
+      "step_id": "dashboard",
+      "action": "wait_for",
+      "locator": {
+        "kind": "css",
+        "selector": ".navbar"
+      },
+      "state": "visible",
+      "timeout_ms": 15000
+    },
+    {
+      "step_id": "open-account",
+      "action": "goto",
+      "destination": {
+        "url": "http://127.0.0.1:8090/#Account/view/6ae213974d8086f05"
+      },
+      "wait_until": "load"
+    },
+    {
+      "step_id": "loaded-account",
+      "action": "wait_for",
+      "locator": {
+        "kind": "css",
+        "selector": "button[data-action=edit]"
+      },
+      "state": "visible",
+      "timeout_ms": 15000
+    },
+    {
+      "step_id": "open-contact",
+      "action": "goto",
+      "destination": {
+        "url": "http://127.0.0.1:8090/#Contact/view/6ae21397addeafcbf"
+      },
+      "wait_until": "load"
+    },
+    {
+      "step_id": "loaded-contact",
+      "action": "wait_for",
+      "locator": {
+        "kind": "css",
+        "selector": "button[data-action=edit]"
+      },
+      "state": "visible",
+      "timeout_ms": 15000
+    },
+    {
+      "step_id": "open-task",
+      "action": "goto",
+      "destination": {
+        "url": "http://127.0.0.1:8090/#Task/view/6ae2139891fc4f360"
+      },
+      "wait_until": "load"
+    },
+    {
+      "step_id": "loaded-task",
+      "action": "wait_for",
+      "locator": {
+        "kind": "css",
+        "selector": "button[data-action=edit]"
+      },
+      "state": "visible",
+      "timeout_ms": 15000
+    }
+  ],
+  "capture": {
+    "at_end": [
+      "dom",
+      "url"
+    ],
+    "events": [
+      "network"
+    ],
+    "network": {
+      "request_body": false,
+      "response_body": false,
+      "header_values": false
+    },
+    "after_each_step": [
+      "dom",
+      "url"
+    ]
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "result": "PASS",
+  "app": "EspoCRM10.0.11",
+  "synthetic_only": true,
+  "capture_id": "6ae21588d19a6daa6",
+  "lead_id": "6ae21588d883530fc",
+  "checks": [
+    "public native endpoint creates lead",
+    "server-controlled source",
+    "unlisted status and assignee ignored",
+    "duplicate email does not create second lead",
+    "create and duplicate capture log",
+    "missing required fields rejected",
+    "inactive capture rejected"
+  ],
+  "emails_and_subscriptions_disabled": true,
+  "capture_left_inactive": true,
+  "limits": "Sequential duplicate test, not concurrent atomic idempotency; no real site integration or enrichment"
+}

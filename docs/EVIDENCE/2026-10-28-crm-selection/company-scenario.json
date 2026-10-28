@@ -1,0 +1,173 @@
+{
+  "browser": {
+    "mode": "launch",
+    "executable_path": "/usr/bin/chromium"
+  },
+  "start_url": {
+    "url": "http://127.0.0.1:8090"
+  },
+  "secrets": [
+    {
+      "secret_id": "local_password",
+      "environment_variable": "REA_LOCAL_ESPO_PASSWORD"
+    }
+  ],
+  "actions": [
+    {
+      "step_id": "username",
+      "action": "fill",
+      "locator": {
+        "kind": "css",
+        "selector": "input[name=username]"
+      },
+      "value": {
+        "source": "literal",
+        "value": "researcher"
+      }
+    },
+    {
+      "step_id": "password",
+      "action": "fill",
+      "locator": {
+        "kind": "css",
+        "selector": "input[name=password]"
+      },
+      "value": {
+        "source": "secret",
+        "secret_id": "local_password"
+      }
+    },
+    {
+      "step_id": "login",
+      "action": "click",
+      "locator": {
+        "kind": "css",
+        "selector": "#btn-login"
+      }
+    },
+    {
+      "step_id": "dashboard",
+      "action": "wait_for",
+      "locator": {
+        "kind": "css",
+        "selector": ".navbar"
+      },
+      "state": "visible",
+      "timeout_ms": 15000
+    },
+    {
+      "step_id": "new-company",
+      "action": "goto",
+      "destination": {
+        "url": "http://127.0.0.1:8090/#Account/create"
+      },
+      "wait_until": "load"
+    },
+    {
+      "step_id": "company-name",
+      "action": "wait_for",
+      "locator": {
+        "kind": "css",
+        "selector": "input[data-name=name]"
+      },
+      "state": "visible",
+      "timeout_ms": 15000
+    },
+    {
+      "step_id": "company-name-fill",
+      "action": "fill",
+      "locator": {
+        "kind": "css",
+        "selector": "input[data-name=name]"
+      },
+      "value": {
+        "source": "literal",
+        "value": "REA Pilot 1793200955"
+      }
+    },
+    {
+      "step_id": "company-website",
+      "action": "fill",
+      "locator": {
+        "kind": "css",
+        "selector": "input[data-name=website]"
+      },
+      "value": {
+        "source": "literal",
+        "value": "https://example.test"
+      }
+    },
+    {
+      "step_id": "company-email",
+      "action": "fill",
+      "locator": {
+        "kind": "css",
+        "selector": "input[type=email]"
+      },
+      "value": {
+        "source": "literal",
+        "value": "pilot@example.test"
+      }
+    },
+    {
+      "step_id": "save-company",
+      "action": "click",
+      "locator": {
+        "kind": "css",
+        "selector": "button[data-action=save]"
+      }
+    },
+    {
+      "step_id": "saved-card",
+      "action": "wait_for",
+      "locator": {
+        "kind": "css",
+        "selector": "button[data-action=edit]"
+      },
+      "state": "visible",
+      "timeout_ms": 15000
+    },
+    {
+      "step_id": "company-list",
+      "action": "goto",
+      "destination": {
+        "url": "http://127.0.0.1:8090/#Account"
+      },
+      "wait_until": "load"
+    },
+    {
+      "step_id": "reopen-company",
+      "action": "click",
+      "locator": {
+        "kind": "role",
+        "role": "link",
+        "name": "REA Pilot 1793200955"
+      },
+      "timeout_ms": 15000
+    },
+    {
+      "step_id": "persisted-card",
+      "action": "wait_for",
+      "locator": {
+        "kind": "css",
+        "selector": ".detail .field[data-name=name]"
+      },
+      "state": "visible",
+      "timeout_ms": 15000
+    }
+  ],
+  "capture": {
+    "at_end": [
+      "dom",
+      "url"
+    ],
+    "events": [
+      "network"
+    ],
+    "network": {
+      "request_body": false,
+      "response_body": false,
+      "header_values": false
+    }
+  }
+}
