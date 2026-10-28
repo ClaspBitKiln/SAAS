@@ -148,17 +148,27 @@ export class RequestParseService {
     if (descriptionIndex < 0 || purchaseIndex < 0) return [];
 
     const amount = (value: string): number | null => {
-      const normalized = value.replace(/\s/g, '').replace(',', '.').replace(/[^\d.]/g, '');
-      if (!/^\d+(?:\.\d+)?$/.test(normalized)) return null;
+      const trimmed = value.trim();
+      // Never discard signs, units or annotations: that would change the quoted price.
+      if (!/^(?:\d+|\d{1,3}(?:[ \u00a0\u202f]\d{3})+)(?:[.,]\d{1,2})?$/.test(trimmed)) {
+        return null;
+      }
+      const normalized = trimmed.replace(/[ \u00a0\u202f]/g, '').replace(',', '.');
       const parsed = Number(normalized);
-      return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+      return Number.isFinite(parsed) && Number.isSafeInteger(Math.round(parsed * 100))
+        ? parsed
+        : null;
     };
 
     return rows.slice(1).flatMap((row) => {
       const description = row[descriptionIndex]?.trim();
       const purchaseAmount = amount(row[purchaseIndex] ?? '');
-      const saleAmount = saleIndex >= 0 ? amount(row[saleIndex] ?? '') : null;
-      if (!description || purchaseAmount == null) return [];
+      const saleValue = saleIndex >= 0 ? (row[saleIndex] ?? '').trim() : '';
+      const saleAmount = saleValue ? amount(saleValue) : null;
+      if (!description) return [];
+      if (purchaseAmount == null || (saleValue && saleAmount == null)) {
+        throw new Error('Invalid price file');
+      }
       return [{ description, purchaseAmount, ...(saleAmount == null ? {} : { saleAmount }) }];
     });
   }

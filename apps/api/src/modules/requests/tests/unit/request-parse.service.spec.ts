@@ -197,4 +197,42 @@ describe('RequestParseService built-in parser', () => {
       ),
     ).rejects.toThrow('Price file has no valid rows');
   });
+
+  it.each(['-100', '+100', '(100)', '100 руб/кг', '1e3', '10 00', '1.234', '9007199254740992']) (
+    'rejects ambiguous purchase price %s instead of changing its meaning', async (value) => {
+      await expect(service.parsePriceFileBuffer(
+        Buffer.from(`Наименование;Закупочная цена\nЛист 09Г2С;${value}`),
+        'text/csv', 'prices.csv',
+      )).rejects.toThrow('Invalid price file');
+    },
+  );
+
+  it('rejects the whole file when a sale price is invalid, including valid earlier rows', async () => {
+    await expect(service.parsePriceFileBuffer(
+      Buffer.from('Наименование;Закупочная цена;Цена продажи\nЛист;100;120\nТруба;200;-250'),
+      'text/csv', 'prices.csv',
+    )).rejects.toThrow('Invalid price file');
+  });
+
+  it('accepts explicit zero, localized grouping and an omitted optional sale price', async () => {
+    const result = await service.parsePriceFileBuffer(
+      Buffer.from('Наименование;Закупочная цена;Цена продажи\nЛист;75\u00a0500,50;82\u202f000.25\nТруба;0;'),
+      'text/csv', 'prices.csv',
+    );
+    expect(result.lines).toEqual([
+      { description: 'Лист', purchaseAmount: 75500.5, saleAmount: 82000.25 },
+      { description: 'Труба', purchaseAmount: 0 },
+    ]);
+  });
+
+  it('rejects a negative numeric XLSX cell', async () => {
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet('Prices');
+    sheet.addRow(['Наименование', 'Закупочная цена']);
+    sheet.addRow(['Лист', -100]);
+    await expect(service.parsePriceFileBuffer(
+      Buffer.from(await workbook.xlsx.writeBuffer()),
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'prices.xlsx',
+    )).rejects.toThrow('Invalid price file');
+  });
 });
