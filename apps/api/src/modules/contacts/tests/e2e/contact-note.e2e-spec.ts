@@ -56,4 +56,12 @@ describe('Contact notes E2E', () => {
       .set(authHeader(otherToken))
       .expect(404);
   });
+
+  it('does not let another organization add a note to this contact', async () => {
+    await request(app.getHttpServer())
+      .post(`/contacts/${contactId}/notes`)
+      .set(authHeader(otherToken))
+      .send({ body: 'Foreign organization must not write this note.' })
+      .expect(404);
+  });
 });
