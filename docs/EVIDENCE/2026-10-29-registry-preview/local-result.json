@@ -1,0 +1,35 @@
+{
+  "result": "PASS",
+  "fixtureSourceOnly": true,
+  "liveRegistryVerified": false,
+  "checks": [
+    "native cInn field",
+    "CRM account INN roundtrip",
+    "preview of empty field",
+    "manager name preserved",
+    "no address write"
+  ],
+  "preview": {
+    "accountId": "6ae2c9f4947496d59",
+    "inn": "7707083893",
+    "origin": "saved-response-unverified",
+    "source": "https://suggestions.dadata.ru/suggestions/api/4_1/rs/findById/party",
+    "observedAt": "2026-10-29T00:00:00+00:00",
+    "status": "review",
+    "suggestions": {
+      "name": "SYNTHETIC registry fixture",
+      "billingAddressStreet": "SYNTHETIC address; not an actual registry result"
+    },
+    "emptyFieldPatch": {
+      "billingAddressStreet": "SYNTHETIC address; not an actual registry result"
+    },
+    "preservedFields": [
+      "name"
+    ],
+    "reviewRequired": true,
+    "applied": false,
+    "registryFacts": {
+      "inn": "7707083893"
+    }
+  }
+}
